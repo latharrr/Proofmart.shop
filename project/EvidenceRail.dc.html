@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    button { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; text-align: left; }
+    button:focus-visible { outline: 2px solid #0E1216; outline-offset: 2px; }
+    a { color: inherit; }
+  </style>
+</helmet>
+
+<div style="width: 100%; height: 100%; min-height: 560px; display: flex; flex-direction: column; background: #FFFFFF; border: 1px solid #DDE1E4; font-family: 'Instrument Sans', system-ui, sans-serif; color: #0E1216; overflow: hidden;">
+
+  <!-- Rail header -->
+  <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 10px 14px 10px 16px; border-bottom: 1px solid #DDE1E4; background: #FFFFFF; gap: 16px;">
+    <div style="display: flex; align-items: baseline; gap: 12px; min-width: 0;">
+      <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; color: #0E1216; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">hdfc_apr25_statement.pdf</span>
+      <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; color: #767C83; letter-spacing: 0.04em; white-space: nowrap;">6&nbsp;pages · 2.1&nbsp;MB · 4.8s</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <span style="display: inline-flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: #B4231F;">
+        <span aria-hidden="true" style="display: inline-block; width: 12px; text-align: center; font-weight: 500;">×</span>
+        FAIL
+      </span>
+      <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; color: #43494F; letter-spacing: 0.02em;">4 markers</span>
+      <span aria-hidden="true" style="width: 1px; height: 16px; background: #DDE1E4;"></span>
+      <button aria-label="Copy JSON" style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; color: #43494F; padding: 4px 8px; border: 1px solid #DDE1E4; border-radius: 3px;" style-hover="{ borderColor: '#C2C7CC', color: '#0E1216' }">Copy JSON</button>
+      <button aria-label="Close" style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 14px; color: #767C83; width: 22px; height: 22px; display: grid; place-items: center;" style-hover="{ color: '#0E1216' }">×</button>
+    </div>
+  </div>
+
+  <!-- Split body -->
+  <div style="display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); flex: 1; min-height: 0;">
+
+    <!-- Document panel -->
+    <div style="position: relative; background: #EDEFF1; border-right: 1px solid #DDE1E4; padding: 20px; display: flex; flex-direction: column; gap: 10px; min-height: 0;">
+      <div style="position: relative; flex: 1; min-height: 0; background: #FFFFFF; border: 1px solid #DDE1E4; overflow: hidden;">
+        <svg viewBox="0 0 640 800" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: 100%; display: block;">
+          <!-- Corner mono marker -->
+          <text x="32" y="30" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="10" font-weight="500" fill="#767C83" letter-spacing="1.2">PAGE 04 · APR 2025</text>
+          <text x="608" y="30" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="10" fill="#767C83" text-anchor="end">continued from p3</text>
+
+          <!-- Bank brand -->
+          <g transform="translate(32, 54)">
+            <rect x="0" y="0" width="14" height="14" fill="#0E1216"/>
+            <text x="24" y="12" font-family="'Instrument Sans', system-ui, sans-serif" font-size="16" font-weight="600" fill="#0E1216" letter-spacing="0.02em">HDFC BANK</text>
+            <text x="120" y="12" font-family="'Instrument Sans', system-ui, sans-serif" font-size="12" fill="#767C83">Statement of Account</text>
+          </g>
+
+          <!-- Metadata grid -->
+          <g transform="translate(32, 100)">
+            <text x="0" y="0" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="10" fill="#767C83" letter-spacing="1.2">ACCOUNT</text>
+            <text x="0" y="18" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="14" fill="#0E1216">XXXX-XX-4821</text>
+
+            <text x="200" y="0" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="10" fill="#767C83" letter-spacing="1.2">HOLDER</text>
+            <text x="200" y="18" font-family="'Instrument Sans', system-ui, sans-serif" font-size="14" fill="#0E1216">Rajesh Sharma</text>
+
+            <text x="0" y="46" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="10" fill="#767C83" letter-spacing="1.2">PERIOD</text>
+            <text x="0" y="64" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="14" fill="#0E1216">01 Apr 2025 – 30 Apr 2025</text>
+
+            <text x="304" y="46" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="10" fill="#767C83" letter-spacing="1.2">PRODUCER</text>
+            <text x="304" y="64" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="14" fill="#0E1216">Microsoft Word 2016</text>
+          </g>
+
+          <line x1="32" y1="196" x2="608" y2="196" stroke="#DDE1E4" stroke-width="1"/>
+
+          <!-- Table header -->
+          <g transform="translate(0, 218)">
+            <text x="32" y="0" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="10" fill="#767C83" letter-spacing="1.2">#</text>
+            <text x="60" y="0" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="10" fill="#767C83" letter-spacing="1.2">DATE</text>
+            <text x="120" y="0" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="10" fill="#767C83" letter-spacing="1.2">DESCRIPTION</text>
+            <text x="430" y="0" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="10" fill="#767C83" letter-spacing="1.2" text-anchor="end">DEBIT</text>
+            <text x="520" y="0" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="10" fill="#767C83" letter-spacing="1.2" text-anchor="end">CREDIT</text>
+            <text x="612" y="0" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="10" fill="#767C83" letter-spacing="1.2" text-anchor="end">BALANCE</text>
+          </g>
+          <line x1="32" y1="228" x2="608" y2="228" stroke="#C2C7CC" stroke-width="1.25"/>
+
+          <!-- Table body (rendered from renderVals to keep SVG namespace clean) -->
+          {{ svgRows }}
+
+          <!-- Table footer -->
+          <g transform="translate(0, 570)">
+            <text x="32" y="0" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="10" fill="#767C83" letter-spacing="1.2">CARRIED TO P5</text>
+            <text x="612" y="0" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="12" fill="#0E1216" font-weight="500" text-anchor="end">91,710.00</text>
+          </g>
+          <line x1="32" y1="580" x2="608" y2="580" stroke="#DDE1E4" stroke-width="1"/>
+
+          <text x="32" y="612" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#767C83" letter-spacing="1.2">HDFC BANK LIMITED · REGD. OFFICE HDFC HOUSE, MUMBAI</text>
+          <text x="32" y="626" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#767C83" letter-spacing="1.2">CIN L65920MH1994PLC080618 · WWW.HDFCBANK.COM</text>
+          <text x="608" y="640" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#767C83" letter-spacing="1.2" text-anchor="end">PAGE 4 / 6</text>
+        </svg>
+
+        <!-- Annotation overlay -->
+        {{ annotation }}
+      </div>
+
+      <!-- Page toolbar row -->
+      <div style="display: flex; align-items: center; justify-content: space-between; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; color: #767C83;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span>page</span>
+          <span style="display: inline-flex; align-items: center; border: 1px solid #DDE1E4; border-radius: 3px; overflow: hidden;">
+            <button style="padding: 2px 8px; color: #43494F; background: #FFFFFF;" style-hover="{ color: '#0E1216' }">‹</button>
+            <span style="padding: 2px 8px; border-left: 1px solid #DDE1E4; border-right: 1px solid #DDE1E4; background: #FFFFFF; color: #0E1216;">4</span>
+            <button style="padding: 2px 8px; color: #43494F; background: #FFFFFF;" style-hover="{ color: '#0E1216' }">›</button>
+          </span>
+          <span>of 6</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <span aria-hidden="true" style="width: 6px; height: 6px; background: #B4231F; display: inline-block;"></span>
+          <span style="letter-spacing: 0.02em;">SAMPLE · synthetic document, not real</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Findings panel -->
+    <div style="display: flex; flex-direction: column; min-height: 0; background: #FFFFFF;">
+      <!-- Sub-header -->
+      <div style="display: grid; grid-template-columns: 56px 1fr; align-items: center; padding: 10px 16px 10px 0; border-bottom: 1px solid #DDE1E4; background: #FFFFFF;">
+        <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 10px; color: #767C83; letter-spacing: 1.2; text-align: center;">04</span>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+          <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 10px; color: #767C83; letter-spacing: 1.2;">FINDINGS</span>
+          <div style="display: flex; align-items: center; gap: 10px; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: 0.06em;">
+            <span style="color: #B4231F; font-weight: 600;">2 FAIL</span>
+            <span style="color: #A66A00; font-weight: 600;">2 REVIEW</span>
+            <span style="color: #767C83;">0 CLEAR</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Findings list -->
+      <div style="flex: 1; overflow-y: auto; min-height: 0;">
+        <sc-for list="{{ findings }}" as="f" hint-placeholder-count="4">
+          <button aria-describedby="{{ f.addrId }}" onMouseEnter="{{ f.onEnter }}" onMouseLeave="{{ f.onLeave }}" onFocus="{{ f.onEnter }}" onBlur="{{ f.onLeave }}" onClick="{{ f.onClick }}" style="{{ f.rowStyle }}" style-hover="{{ f.hoverStyle }}">
+            <div style="display: grid; grid-template-columns: 56px 1fr; gap: 0; padding: 14px 0; border-bottom: 1px solid #DDE1E4; width: 100%; align-items: start;">
+              <div id="{{ f.addrId }}" style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; color: #767C83; text-align: center; line-height: 16px;">
+                <div>{{ f.addr1 }}</div>
+                <div style="margin-top: 2px;">{{ f.addr2 }}</div>
+              </div>
+              <div style="padding-right: 16px; min-width: 0;">
+                <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+                  <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; color: #0E1216; letter-spacing: 0.02em;">{{ f.marker }}</span>
+                  <span style="display: inline-flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: {{ f.color }}; white-space: nowrap;">
+                    <span aria-hidden="true" style="display: inline-block; width: 12px; text-align: center; font-weight: 500;">{{ f.glyph }}</span>
+                    {{ f.verdict }}
+                  </span>
+                </div>
+                <div style="font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 13px; line-height: 20px; color: #43494F; margin-top: 6px;">{{ f.explanation }}</div>
+                <div style="margin-top: 8px; padding: 8px 10px; background: #EDEFF1; border-left: 2px solid {{ f.color }}; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; line-height: 18px; color: #0E1216; white-space: pre-line; font-variant-numeric: tabular-nums;">{{ f.arithmetic }}</div>
+              </div>
+            </div>
+          </button>
+        </sc-for>
+      </div>
+
+      <!-- Rail footer -->
+      <div style="display: grid; grid-template-columns: 56px 1fr; align-items: center; padding: 10px 16px 10px 0; border-top: 1px solid #DDE1E4; background: #FFFFFF;">
+        <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 10px; color: #767C83; letter-spacing: 1.2; text-align: center;">↵</span>
+        <div style="display: flex; align-items: center; justify-content: space-between; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; color: #767C83;">
+          <span>Tab · Enter to pin · Esc to clear</span>
+          <span>colophon.dev/d/req_8fk2</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1000, &quot;height&quot;: 640}}">
+const VERDICT = {
+  CLEAR: { color: '#1F6B4A', fill: 'rgba(31,107,74,0.10)', glyph: '=' },
+  REVIEW: { color: '#A66A00', fill: 'rgba(166,106,0,0.10)', glyph: '~' },
+  FAIL: { color: '#B4231F', fill: 'rgba(180,35,31,0.10)', glyph: '×' },
+  INCONCLUSIVE: { color: '#5A6570', fill: 'rgba(90,101,112,0.10)', glyph: '?' }
+};
+
+const TXNS = [
+  { i: 6,  date: '12 Apr', desc: 'SALARY CREDIT HDFCEMP',        debit: null,     credit: 84120.00, balance: 109120.00 },
+  { i: 7,  date: '12 Apr', desc: 'UPI/rahul@ybl/456102',          debit: 250.00,   credit: null,     balance: 108870.00 },
+  { i: 8,  date: '13 Apr', desc: 'ATM WDL BLR-KRMR-013',          debit: 5000.00,  credit: null,     balance: 103870.00 },
+  { i: 9,  date: '14 Apr', desc: 'POS/AMAZON RETAIL IN',          debit: 3499.00,  credit: null,     balance: 100371.00 },
+  { i: 10, date: '15 Apr', desc: 'EMI/HDFC-HOME LOAN 88112',      debit: 32180.00, credit: null,     balance: 68191.00  },
+  { i: 11, date: '16 Apr', desc: 'RTGS IN/CLIENT-INV-1092',       debit: null,     credit: 45000.00, balance: 113191.00 },
+  { i: 12, date: '17 Apr', desc: 'POS/BIGBASKET GROCERY',         debit: 2140.00,  credit: null,     balance: 111051.00 },
+  { i: 13, date: '18 Apr', desc: 'UPI/mom@sbi/PERSONAL',          debit: 10000.00, credit: null,     balance: 101051.00 },
+  { i: 14, date: '20 Apr', desc: 'IMPS IN /INVOICE 2081',         debit: null,     credit: 0.00,     balance: 101051.00 },
+  { i: 15, date: '22 Apr', desc: 'POS/APOLLO PHARMACY',           debit: 1890.00,  credit: null,     balance: 99161.00  },
+  { i: 16, date: '24 Apr', desc: 'POS/UBER 5T4A9',                debit: 14951.00, credit: null,     balance: 84210.00  },
+  { i: 17, date: '25 Apr', desc: 'IMPS IN/JOE-K PAYMENT',         debit: null,     credit: 12500.00, balance: 91710.00, breakBalance: true }
+];
+
+const FINDINGS = [
+  {
+    id: 'f1', verdict: 'FAIL', marker: 'BALANCE_BREAK',
+    addr1: 'p4·r17', addr2: '502,674',
+    explanation: 'Running balance differs from prior + credit − debit by ₹5,000.00.',
+    arithmetic: '84,210.00 + 12,500.00 = 96,710.00\ndocument shows           91,710.00',
+    rect: { x: 548, y: 528, w: 68, h: 22 }
+  },
+  {
+    id: 'f2', verdict: 'FAIL', marker: 'PRODUCER_MISMATCH',
+    addr1: 'p4·r03', addr2: '336,158',
+    explanation: 'PDF producer string is not on the HDFC template roster.',
+    arithmetic: 'expected  Adobe LiveCycle 7.1\nfound     Microsoft Word 2016 (16.0)',
+    rect: { x: 334, y: 152, w: 156, h: 20 }
+  },
+  {
+    id: 'f3', verdict: 'REVIEW', marker: 'FONT_METRIC_SHIFT',
+    addr1: 'p4·r08', addr2: '380,296',
+    explanation: 'Glyph advance width for "5" differs from surrounding characters.',
+    arithmetic: 'run avg advance   6.42pt\ncell avg advance  5.98pt · Δ 7.4%',
+    rect: { x: 368, y: 296, w: 64, h: 22 }
+  },
+  {
+    id: 'f4', verdict: 'REVIEW', marker: 'OCR_LOW_CONFIDENCE',
+    addr1: 'p4·r14', addr2: '118,452',
+    explanation: 'Description text OCR confidence below the 0.75 threshold.',
+    arithmetic: 'confidence  0.62\nthreshold   0.75',
+    rect: { x: 118, y: 452, w: 138, h: 22 }
+  }
+];
+
+function fmt(n) {
+  if (n === null || n === undefined) return '·';
+  if (n === 0) return '0.00';
+  return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function AnnotationOverlay({ finding }) {
+  const strokeRef = React.useRef(null);
+  React.useLayoutEffect(() => {
+    const el = strokeRef.current;
+    if (!el) return;
+    const { w, h } = finding.rect;
+    const p = 2 * (w + h);
+    el.style.transition = 'none';
+    el.style.strokeDashoffset = String(p);
+    // eslint-disable-next-line
+    el.getBoundingClientRect();
+    el.style.transition = 'stroke-dashoffset 180ms cubic-bezier(0.2,0,0,1)';
+    el.style.strokeDashoffset = '0';
+  }, [finding.id]);
+
+  const { x, y, w, h } = finding.rect;
+  const v = VERDICT[finding.verdict];
+  const p = 2 * (w + h);
+  const T = 6;
+  const corners = [
+    `M ${x - T} ${y} L ${x} ${y} L ${x} ${y - T}`,
+    `M ${x + w + T} ${y} L ${x + w} ${y} L ${x + w} ${y - T}`,
+    `M ${x - T} ${y + h} L ${x} ${y + h} L ${x} ${y + h + T}`,
+    `M ${x + w + T} ${y + h} L ${x + w} ${y + h} L ${x + w} ${y + h + T}`
+  ];
+
+  return React.createElement('svg', {
+    viewBox: '0 0 640 800',
+    preserveAspectRatio: 'xMidYMid meet',
+    style: { position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }
+  },
+    React.createElement('rect', { x, y, width: w, height: h, fill: v.fill, stroke: 'none' }),
+    React.createElement('rect', {
+      ref: strokeRef,
+      x, y, width: w, height: h,
+      fill: 'none', stroke: v.color, strokeWidth: 1,
+      strokeDasharray: p, strokeDashoffset: p
+    }),
+    ...corners.map((d, i) => React.createElement('path', {
+      key: i, d, fill: 'none', stroke: v.color, strokeWidth: 1.25, strokeLinecap: 'square'
+    }))
+  );
+}
+
+class Component extends DCLogic {
+  state = { hoveredId: null, pinnedId: 'f1' };
+
+  componentDidMount() {
+    this._esc = (e) => { if (e.key === 'Escape') this.setState({ pinnedId: null, hoveredId: null }); };
+    window.addEventListener('keydown', this._esc);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this._esc);
+  }
+
+  renderVals() {
+    const active = this.state.hoveredId || this.state.pinnedId;
+
+const MONO = "'IBM Plex Mono', ui-monospace, monospace";
+    const SANS = "'Instrument Sans', system-ui, sans-serif";
+    const svgRows = TXNS.map((t, idx) => {
+      const y = 240 + idx * 26;
+      const balColor = t.breakBalance ? '#B4231F' : '#0E1216';
+      const balWeight = t.breakBalance ? '600' : '400';
+      const mut = (v) => v ? '#0E1216' : '#C2C7CC';
+      return React.createElement('g', { key: t.i, transform: `translate(0, ${y})` },
+        React.createElement('text', { x: 52, y: 16, fontFamily: MONO, fontSize: 12, fill: '#767C83', textAnchor: 'end' }, String(t.i).padStart(2, '0')),
+        React.createElement('text', { x: 60, y: 16, fontFamily: MONO, fontSize: 12, fill: '#0E1216' }, t.date),
+        React.createElement('text', { x: 120, y: 16, fontFamily: SANS, fontSize: 12, fill: '#0E1216' }, t.desc),
+        React.createElement('text', { x: 430, y: 16, fontFamily: MONO, fontSize: 12, fill: mut(t.debit), textAnchor: 'end' }, fmt(t.debit)),
+        React.createElement('text', { x: 520, y: 16, fontFamily: MONO, fontSize: 12, fill: mut(t.credit), textAnchor: 'end' }, fmt(t.credit)),
+        React.createElement('text', { x: 612, y: 16, fontFamily: MONO, fontSize: 12, fill: balColor, fontWeight: balWeight, textAnchor: 'end' }, fmt(t.balance)),
+        React.createElement('line', { x1: 32, y1: 26, x2: 608, y2: 26, stroke: '#EDEFF1', strokeWidth: 1 })
+      );
+    });
+
+    const findings = FINDINGS.map((f) => {
+      const v = VERDICT[f.verdict];
+      const isActive = f.id === active;
+      const isPinned = f.id === this.state.pinnedId;
+      return {
+        id: f.id,
+        addrId: `addr-${f.id}`,
+        addr1: f.addr1,
+        addr2: f.addr2,
+        marker: f.marker,
+        verdict: f.verdict,
+        explanation: f.explanation,
+        arithmetic: f.arithmetic,
+        color: v.color,
+        glyph: v.glyph,
+        rowStyle: {
+          display: 'block',
+          width: '100%',
+          background: isActive ? v.fill : 'transparent',
+          borderLeft: isPinned ? `2px solid ${v.color}` : '2px solid transparent',
+          transition: 'background-color 120ms cubic-bezier(0.2,0,0,1)'
+        },
+        hoverStyle: { background: v.fill },
+        onEnter: () => this.setState({ hoveredId: f.id }),
+        onLeave: () => this.setState({ hoveredId: null }),
+        onClick: () => this.setState((s) => ({ pinnedId: s.pinnedId === f.id ? null : f.id }))
+      };
+    });
+
+    const activeFinding = FINDINGS.find((f) => f.id === active);
+    const annotation = activeFinding ? React.createElement(AnnotationOverlay, { finding: activeFinding }) : null;
+
+    return { svgRows, findings, annotation };
+  }
+}
+</script>
+</body>
+</html>

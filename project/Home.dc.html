@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body { background: #FFFFFF; color: #0E1216; font-family: 'Instrument Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #0E1216; text-decoration: none; }
+    a:hover { color: #43494F; }
+    button { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; }
+    ::selection { background: #0E1216; color: #F5F5F0; }
+  </style>
+</helmet>
+
+<div style="width: 100%; min-height: 100vh; background: #FFFFFF; color: #0E1216;">
+
+  <!-- =============== TOP BAR =============== -->
+  <div style="position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,0.92); backdrop-filter: saturate(1.2) blur(10px); border-bottom: 1px solid #DDE1E4;">
+    <div style="max-width: 1320px; margin: 0 auto; padding: 14px 32px; display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="width: 22px; height: 22px; background: #0E1216; position: relative;">
+          <div style="position: absolute; inset: 5px; border: 1.5px solid #F5F5F0;"></div>
+        </div>
+        <span style="font-family: 'Instrument Sans'; font-weight: 600; letter-spacing: -0.01em; font-size: 17px;">Colophon</span>
+        <span style="font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83; letter-spacing: 0.06em; margin-left: 4px;">V0.9 BETA</span>
+      </div>
+      <nav style="display: flex; align-items: center; gap: 28px; font-family: 'Instrument Sans'; font-size: 14px; color: #43494F;">
+        <a href="#pipeline">Pipeline</a>
+        <a href="#markers">Markers</a>
+        <a href="#run">Run</a>
+        <a href="#outputs">Outputs</a>
+        <a href="#integrate">Integrate</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#docs" style="font-family: 'IBM Plex Mono'; font-size: 12px; color: #767C83;">docs ↗</a>
+      </nav>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <a href="#signin" style="font-family: 'Instrument Sans'; font-size: 14px; color: #43494F;">Sign in</a>
+        <a href="#access" style="font-family: 'IBM Plex Mono'; font-size: 12px; letter-spacing: 0.04em; padding: 8px 12px; background: #0E1216; color: #F5F5F0; border-radius: 3px;">GET ACCESS →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============== HERO =============== -->
+  <section style="max-width: 1320px; margin: 0 auto; padding: 72px 32px 40px;">
+    <div style="display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 56px; align-items: end;">
+      <div>
+        <div style="display: inline-flex; align-items: center; gap: 8px; font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83; letter-spacing: 0.08em; margin-bottom: 24px;">
+          <span aria-hidden="true" style="width: 6px; height: 6px; background: #B4231F; display: inline-block;"></span>
+          DOCUMENT FORENSICS · API
+        </div>
+        <h1 style="font-family: 'Instrument Sans'; font-weight: 500; font-size: 72px; line-height: 0.98; letter-spacing: -0.035em; margin: 0 0 24px; text-wrap: pretty;">
+          Every claim<br>on a document,<br><span style="color: #43494F;">on the record.</span>
+        </h1>
+        <p style="font-family: 'Instrument Sans'; font-size: 17px; line-height: 1.55; color: #43494F; max-width: 44ch; margin: 0 0 32px;">
+          Colophon takes a PDF and returns a signed dossier of findings — each pinned to its pixel, each with the arithmetic. You read the rail, not the doc.
+        </p>
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 40px;">
+          <a href="#access" style="font-family: 'IBM Plex Mono'; font-size: 12px; letter-spacing: 0.06em; padding: 12px 18px; background: #0E1216; color: #F5F5F0; border-radius: 3px;">START A SCAN →</a>
+          <a href="#run" style="font-family: 'IBM Plex Mono'; font-size: 12px; letter-spacing: 0.06em; padding: 12px 18px; border: 1px solid #DDE1E4; color: #0E1216; border-radius: 3px;">READ THE DOSSIER</a>
+        </div>
+        <div style="padding-top: 22px; border-top: 1px solid #DDE1E4; max-width: 520px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <span style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #767C83; letter-spacing: 0.16em;">SAMPLE SCAN · REQ_8FK2</span>
+            <span style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #767C83; letter-spacing: 0.06em;">reads from the rail →</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, auto); gap: 32px;">
+            <div>
+              <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #767C83; letter-spacing: 0.12em; margin-bottom: 6px;">DOCUMENT</div>
+              <div style="font-family: 'Instrument Sans'; font-size: 22px; font-weight: 500;">6<span style="font-family: 'IBM Plex Mono'; font-size: 13px; color: #767C83; font-weight: 400; margin-left: 4px;">pages</span></div>
+            </div>
+            <div>
+              <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #767C83; letter-spacing: 0.12em; margin-bottom: 6px;">FINDINGS</div>
+              <div style="font-family: 'Instrument Sans'; font-size: 22px; font-weight: 500;">4<span style="font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83; font-weight: 400; margin-left: 6px; letter-spacing: 0.04em;">2 FAIL · 2 REVIEW</span></div>
+            </div>
+            <div>
+              <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #767C83; letter-spacing: 0.12em; margin-bottom: 6px;">VERDICT</div>
+              <div style="font-family: 'Instrument Sans'; font-size: 22px; font-weight: 500; color: #B4231F;">× FAIL</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live rail -->
+      <div style="position: relative;">
+        <div style="position: absolute; top: -22px; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; font-family: 'IBM Plex Mono'; font-size: 10px; color: #767C83; letter-spacing: 0.1em;">
+          <span>REQ_8FK2 · LIVE</span>
+          <span>DRAG A PDF ONTO THE RAIL ↓</span>
+        </div>
+        <div style="height: 640px; box-shadow: 0 24px 60px -30px rgba(14,18,22,0.35);">
+          <dc-import name="EvidenceRail" hint-size="100%,100%"></dc-import>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category strip — factual, no fabricated customers -->
+    <div style="margin-top: 72px; padding-top: 22px; border-top: 1px solid #DDE1E4;">
+      <div style="display: flex; align-items: center; gap: 32px; flex-wrap: wrap; justify-content: space-between;">
+        <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #767C83; letter-spacing: 0.14em;">BUILT FOR</div>
+        <div style="font-family: 'IBM Plex Mono'; font-size: 13px; color: #0E1216; letter-spacing: 0.2em;">
+          LENDING &nbsp;·&nbsp; VERIFICATION &nbsp;·&nbsp; RISK &nbsp;·&nbsp; ACCOUNTING &nbsp;·&nbsp; COMPLIANCE
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============== PIPELINE =============== -->
+  <section id="pipeline" style="border-top: 1px solid #DDE1E4; background: #FAFAF7;">
+    <div style="max-width: 1320px; margin: 0 auto; padding: 88px 32px;">
+      <div style="display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 56px; align-items: start; margin-bottom: 56px;">
+        <div>
+          <div style="font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83; letter-spacing: 0.1em; margin-bottom: 12px;">§ 02 · PIPELINE</div>
+          <h2 style="font-family: 'Instrument Sans'; font-weight: 500; font-size: 44px; line-height: 1.02; letter-spacing: -0.025em; margin: 0 0 16px;">From bytes<br>to bounded evidence.</h2>
+        </div>
+        <p style="font-family: 'Instrument Sans'; font-size: 17px; line-height: 1.55; color: #43494F; max-width: 62ch; margin: 8px 0 0;">
+          Every stage writes back to the same address space: page, x, y, run. When you click a finding in the rail you land on the exact glyph that produced it — because that glyph's coordinates are what the finding was named after.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid #DDE1E4; border-bottom: 1px solid #DDE1E4;">
+        {{ pipelineCells }}
+      </div>
+
+      <div style="margin-top: 24px; font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83; letter-spacing: 0.04em;">
+        SAMPLE · timings from REQ_8FK2 on the rail above. Production timings vary with document, format, and marker set.
+      </div>
+    </div>
+  </section>
+
+  <!-- =============== MARKERS =============== -->
+  <section id="markers" style="border-top: 1px solid #DDE1E4;">
+    <div style="max-width: 1320px; margin: 0 auto; padding: 88px 32px;">
+      <div style="display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 56px; margin-bottom: 48px; align-items: end;">
+        <div>
+          <div style="font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83; letter-spacing: 0.1em; margin-bottom: 12px;">§ 03 · CATALOG</div>
+          <h2 style="font-family: 'Instrument Sans'; font-weight: 500; font-size: 44px; line-height: 1.02; letter-spacing: -0.025em; margin: 0;">Every marker<br>is a rule with a citation.</h2>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: end; justify-content: flex-end;">
+          {{ markerTabs }}
+        </div>
+      </div>
+
+      <div style="border-top: 1px solid #DDE1E4;">
+        {{ markerRows }}
+      </div>
+
+      <div style="margin-top: 24px; display: flex; align-items: center; justify-content: space-between; font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83; letter-spacing: 0.04em;">
+        <span>Six representative markers · full catalog under /docs/markers</span>
+        <a href="#catalog" style="color: #0E1216;">read the catalog →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============== RUN =============== -->
+  <section id="run" style="border-top: 1px solid #DDE1E4; background: #FAFAF7;">
+    <div style="max-width: 1320px; margin: 0 auto; padding: 88px 32px;">
+      <div style="display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 56px; align-items: start; margin-bottom: 40px;">
+        <div>
+          <div style="font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83; letter-spacing: 0.1em; margin-bottom: 12px;">§ 04 · RUN</div>
+          <h2 style="font-family: 'Instrument Sans'; font-weight: 500; font-size: 44px; line-height: 1.02; letter-spacing: -0.025em; margin: 0 0 16px;">One call.<br>One signed dossier.</h2>
+        </div>
+        <p style="font-family: 'Instrument Sans'; font-size: 17px; line-height: 1.55; color: #43494F; max-width: 62ch; margin: 8px 0 0;">
+          The API is small on purpose. Send a PDF; receive the same finding graph you inspected on the rail. Every field maps back to a rail address.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 20px; align-items: start;">
+        <div style="background: #0E1216; color: #E5E7EA; border-radius: 4px; overflow: hidden;">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #2A2F35;">
+            <span style="font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83; letter-spacing: 0.08em;">$ TERMINAL · SAMPLE</span>
+            <span style="font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83;">req_8fk2</span>
+          </div>
+          <pre style="margin: 0; padding: 22px 20px; font-family: 'IBM Plex Mono'; font-size: 12px; line-height: 1.75; color: #F5F5F0; overflow-x: auto;">$ curl <span style="color: #A9BFD8;">https://api.colophon.dev/v1/analyze</span> \
+    -H <span style="color: #E2C48A;">"Authorization: Bearer $CO_KEY"</span> \
+    -F <span style="color: #E2C48A;">"document=@hdfc_apr25.pdf"</span>
+
+<span style="color: #767C83;">↳ 4.8s · signed dossier returned inline · SAMPLE</span>
+<span style="color: #E38A82;">✗ FAIL</span> · req_8fk2 · 4 findings
+   <span style="color: #E38A82;">×</span> BALANCE_BREAK        p4·r17
+   <span style="color: #E38A82;">×</span> PRODUCER_MISMATCH    p4·r03
+   <span style="color: #F2B04B;">~</span> FONT_METRIC_SHIFT    p4·r08
+   <span style="color: #F2B04B;">~</span> OCR_LOW_CONFIDENCE   p4·r14
+
+<span style="color: #767C83;">dossier → req_8fk2.dossier.pdf (signed)</span>
+<span style="color: #767C83;">verify  → colophon verify req_8fk2</span></pre>
+        </div>
+
+        <div style="display: grid; grid-template-rows: repeat(3, auto); gap: 12px; align-content: start;">
+          <div style="background: #FFFFFF; border: 1px solid #DDE1E4; padding: 20px 22px;">
+            <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #767C83; letter-spacing: 0.14em; margin-bottom: 6px;">STEP 01 · SEND</div>
+            <div style="font-family: 'Instrument Sans'; font-size: 17px; font-weight: 500; letter-spacing: -0.01em; margin-bottom: 6px;">One multipart POST.</div>
+            <div style="font-family: 'Instrument Sans'; font-size: 14px; color: #43494F; line-height: 1.55;">Files up to 50 pages, 20 MB. Timeout 30 s. Retries idempotent by content hash.</div>
+          </div>
+          <div style="background: #FFFFFF; border: 1px solid #DDE1E4; padding: 20px 22px;">
+            <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #767C83; letter-spacing: 0.14em; margin-bottom: 6px;">STEP 02 · RECEIVE</div>
+            <div style="font-family: 'Instrument Sans'; font-size: 17px; font-weight: 500; letter-spacing: -0.01em; margin-bottom: 6px;">The full evidence graph.</div>
+            <div style="font-family: 'Instrument Sans'; font-size: 14px; color: #43494F; line-height: 1.55;">Every finding carries page, box, expected/found, marker id — every value points back to the rail address you can screenshot.</div>
+          </div>
+          <div style="background: #FFFFFF; border: 1px solid #DDE1E4; padding: 20px 22px;">
+            <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #767C83; letter-spacing: 0.14em; margin-bottom: 6px;">STEP 03 · VERIFY</div>
+            <div style="font-family: 'Instrument Sans'; font-size: 17px; font-weight: 500; letter-spacing: -0.01em; margin-bottom: 6px;">Ed25519, offline.</div>
+            <div style="font-family: 'Instrument Sans'; font-size: 14px; color: #43494F; line-height: 1.55;">Anyone can verify a dossier against the published key — your auditor, a regulator, a customer — with no account.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============== OUTPUTS =============== -->
+  <section id="outputs" style="border-top: 1px solid #DDE1E4; background: #0E1216; color: #F5F5F0;">
+    <div style="max-width: 1320px; margin: 0 auto; padding: 88px 32px;">
+      <div style="display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 56px; align-items: start; margin-bottom: 48px;">
+        <div>
+          <div style="font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83; letter-spacing: 0.1em; margin-bottom: 12px;">§ 05 · OUTPUTS</div>
+          <h2 style="font-family: 'Instrument Sans'; font-weight: 500; font-size: 44px; line-height: 1.02; letter-spacing: -0.025em; margin: 0 0 16px; color: #F5F5F0;">Two shapes.<br>Same evidence.</h2>
+        </div>
+        <p style="font-family: 'Instrument Sans'; font-size: 17px; line-height: 1.55; color: #C2C7CC; max-width: 60ch; margin: 8px 0 0;">
+          The JSON is what your services read. The PDF dossier is what your reviewers sign. Both are produced from the same finding graph — the two artifacts can never disagree.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px;">
+        <!-- JSON output -->
+        <div style="background: #14181D; border: 1px solid #2A2F35; border-radius: 4px; overflow: hidden;">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #2A2F35;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83; letter-spacing: 0.08em;">POST /v1/analyze → 200 OK</span>
+            </div>
+            <span style="font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83;">application/json</span>
+          </div>
+          <pre style="margin: 0; padding: 18px 20px; font-family: 'IBM Plex Mono'; font-size: 12px; line-height: 1.65; color: #F5F5F0; overflow-x: auto;"><span style="color: #767C83;">{
+  </span><span style="color: #A9BFD8;">"request_id"</span><span style="color: #767C83;">: </span><span style="color: #E2C48A;">"req_8fk2"</span><span style="color: #767C83;">,
+  </span><span style="color: #A9BFD8;">"verdict"</span><span style="color: #767C83;">: </span><span style="color: #E38A82;">"FAIL"</span><span style="color: #767C83;">,
+  </span><span style="color: #A9BFD8;">"findings"</span><span style="color: #767C83;">: [
+    {
+      </span><span style="color: #A9BFD8;">"marker"</span><span style="color: #767C83;">: </span><span style="color: #E2C48A;">"BALANCE_BREAK"</span><span style="color: #767C83;">,
+      </span><span style="color: #A9BFD8;">"page"</span><span style="color: #767C83;">: </span><span style="color: #C9D1B6;">4</span><span style="color: #767C83;">,
+      </span><span style="color: #A9BFD8;">"box"</span><span style="color: #767C83;">: [</span><span style="color: #C9D1B6;">548</span><span style="color: #767C83;">, </span><span style="color: #C9D1B6;">528</span><span style="color: #767C83;">, </span><span style="color: #C9D1B6;">68</span><span style="color: #767C83;">, </span><span style="color: #C9D1B6;">22</span><span style="color: #767C83;">],
+      </span><span style="color: #A9BFD8;">"expected"</span><span style="color: #767C83;">: </span><span style="color: #C9D1B6;">96710.00</span><span style="color: #767C83;">,
+      </span><span style="color: #A9BFD8;">"found"</span><span style="color: #767C83;">: </span><span style="color: #C9D1B6;">91710.00</span><span style="color: #767C83;">,
+      </span><span style="color: #A9BFD8;">"delta"</span><span style="color: #767C83;">: </span><span style="color: #C9D1B6;">-5000.00</span><span style="color: #767C83;">,
+      </span><span style="color: #A9BFD8;">"confidence"</span><span style="color: #767C83;">: </span><span style="color: #C9D1B6;">1.00</span><span style="color: #767C83;">
+    }
+  ],
+  </span><span style="color: #A9BFD8;">"signature"</span><span style="color: #767C83;">: </span><span style="color: #E2C48A;">"ed25519:8f…3c"</span><span style="color: #767C83;">
+}</span></pre>
+        </div>
+
+        <!-- PDF dossier -->
+        <div style="background: #14181D; border: 1px solid #2A2F35; border-radius: 4px; overflow: hidden;">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #2A2F35;">
+            <span style="font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83; letter-spacing: 0.08em;">req_8fk2.dossier.pdf</span>
+            <span style="font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83;">signed · 3 pages</span>
+          </div>
+          <div style="padding: 24px; background: #14181D; height: 100%; display: flex; align-items: stretch;">
+            <div style="flex: 1; background: #F5F5F0; color: #0E1216; padding: 22px 24px; font-family: 'Instrument Sans'; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 14px; min-height: 380px;">
+              <div style="display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid #DDE1E4; padding-bottom: 10px;">
+                <div style="font-family: 'Instrument Sans'; font-weight: 600; font-size: 15px; letter-spacing: -0.01em;">Colophon Dossier</div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #767C83; letter-spacing: 0.08em;">REQ_8FK2 · 12 AUG 2026</div>
+              </div>
+              <div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #767C83; letter-spacing: 0.12em;">SUBJECT</div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 12px; margin-top: 2px;">hdfc_apr25_statement.pdf</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: rgba(180,35,31,0.08); border-left: 2px solid #B4231F;">
+                <span style="font-family: 'IBM Plex Mono'; font-size: 11px; font-weight: 600; color: #B4231F; letter-spacing: 0.08em;">× FAIL</span>
+                <span style="font-family: 'Instrument Sans'; font-size: 13px; color: #0E1216;">4 markers · 2 fail, 2 review</span>
+              </div>
+              <div style="display: grid; grid-template-columns: 60px 1fr; row-gap: 10px; column-gap: 10px; font-size: 12px;">
+                <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #767C83;">01 · p4</div>
+                <div>
+                  <div style="font-family: 'IBM Plex Mono'; font-size: 11px; font-weight: 500;">BALANCE_BREAK</div>
+                  <div style="color: #43494F; font-size: 11px; line-height: 1.4;">Running balance short ₹5,000 on row 17.</div>
+                </div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #767C83;">02 · p4</div>
+                <div>
+                  <div style="font-family: 'IBM Plex Mono'; font-size: 11px; font-weight: 500;">PRODUCER_MISMATCH</div>
+                  <div style="color: #43494F; font-size: 11px; line-height: 1.4;">PDF authored in MS Word 2016, not bank template.</div>
+                </div>
+              </div>
+              <div style="margin-top: auto; padding-top: 10px; border-top: 1px solid #DDE1E4; display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-family: 'IBM Plex Mono'; font-size: 9px; color: #767C83; letter-spacing: 0.1em;">SIGNED ED25519 · 8F…3C</div>
+                <div style="width: 44px; height: 44px; border: 1px solid #0E1216; display: grid; place-items: center; font-family: 'IBM Plex Mono'; font-size: 8px; letter-spacing: 0.1em;">SEAL</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 24px; display: flex; align-items: center; gap: 24px; font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83;">
+        <span>Both artifacts share the same finding_id — cross-referenceable in your audit trail.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============== INTEGRATE =============== -->
+  <section id="integrate" style="border-top: 1px solid #2A2F35; background: #0E1216; color: #F5F5F0;">
+    <div style="max-width: 1320px; margin: 0 auto; padding: 88px 32px;">
+      <div style="display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 56px; align-items: end; margin-bottom: 48px;">
+        <div>
+          <div style="font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83; letter-spacing: 0.1em; margin-bottom: 12px;">§ 06 · INTEGRATE</div>
+          <h2 style="font-family: 'Instrument Sans'; font-weight: 500; font-size: 44px; line-height: 1.02; letter-spacing: -0.025em; margin: 0; color: #F5F5F0;">Four ways in.<br>Same signatures.</h2>
+        </div>
+        <p style="font-family: 'Instrument Sans'; font-size: 17px; line-height: 1.55; color: #C2C7CC; max-width: 60ch; margin: 8px 0 0;">
+          The transport changes; the evidence graph does not. Every path returns the same signed dossier, verifiable against the same public key.
+        </p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid #2A2F35;">
+        {{ integrationCells }}
+      </div>
+    </div>
+  </section>
+
+  <!-- =============== PRICING =============== -->
+  <section id="pricing" style="border-top: 1px solid #DDE1E4;">
+    <div style="max-width: 1320px; margin: 0 auto; padding: 88px 32px;">
+      <div style="display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 56px; margin-bottom: 48px; align-items: end;">
+        <div>
+          <div style="font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83; letter-spacing: 0.1em; margin-bottom: 12px;">§ 07 · PRICING</div>
+          <h2 style="font-family: 'Instrument Sans'; font-weight: 500; font-size: 44px; line-height: 1.02; letter-spacing: -0.025em; margin: 0;">Per scan.<br>Per finding. Nothing else.</h2>
+        </div>
+        <p style="font-family: 'Instrument Sans'; font-size: 15px; line-height: 1.55; color: #43494F; max-width: 52ch; margin: 0;">
+          No seats, no minimums. A scan is one document up to 50 pages. Findings are metered when they change your decision — if we say CLEAR, it's free.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid #DDE1E4;">
+        {{ pricingCells }}
+      </div>
+    </div>
+  </section>
+
+  <!-- =============== FOOTER =============== -->
+  <footer style="border-top: 1px solid #DDE1E4; background: #FAFAF7;">
+    <div style="max-width: 1320px; margin: 0 auto; padding: 56px 32px 32px;">
+      <div style="display: grid; grid-template-columns: minmax(0, 5fr) repeat(3, 1fr); gap: 40px; padding-bottom: 40px; border-bottom: 1px solid #DDE1E4;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+            <div style="width: 22px; height: 22px; background: #0E1216; position: relative;">
+              <div style="position: absolute; inset: 5px; border: 1.5px solid #F5F5F0;"></div>
+            </div>
+            <span style="font-family: 'Instrument Sans'; font-weight: 600; font-size: 17px;">Colophon</span>
+          </div>
+          <p style="font-family: 'Instrument Sans'; font-size: 14px; color: #43494F; max-width: 40ch; line-height: 1.55;">
+            Document forensics as a signed evidence graph. Built in Bengaluru.
+          </p>
+        </div>
+        {{ footerCols }}
+      </div>
+      <div style="padding-top: 22px; display: flex; align-items: center; justify-content: space-between; font-family: 'IBM Plex Mono'; font-size: 11px; color: #767C83;">
+        <span>© 2026 Colophon Systems · MIT No. 2026/COL/0041</span>
+        <span>v0.9.14 · public beta</span>
+      </div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1440, &quot;height&quot;: 900}}">
+const PIPELINE = [
+  { i: '01', name: 'Ingest', ms: '210 ms',
+    body: 'Byte-exact PDF parse. Object streams decoded, xref reconstructed, embedded fonts hashed against the template registry.',
+    signal: 'producer · xref · fonts' },
+  { i: '02', name: 'Extract', ms: '1.4 s',
+    body: 'Text runs recovered with sub-pixel coordinates. Table structure inferred from column occupancy, not ruled lines.',
+    signal: 'runs · cells · glyphs' },
+  { i: '03', name: 'Reason', ms: '2.9 s',
+    body: 'Domain rules run over the run graph — arithmetic identities, template match, glyph metrics, semantic outliers.',
+    signal: 'markers · rules · verdict' },
+  { i: '04', name: 'Attest', ms: '260 ms',
+    body: 'Findings collapsed to a Merkle root, signed ed25519, and returned with a per-finding coordinate box for audit.',
+    signal: 'signed · replay · webhook' }
+];
+
+const MARKERS = [
+  { id: 'BALANCE_BREAK',       cat: 'Arithmetic', verdict: 'FAIL',   desc: 'Running balance disagrees with prior ± net movement.',   cites: 'row · math · box' },
+  { id: 'PRODUCER_MISMATCH',   cat: 'Provenance', verdict: 'FAIL',   desc: 'PDF producer string is not on the issuer template roster.', cites: 'metadata · roster' },
+  { id: 'FONT_METRIC_SHIFT',   cat: 'Typography', verdict: 'REVIEW', desc: 'Glyph advance width departs from surrounding text run.',    cites: 'glyph · run · box' },
+  { id: 'OCR_LOW_CONFIDENCE',  cat: 'Extraction', verdict: 'REVIEW', desc: 'Recognizer confidence below the 0.75 threshold on a cell used in reasoning.', cites: 'cell · confidence' },
+  { id: 'DUP_TXN_HASH',        cat: 'Semantic',   verdict: 'FAIL',   desc: 'Two transactions share amount, counterparty, and reference within a 3-day window.', cites: 'rows · window' },
+  { id: 'SIGNATURE_INVALID',   cat: 'Provenance', verdict: 'FAIL',   desc: 'Detached digital signature does not validate against the issuer chain.', cites: 'signature · chain' }
+];
+
+const MARKER_TABS = ['All', 'Arithmetic', 'Provenance', 'Typography', 'Extraction', 'Semantic'];
+
+const INTEGRATIONS = [
+  { name: 'REST', kind: 'sync', body: 'POST a PDF. Receive the signed dossier on the same request. 30 s timeout.' },
+  { name: 'Webhook', kind: 'async · replay', body: 'Attach a callback URL; the dossier posts back keyed by request_id. Replay any request from the dashboard.' },
+  { name: 'CLI', kind: 'terminal', body: 'colophon scan file.pdf writes JSON to stdout and drops the dossier PDF next to the source.' },
+  { name: 'Verify', kind: 'public key', body: 'Every dossier is signed ed25519. Verify offline against the key at colophon.dev/.well-known/keys.' }
+];
+
+const PRICING = [
+  {
+    tier: 'Team', price: '₹0.60', unit: 'per finding',
+    scan: '₹8 / scan',
+    body: 'For teams verifying customer-supplied documents in a review queue.',
+    cta: 'Start with 500 free findings',
+    included: ['REST + webhook', 'Signed dossier PDF', 'Rail review app', 'Email support']
+  },
+  {
+    tier: 'Growth', price: '₹0.42', unit: 'per finding',
+    scan: '₹6 / scan',
+    body: 'For teams running Colophon in the underwriting loop.',
+    cta: 'Book a pipeline review',
+    included: ['Everything in Team', 'Webhook retries', 'Custom marker rules', 'Priority email'],
+    highlight: true
+  },
+  {
+    tier: 'Sovereign', price: 'Custom', unit: 'annual',
+    scan: 'unmetered',
+    body: 'For deployments that cannot leave your infrastructure. Scope defined together.',
+    cta: 'Speak to the founding team',
+    included: ['Deployed in your environment', 'Marker source access', 'Named forensic contact', 'Custom terms']
+  }
+];
+
+const FOOTER = [
+  { h: 'Product',   links: ['Pipeline', 'Marker catalog', 'Dossier format', 'Changelog', 'Status page'] },
+  { h: 'Developers',links: ['REST reference', 'Webhooks', 'CLI', 'Verify signatures', 'Sample vault'] },
+  { h: 'Company',   links: ['Manifesto', 'Trust & security', 'Careers · 4', 'Press kit', 'Contact'] }
+];
+
+const VERDICT = {
+  FAIL:   { color: '#B4231F', glyph: '×' },
+  REVIEW: { color: '#A66A00', glyph: '~' },
+  CLEAR:  { color: '#1F6B4A', glyph: '=' }
+};
+
+const MONO = "'IBM Plex Mono', ui-monospace, monospace";
+const SANS = "'Instrument Sans', system-ui, sans-serif";
+
+class Component extends DCLogic {
+  state = { markerFilter: 'All' };
+
+  renderVals() {
+    // === Pipeline cells ===
+    const pipelineCells = PIPELINE.map((p, i) => React.createElement('div', {
+      key: p.i,
+      style: {
+        padding: '32px 24px 28px',
+        borderRight: i < PIPELINE.length - 1 ? '1px solid #DDE1E4' : 'none',
+        background: '#FAFAF7',
+        position: 'relative'
+      }
+    },
+      React.createElement('div', { style: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 20 } },
+        React.createElement('span', { style: { fontFamily: MONO, fontSize: 11, color: '#767C83', letterSpacing: '0.1em' } }, p.i),
+        React.createElement('span', { style: { fontFamily: MONO, fontSize: 11, color: '#B4231F', letterSpacing: '0.06em' } }, p.ms)
+      ),
+      React.createElement('div', { style: { fontFamily: SANS, fontSize: 22, fontWeight: 500, letterSpacing: '-0.015em', marginBottom: 12 } }, p.name),
+      React.createElement('div', { style: { fontFamily: SANS, fontSize: 14, lineHeight: 1.5, color: '#43494F', marginBottom: 20, minHeight: 84 } }, p.body),
+      React.createElement('div', { style: { fontFamily: MONO, fontSize: 11, color: '#0E1216', letterSpacing: '0.02em', paddingTop: 14, borderTop: '1px dashed #DDE1E4' } }, p.signal),
+      // Connector arrow, except on last
+      i < PIPELINE.length - 1 ? React.createElement('div', {
+        style: { position: 'absolute', right: -6, top: 40, width: 12, height: 12, background: '#FAFAF7', borderRight: '1px solid #DDE1E4', borderTop: '1px solid #DDE1E4', transform: 'rotate(45deg)' }
+      }) : null
+    ));
+
+    // === Marker tabs ===
+    const markerTabs = MARKER_TABS.map((t) => {
+      const active = t === this.state.markerFilter;
+      return React.createElement('button', {
+        key: t,
+        onClick: () => this.setState({ markerFilter: t }),
+        style: {
+          padding: '6px 12px',
+          fontFamily: MONO,
+          fontSize: 11,
+          letterSpacing: '0.04em',
+          color: active ? '#F5F5F0' : '#43494F',
+          background: active ? '#0E1216' : '#FFFFFF',
+          border: '1px solid ' + (active ? '#0E1216' : '#DDE1E4'),
+          borderRadius: 3,
+          cursor: 'pointer'
+        }
+      }, t);
+    });
+
+    // === Marker rows ===
+    const filtered = this.state.markerFilter === 'All' ? MARKERS : MARKERS.filter((m) => m.cat === this.state.markerFilter);
+    const markerRows = filtered.map((m, i) => {
+      const v = VERDICT[m.verdict];
+      return React.createElement('div', {
+        key: m.id,
+        style: {
+          display: 'grid',
+          gridTemplateColumns: '48px 2.6fr 1fr 1.2fr 1.2fr',
+          columnGap: 24,
+          alignItems: 'center',
+          padding: '18px 0',
+          borderBottom: '1px solid #DDE1E4'
+        }
+      },
+        React.createElement('div', { style: { fontFamily: MONO, fontSize: 10, color: '#767C83', letterSpacing: '0.1em' } }, String(i + 1).padStart(2, '0')),
+        React.createElement('div', null,
+          React.createElement('div', { style: { fontFamily: MONO, fontSize: 13, fontWeight: 500, letterSpacing: '0.01em' } }, m.id),
+          React.createElement('div', { style: { fontFamily: SANS, fontSize: 13, color: '#43494F', marginTop: 4, lineHeight: 1.4 } }, m.desc)
+        ),
+        React.createElement('div', { style: { fontFamily: MONO, fontSize: 11, color: '#43494F', letterSpacing: '0.04em' } }, m.cat.toUpperCase()),
+        React.createElement('div', { style: { display: 'inline-flex', alignItems: 'center', gap: 8 } },
+          React.createElement('span', { style: { width: 12, textAlign: 'center', fontFamily: MONO, fontSize: 12, color: v.color, fontWeight: 500 } }, v.glyph),
+          React.createElement('span', { style: { fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', color: v.color } }, m.verdict)
+        ),
+        React.createElement('div', { style: { fontFamily: MONO, fontSize: 11, color: '#43494F', letterSpacing: '0.02em', textAlign: 'right' } },
+          'cites · ',
+          React.createElement('span', { style: { color: '#0E1216' } }, m.cites)
+        )
+      );
+    });
+
+    // === Integration cells ===
+    const integrationCells = INTEGRATIONS.map((it, i) => React.createElement('div', {
+      key: it.name,
+      style: {
+        padding: '32px 24px 28px',
+        borderRight: i < INTEGRATIONS.length - 1 ? '1px solid #2A2F35' : 'none',
+        borderBottom: '1px solid #2A2F35'
+      }
+    },
+      React.createElement('div', { style: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 16 } },
+        React.createElement('span', { style: { fontFamily: SANS, fontSize: 20, fontWeight: 500, letterSpacing: '-0.015em' } }, it.name),
+        React.createElement('span', { style: { fontFamily: MONO, fontSize: 10, color: '#767C83', letterSpacing: '0.08em' } }, it.kind.toUpperCase())
+      ),
+      React.createElement('div', { style: { fontFamily: SANS, fontSize: 13, lineHeight: 1.55, color: '#C2C7CC' } }, it.body)
+    ));
+
+    // === Pricing cells ===
+    const pricingCells = PRICING.map((p, i) => React.createElement('div', {
+      key: p.tier,
+      style: {
+        padding: '32px 28px 32px',
+        borderRight: i < PRICING.length - 1 ? '1px solid #DDE1E4' : 'none',
+        background: p.highlight ? '#FAFAF7' : '#FFFFFF',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 20
+      }
+    },
+      p.highlight ? React.createElement('div', {
+        style: { position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#0E1216' }
+      }) : null,
+      React.createElement('div', { style: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' } },
+        React.createElement('span', { style: { fontFamily: MONO, fontSize: 11, color: '#767C83', letterSpacing: '0.08em' } }, p.tier.toUpperCase()),
+        p.highlight ? React.createElement('span', { style: { fontFamily: MONO, fontSize: 10, color: '#0E1216', letterSpacing: '0.1em', border: '1px solid #0E1216', padding: '2px 6px' } }, 'RECOMMENDED') : null
+      ),
+      React.createElement('div', null,
+        React.createElement('div', { style: { display: 'flex', alignItems: 'baseline', gap: 6 } },
+          React.createElement('span', { style: { fontFamily: SANS, fontSize: 40, fontWeight: 500, letterSpacing: '-0.02em' } }, p.price),
+          React.createElement('span', { style: { fontFamily: MONO, fontSize: 12, color: '#767C83' } }, p.unit)
+        ),
+        React.createElement('div', { style: { fontFamily: MONO, fontSize: 11, color: '#43494F', marginTop: 4, letterSpacing: '0.02em' } }, '+ ', p.scan)
+      ),
+      React.createElement('p', { style: { fontFamily: SANS, fontSize: 13, lineHeight: 1.55, color: '#43494F', margin: 0 } }, p.body),
+      React.createElement('div', { style: { borderTop: '1px solid #DDE1E4', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 8 } },
+        ...p.included.map((li) => React.createElement('div', {
+          key: li,
+          style: { display: 'flex', alignItems: 'baseline', gap: 8, fontFamily: SANS, fontSize: 13, color: '#0E1216' }
+        },
+          React.createElement('span', { style: { fontFamily: MONO, fontSize: 10, color: '#43494F' } }, '·'),
+          React.createElement('span', null, li)
+        ))
+      ),
+      React.createElement('a', {
+        href: '#cta',
+        style: {
+          marginTop: 'auto',
+          fontFamily: MONO,
+          fontSize: 12,
+          letterSpacing: '0.06em',
+          padding: '10px 12px',
+          textAlign: 'center',
+          background: p.highlight ? '#0E1216' : 'transparent',
+          color: p.highlight ? '#F5F5F0' : '#0E1216',
+          border: p.highlight ? '1px solid #0E1216' : '1px solid #DDE1E4',
+          textDecoration: 'none',
+          borderRadius: 3
+        }
+      }, p.cta.toUpperCase(), ' →')
+    ));
+
+    // === Footer columns ===
+    const footerCols = FOOTER.map((c) => React.createElement('div', { key: c.h },
+      React.createElement('div', { style: { fontFamily: MONO, fontSize: 10, color: '#767C83', letterSpacing: '0.12em', marginBottom: 14 } }, c.h.toUpperCase()),
+      React.createElement('ul', { style: { listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 } },
+        ...c.links.map((l) => React.createElement('li', { key: l },
+          React.createElement('a', { href: '#', style: { fontFamily: SANS, fontSize: 13, color: '#43494F' } }, l)
+        ))
+      )
+    ));
+
+    return {
+      pipelineCells, markerTabs, markerRows,
+      integrationCells, pricingCells, footerCols
+    };
+  }
+}
+</script>
+</body>
+</html>
