@@ -1,17 +1,21 @@
 import type { NextConfig } from "next";
 
-// `npm run build` runs `next build --webpack` (see package.json), not the
-// Turbopack default. This is a real, verified workaround, not a stylistic
-// choice: under Turbopack, Next's build-time "Collecting page data" step
-// fails to load @firecrawl/pdf-inspector's native binding for
-// `/api/inspect` — reproduced against a real deployment build — even
-// though the exact same code, same node_modules, and same platform work
-// correctly both in `next dev` and at actual request-serving runtime under
-// `next start`. `next build --webpack` was confirmed clean end-to-end
-// (build succeeds, the native binding loads, a real HTTP request against
-// the built server correctly extracts text AND runs OCR). `next dev` is
-// left on Turbopack — the failure is specific to the build-time page-data
-// collection step, which dev mode doesn't run the same way.
+// `npm run build` uses the Turbopack default (plain `next build`), not
+// `--webpack`. An earlier version of this file forced `--webpack` because
+// @firecrawl/pdf-inspector's native binding failed to load during Vercel's
+// build-time "Collecting page data" step. That was a misdiagnosis: the real
+// cause was @firecrawl/pdf-inspector@1.14.2's binary requiring a newer
+// glibc than Vercel's build image provides (see the `dependencies` pin on
+// 1.12.0 in package.json) — switching bundlers only appeared to fix it
+// because it was tested on a different commit at the same time the glibc
+// issue was separately present. Forcing `--webpack` has its own real cost:
+// it silently produces a plain static-file build with no serverless
+// functions wired up (Vercel's Next.js builder no longer recognizes the
+// output), so `/api/inspect` 404s in production. Confirmed fixed by
+// reverting to Turbopack once the glibc pin (1.12.0) was in place — the
+// build succeeds, `/api/inspect` and `/api/upload-token` are correctly
+// detected as serverless functions, and outputFileTracingIncludes below
+// still traces every OCR asset correctly under Turbopack.
 const nextConfig: NextConfig = {
   // Native/multi-file packages that must stay on disk as real files and be
   // loaded via Node's require, not bundled into a single webpack/turbopack
