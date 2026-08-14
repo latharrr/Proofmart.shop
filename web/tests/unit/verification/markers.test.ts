@@ -62,7 +62,6 @@ function raw(overrides: Partial<RawExtraction> = {}): RawExtraction {
       hasEncodingIssues: false,
     },
     textItems: [],
-    structureElements: [],
     pageSizes: new Map([[1, { widthPt: 612, heightPt: 792 }]]),
     ...overrides,
   };

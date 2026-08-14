@@ -1,12 +1,51 @@
 import "server-only";
 
-import { FALLBACK_PAGE_SIZE, type RawExtraction } from "./extract";
+import { FALLBACK_PAGE_SIZE, type RawExtraction, type TextItem } from "./extract";
 import type { ExtractedFact, PdfClassification, PdfRect, ProcessedDocument, ProcessedPage } from "./types";
 
 const MAX_FACTS_PER_KIND = 50;
 const MAX_TOTAL_FACTS = 300;
 
-const HEADING_ROLE = /^H[1-6]$/;
+/**
+ * Mean glyph advance as a fraction of font size, used only by
+ * `textItemWidth` below. 0.5 is the conventional approximation for
+ * proportional sans-serif faces (Helvetica's lowercase advances cluster
+ * around 0.5–0.56em); it is an average, never an exact measurement.
+ */
+const MEAN_GLYPH_ADVANCE_RATIO = 0.5;
+
+/**
+ * Width of a positioned text run, in PDF points.
+ *
+ * pdf-inspector 1.12.0 — the version this project is pinned to, because
+ * 1.13.0+ ships binaries requiring a GLIBC newer than Vercel provides (see
+ * the version note in `extract.ts`) — returns `width: 0` for every
+ * glyph-derived text item, verified empirically against real extractions.
+ * Its `x`, `y`, `height`, `fontSize`, and `text` are all correct; only the
+ * run's measured advance width is missing.
+ *
+ * Without a width, every evidence highlight the rail draws over a text run
+ * collapses to an invisible zero-width sliver (caught by the Playwright
+ * overlay tests, not by unit tests). So when — and only when — the real
+ * width is absent, this estimates one from the exact font size and
+ * character count.
+ *
+ * This estimate sizes a *highlight box*; it is never part of a finding's
+ * evidence. A finding's page, coordinates, and arithmetic all remain
+ * exactly what the document itself reports. The estimate can run slightly
+ * wide or narrow versus the true glyph run, especially for monospace or
+ * condensed faces. A real width, whenever the library provides one, always
+ * wins — so this self-heals if the version pin is ever lifted.
+ */
+export function textItemWidth(item: Pick<TextItem, "width" | "text" | "fontSize">): number {
+  if (item.width > 0) return item.width;
+  return item.text.length * item.fontSize * MEAN_GLYPH_ADVANCE_RATIO;
+}
+
+/** Rail-space rect for a positioned text run, with the width fallback above applied. */
+export function textItemRect(item: TextItem, pageHeightPt: number): PdfRect {
+  return toRailRect(item.x, item.y, textItemWidth(item), item.height, pageHeightPt);
+}
 
 /**
  * pdf-inspector's positioned text/link bboxes come back in *native* PDF
@@ -128,53 +167,17 @@ function deriveFacts(raw: RawExtraction, classification: PdfClassification): Ext
     });
   }
 
-  for (const fact of deriveHeadingFacts(raw)) push(fact);
+  // No heading facts: deriving them needs `extractStructureElements` (the
+  // PDF's own tagged-structure H1–H6 roles), which only exists in
+  // pdf-inspector 1.14.0+ — a version whose native binary can't load on
+  // Vercel (see the version note in `extract.ts`). Guessing headings from
+  // font size or markdown `#` prefixes would be a different, weaker signal
+  // presented under the same name, so nothing is substituted. The `heading`
+  // fact kind itself is retained: the bundled sample document still uses
+  // it, and it becomes live again if the pin is ever lifted.
   for (const fact of deriveLinkFacts(raw)) push(fact);
   for (const fact of deriveFormFieldFacts(raw)) push(fact);
 
-  return facts;
-}
-
-function deriveHeadingFacts(raw: RawExtraction): ExtractedFact[] {
-  const headingRoleByKey = new Map<string, string>();
-  for (const el of raw.structureElements) {
-    if (HEADING_ROLE.test(el.role)) headingRoleByKey.set(`${el.page}:${el.mcid}`, el.role);
-  }
-  if (headingRoleByKey.size === 0) return [];
-
-  // Group text items sharing an mcid so a multi-run heading becomes one
-  // fact with one bounding rect, not one fact per glyph run.
-  const groups = new Map<string, { role: string; page: number; text: string[]; rect: PdfRect }>();
-  for (const item of raw.textItems) {
-    if (item.itemType !== "Text" || item.mcid === undefined || item.mcid === null) continue;
-    const key = `${item.page}:${item.mcid}`;
-    const role = headingRoleByKey.get(key);
-    if (!role) continue;
-
-    const existing = groups.get(key);
-    const pageHeight = (raw.pageSizes.get(item.page) ?? FALLBACK_PAGE_SIZE).heightPt;
-    const itemRect = toRailRect(item.x, item.y, item.width, item.height, pageHeight);
-    if (!existing) {
-      groups.set(key, { role, page: item.page, text: [item.text], rect: itemRect });
-    } else {
-      existing.text.push(item.text);
-      existing.rect = union(existing.rect, itemRect);
-    }
-  }
-
-  const facts: ExtractedFact[] = [];
-  let i = 0;
-  for (const [key, g] of groups) {
-    facts.push({
-      id: `fact-heading-${key}`,
-      kind: "heading",
-      page: g.page,
-      rect: g.rect,
-      label: `${g.role} heading`,
-      detail: g.text.join("").trim() || "(empty)",
-    });
-    if (++i >= MAX_FACTS_PER_KIND) break;
-  }
   return facts;
 }
 
@@ -187,7 +190,10 @@ function deriveLinkFacts(raw: RawExtraction): ExtractedFact[] {
       id: `fact-link-${item.page}-${facts.length}`,
       kind: "link",
       page: item.page,
-      rect: toRailRect(item.x, item.y, item.width, item.height, pageHeight),
+      // Link rects come from the PDF's own /Annots geometry, so their width
+      // is real; `textItemRect` passes it straight through, and only fills
+      // in a width for the glyph-derived items that lack one.
+      rect: textItemRect(item, pageHeight),
       label: "Link",
       detail: item.linkUrl,
     });
@@ -205,7 +211,7 @@ function deriveFormFieldFacts(raw: RawExtraction): ExtractedFact[] {
       id: `fact-field-${item.page}-${facts.length}`,
       kind: "form-field",
       page: item.page,
-      rect: toRailRect(item.x, item.y, item.width, item.height, pageHeight),
+      rect: textItemRect(item, pageHeight),
       label: "Form field",
       detail: item.text || "(unlabeled)",
     });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeDocument, toRailRect, union } from "@/lib/pdf/normalize";
+import { normalizeDocument, textItemRect, textItemWidth, toRailRect, union } from "@/lib/pdf/normalize";
 import type { PdfClassification } from "@/lib/pdf/types";
 import type { RawExtraction, TextItem } from "@/lib/pdf/extract";
 
@@ -32,6 +32,43 @@ describe("toRailRect", () => {
 
   it("a rect flush with the page top maps to y=0", () => {
     expect(toRailRect(0, 772, 50, 20, 792)).toEqual({ x: 0, y: 0, w: 50, h: 20 });
+  });
+});
+
+// pdf-inspector 1.12.0 (the pinned version — see extract.ts) returns
+// width: 0 for glyph-derived text runs, which would collapse every
+// evidence highlight to an invisible sliver. These cover the fallback that
+// fills one in, and — just as importantly — that it never overrides a real
+// width when the library does supply one.
+describe("textItemWidth", () => {
+  it("passes a real width straight through, untouched", () => {
+    expect(textItemWidth({ width: 180, text: "https://example.com", fontSize: 10 })).toBe(180);
+  });
+
+  it("estimates from font size and character count when the width is missing", () => {
+    // 8 chars x 10pt x 0.5 mean advance ratio
+    expect(textItemWidth({ width: 0, text: "12000.00", fontSize: 10 })).toBe(40);
+  });
+
+  it("scales with font size, so a larger run gets a wider box", () => {
+    const small = textItemWidth({ width: 0, text: "Total", fontSize: 9 });
+    const large = textItemWidth({ width: 0, text: "Total", fontSize: 18 });
+    expect(large).toBeCloseTo(small * 2);
+  });
+
+  it("returns 0 for empty text rather than a phantom box", () => {
+    expect(textItemWidth({ width: 0, text: "", fontSize: 12 })).toBe(0);
+  });
+});
+
+describe("textItemRect", () => {
+  it("produces a drawable (non-zero-width) rect for a zero-width text run, with x/y/height still exact", () => {
+    const item = textItem({ text: "12000.00", x: 500, y: 656, width: 0, height: 9, page: 1, itemType: "Text", fontSize: 9 });
+    const rect = textItemRect(item, 792);
+    expect(rect.w).toBeGreaterThan(0);
+    expect(rect.x).toBe(500); // exact, from the document
+    expect(rect.h).toBe(9); // exact, from the document
+    expect(rect.y).toBe(792 - (656 + 9)); // exact flip, unaffected by the width fallback
   });
 });
 
@@ -82,7 +119,6 @@ function baseRaw(overrides: Partial<RawExtraction> = {}): RawExtraction {
       hasEncodingIssues: false,
     },
     textItems: [],
-    structureElements: [],
     pageSizes: new Map([
       [1, { widthPt: 612, heightPt: 792 }],
       [2, { widthPt: 612, heightPt: 792 }],
@@ -119,22 +155,19 @@ describe("normalizeDocument", () => {
     expect(fact?.detail).toContain("low_confidence");
   });
 
-  it("groups multi-run headings into one fact with a merged bounding rect", () => {
+  // Heading facts are deliberately not derived while pdf-inspector is
+  // pinned to 1.12.0 (no `extractStructureElements` — see extract.ts).
+  // This asserts the *absence* is real and intentional: plain text runs
+  // must not be silently promoted to headings by some weaker heuristic.
+  it("emits no heading facts, and never guesses them from text runs alone", () => {
     const raw = baseRaw({
-      structureElements: [{ page: 1, mcid: 0, role: "H1" }],
       textItems: [
-        textItem({ text: "Quarterly ", x: 72, y: 700, width: 80, height: 18, page: 1, itemType: "Text", mcid: 0 }),
-        textItem({ text: "Report", x: 152, y: 700, width: 50, height: 18, page: 1, itemType: "Text", mcid: 0 }),
+        textItem({ text: "Quarterly ", x: 72, y: 700, width: 80, height: 18, page: 1, itemType: "Text" }),
+        textItem({ text: "Report", x: 152, y: 700, width: 50, height: 18, page: 1, itemType: "Text" }),
       ],
     });
     const doc = normalizeDocument(raw, classification, { filename: "a.pdf", sizeBytes: 100 });
-    const headingFacts = doc.facts.filter((f) => f.kind === "heading");
-    expect(headingFacts).toHaveLength(1);
-    expect(headingFacts[0].detail).toBe("Quarterly Report");
-    // Merged rect spans both runs (x: first run's start to second run's
-    // end); y is flipped from the native y=700 both runs share, on a
-    // 792pt-tall page: 792-(700+18)=74.
-    expect(headingFacts[0].rect).toEqual({ x: 72, y: 74, w: 130, h: 18 });
+    expect(doc.facts.filter((f) => f.kind === "heading")).toHaveLength(0);
   });
 
   it("extracts link facts with their real coordinates and URL", () => {

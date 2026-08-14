@@ -1,7 +1,7 @@
 import "server-only";
 
 import { FALLBACK_PAGE_SIZE, type RawExtraction, type TextItem } from "@/lib/pdf/extract";
-import { toRailRect } from "@/lib/pdf/normalize";
+import { textItemRect } from "@/lib/pdf/normalize";
 import type { Coordinate } from "./types";
 
 /**
@@ -93,7 +93,7 @@ export function parseAmount(raw: string): number | null {
 
 export function cellCoordinate(raw: RawExtraction, page: number, item: TextItem): Coordinate {
   const pageHeight = (raw.pageSizes.get(page) ?? FALLBACK_PAGE_SIZE).heightPt;
-  return { page, rect: toRailRect(item.x, item.y, item.width, item.height, pageHeight) };
+  return { page, rect: textItemRect(item, pageHeight) };
 }
 
 const MONTHS: Record<string, number> = {

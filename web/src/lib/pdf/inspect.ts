@@ -1,6 +1,6 @@
 import "server-only";
 
-import { classifyPdfAsync } from "@firecrawl/pdf-inspector";
+import { classifyPdf } from "@firecrawl/pdf-inspector";
 import { MAX_UPLOAD_BYTES, type PdfClassification, type ProcessingError } from "./types";
 
 /**
@@ -55,9 +55,16 @@ function looksEncrypted(buffer: Buffer): boolean {
   return buffer.toString("latin1").includes("/Encrypt");
 }
 
+/**
+ * Stays `async` even though the underlying call is synchronous: this is
+ * pinned to pdf-inspector 1.12.0, whose `*Async` variants don't exist yet
+ * (see the version note in `extract.ts`). Callers already await it, and
+ * keeping the signature async means the sync/async split is an
+ * implementation detail we can reverse without touching call sites.
+ */
 export async function classify(buffer: Buffer): Promise<{ ok: true; result: PdfClassification } | { ok: false; error: ProcessingError }> {
   try {
-    const raw = await classifyPdfAsync(buffer);
+    const raw = classifyPdf(buffer);
     return {
       ok: true,
       result: {

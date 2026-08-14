@@ -116,7 +116,6 @@ describe("cellCoordinate", () => {
         hasEncodingIssues: false,
       },
       textItems: [],
-      structureElements: [],
       pageSizes: new Map([[1, { widthPt: 612, heightPt: 792 }]]),
     };
     const cell = item({ text: "9500.00", x: 400, y: 600, width: 40, height: 10, page: 1 });

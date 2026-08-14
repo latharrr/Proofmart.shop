@@ -51,13 +51,22 @@ npm run test:e2e      # playwright — browser tests (starts its own prod server
 ```
 Uploaded PDF
   → lib/pdf/inspect.ts    (validate, classify — @firecrawl/pdf-inspector)
-  → lib/pdf/extract.ts    (positioned text, markdown, structure — PDFProcessor)
+  → lib/pdf/extract.ts    (positioned text, markdown — PDFProcessor)
   → lib/pdf/normalize.ts  (raw extraction → ProcessedDocument + ExtractedFact[])
   → lib/verification/     (Marker registry → VerificationFinding[] → Verdict)
   → Evidence Rail          (real coordinates, real verdict, real evidence)
 ```
 
 See `lib/verification/registry.ts` for the implemented markers and the ones deliberately not implemented (with reasons).
+
+### pdf-inspector version pin (important)
+
+`@firecrawl/pdf-inspector` is pinned to an exact `1.12.0` — **do not bump it without re-verifying a real Vercel deployment.** From 1.13.0 onward the package's prebuilt Linux binaries are compiled against `GLIBC_2.35`, which is newer than Vercel's build/runtime image provides, so the native module fails to load with `ERR_DLOPEN_FAILED: version 'GLIBC_2.35' not found` and the build dies at "Collecting page data". Verified by reading the binaries' own ELF symbol versions (`readelf -V`): 1.12.0 tops out at `GLIBC_2.34`, 1.13.0+ requires 2.35. Changing the Node.js version in Vercel project settings does not help — the glibc floor belongs to the build image, not the Node runtime.
+
+Two capabilities are given up by this pin, both handled explicitly rather than silently:
+
+- **Heading facts.** Deriving them needs `extractStructureElements` (the PDF's own tagged H1–H6 roles), added in 1.14.0. Nothing substitutes for it — guessing headings from font size or markdown `#` prefixes would be a weaker signal presented under the same name. The `heading` fact kind remains defined and becomes live again if the pin is lifted.
+- **Measured text-run widths.** 1.12.0 returns `width: 0` for every glyph-derived text run (`x`, `y`, `height`, `fontSize`, and text are all still exact). Left alone this collapses every evidence highlight to an invisible zero-width sliver. `textItemWidth` in `lib/pdf/normalize.ts` therefore estimates a width from the exact font size and character count **only when the real width is absent** — a real width always wins, so this self-heals on a future upgrade. The estimate sizes a *highlight box* only; it never enters a finding's evidence, and every finding's page, coordinates, and arithmetic remain exactly what the document reports. Link and form-field rects come from the PDF's own `/Annots` geometry and carry real widths, so they are unaffected.
 
 ## Deploying on Vercel
 

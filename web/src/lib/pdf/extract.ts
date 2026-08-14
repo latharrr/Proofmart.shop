@@ -1,13 +1,11 @@
 import "server-only";
 
 import {
-  extractPagesMarkdownAsync,
-  extractStructureElements,
+  extractPagesMarkdown,
   extractTextWithPositions,
-  processPdfAsync,
+  processPdf,
   type PagesExtractionResult,
   type PdfResult,
-  type StructureElementJs,
   type TextItem,
 } from "@firecrawl/pdf-inspector";
 import { PDFDocument } from "pdf-lib";
@@ -19,7 +17,6 @@ export interface RawExtraction {
   markdown: PagesExtractionResult;
   meta: PdfResult;
   textItems: TextItem[];
-  structureElements: StructureElementJs[];
   /** 1-indexed page -> page size in PDF points. Needed to flip pdf-inspector's positioned-text/link coordinates (native bottom-left origin) into the rail's top-left convention — pdf-inspector never returns page dimensions itself. */
   pageSizes: Map<number, { widthPt: number; heightPt: number }>;
 }
@@ -28,23 +25,33 @@ export const FALLBACK_PAGE_SIZE = { widthPt: 612, heightPt: 792 }; // US Letter
 
 /**
  * Pulls every raw signal the normalization layer needs in one pass.
- * `extractStructureElements` has no async variant in this version of the
- * library, so it runs synchronously alongside the awaited calls — cheap
- * relative to markdown/position extraction on realistic documents.
+ *
+ * pdf-inspector is pinned to 1.12.0 (see package.json) because 1.13.0+
+ * ships native binaries requiring GLIBC_2.35, which Vercel's build/runtime
+ * image doesn't provide — verified by reading the binaries' own ELF symbol
+ * versions, and reproduced as a real deployment failure. 1.12.0's binary
+ * tops out at GLIBC_2.34 and loads correctly there.
+ *
+ * Two consequences of that pin, both deliberate:
+ *  - The `*Async` variants (added in 1.13.0) don't exist, so the sync calls
+ *    are used directly. No practical loss: a serverless invocation handles
+ *    one request at a time, so there's no other work to interleave with.
+ *    This function stays `async` for `readPageSizes` (genuinely async) and
+ *    to keep the signature stable for callers.
+ *  - `extractStructureElements` (added in 1.14.0) doesn't exist, so tagged
+ *    heading facts aren't produced. Nothing fabricates a replacement — see
+ *    the note in `normalize.ts`.
  *
  * Page sizes come from pdf-lib, not pdf-inspector — pdf-inspector never
  * exposes page dimensions, only content bboxes.
  */
 export async function extractContent(buffer: Buffer): Promise<RawExtraction> {
-  const [markdown, meta, pageSizes] = await Promise.all([
-    extractPagesMarkdownAsync(buffer),
-    processPdfAsync(buffer),
-    readPageSizes(buffer),
-  ]);
+  const pageSizes = await readPageSizes(buffer);
+  const markdown = extractPagesMarkdown(buffer);
+  const meta = processPdf(buffer);
   const textItems = extractTextWithPositions(buffer);
-  const structureElements = extractStructureElements(buffer);
 
-  return { markdown, meta, textItems, structureElements, pageSizes };
+  return { markdown, meta, textItems, pageSizes };
 }
 
 async function readPageSizes(buffer: Buffer): Promise<Map<number, { widthPt: number; heightPt: number }>> {
@@ -64,7 +71,7 @@ async function readPageSizes(buffer: Buffer): Promise<Map<number, { widthPt: num
 }
 
 // Re-exported so callers never need to import the native package directly.
-export type { PagesExtractionResult, PdfResult, StructureElementJs, TextItem };
+export type { PagesExtractionResult, PdfResult, TextItem };
 
 /**
  * The Phase 1 `DocumentProcessor`: validates, classifies, extracts, and
