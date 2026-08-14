@@ -2,7 +2,7 @@ import { del } from "@vercel/blob";
 import { PDFProcessor } from "@/lib/pdf/extract";
 import type { ProcessingError, ProcessingErrorCode } from "@/lib/pdf/types";
 import { ProcessingFailure } from "@/lib/pdf/types";
-import { TesseractCliOcrProcessor } from "@/lib/ocr/tesseract-cli-processor";
+import { TesseractJsOcrProcessor } from "@/lib/ocr";
 import { VerificationEngine } from "@/lib/verification/engine";
 
 // @firecrawl/pdf-inspector is a native (napi-rs) module — it cannot run on
@@ -81,11 +81,15 @@ export async function POST(request: Request) {
   const { buffer, filename, blobUrl } = input;
 
   try {
-    // Safe to always wire up: TesseractCliOcrProcessor never throws out of
-    // PDFProcessor's OCR step (see applyOcr's try/catch) — on a runtime
-    // without the `tesseract` binary (e.g. Vercel's default serverless
-    // environment), OCR-needing pages simply produce no ocr-text facts.
-    const processor = new PDFProcessor(new TesseractCliOcrProcessor());
+    // TesseractJsOcrProcessor bundles every asset it needs (worker script,
+    // WASM core, English trained data — see lib/ocr/tesseract-js.ts) and
+    // never fetches anything over the network, so it works unmodified on
+    // Vercel's default Node.js serverless runtime. A fresh instance per
+    // request means a fresh worker per processing job, torn down by
+    // PDFProcessor.applyOcr's `finally` once every OCR-needing page in this
+    // document is done — never throws out of PDFProcessor's OCR step
+    // either way (see applyOcr's try/catch).
+    const processor = new PDFProcessor(new TesseractJsOcrProcessor());
     const { document, raw } = await processor.processWithEvidence(buffer, { filename, sizeBytes: buffer.byteLength });
     const verification = new VerificationEngine().run({ document, raw });
     return Response.json({ document, verification });

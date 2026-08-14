@@ -155,12 +155,21 @@ export interface OCRTextItem {
 /**
  * Recognizes text on one OCR-needed page. `buffer` is the whole PDF's
  * bytes — the implementation is responsible for extracting/rasterizing
- * that one page's image content itself. See
- * `lib/ocr/tesseract-cli-processor.ts` for the real (local, no-API-key)
- * implementation and its documented limitations.
+ * that one page's image content itself. See `lib/ocr/tesseract-js.ts` for
+ * the production implementation (bundled Tesseract.js, no CDN, no system
+ * binary) and `lib/ocr/tesseract-cli-processor.ts` for a self-hosted
+ * alternative that shells out to the system `tesseract` binary.
  */
 export interface OCRProcessor {
   recognize(buffer: Buffer, page: number): Promise<OCRTextItem[]>;
+  /**
+   * Optional lifecycle hook, called once after every OCR-needing page in a
+   * single processing job has been recognized (whether or not any of them
+   * failed) — lets a processor that owns an expensive persistent resource
+   * (e.g. a Tesseract.js worker thread) release it exactly once per job
+   * rather than per page. Processors with no such resource can omit it.
+   */
+  terminate?(): Promise<void>;
 }
 
 // The Phase 1 placeholder `VerificationEngine` interface that used to live

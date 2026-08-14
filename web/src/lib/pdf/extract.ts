@@ -125,29 +125,42 @@ export class PDFProcessor implements DocumentProcessor {
    * confidence all preserved) — clearly distinguished by `kind` from
    * `heading`/`link`/etc. facts, which come from the native text layer.
    * Never throws: a page that fails to OCR (unsupported image encoding,
-   * binary unavailable) is simply skipped, leaving its existing
+   * asset/runtime unavailable) is simply skipped, leaving its existing
    * OCR_LOW_CONFIDENCE-derived fact as the only signal for that page —
    * no fabricated text, ever.
+   *
+   * One OCR processor instance is reused across every page in this loop
+   * (a processor that owns a persistent resource, like a Tesseract.js
+   * worker, only pays that setup cost once per document) and explicitly
+   * `terminate()`d in `finally` once the whole job is done — whether every
+   * page succeeded, some failed, or none needed OCR at all.
    */
   private async applyOcr(document: ProcessedDocument, buffer: Buffer, pagesNeedingOcr: number[]): Promise<void> {
-    for (const zeroIndexedPage of pagesNeedingOcr) {
-      const page = zeroIndexedPage + 1;
-      try {
-        const items = await this.ocr!.recognize(buffer, page);
-        items.forEach((item, i) => {
-          document.facts.push({
-            id: `fact-ocr-text-${page}-${i}`,
-            kind: "ocr-text",
-            page,
-            rect: item.rect,
-            label: `OCR text · ${Math.round(item.confidence * 100)}% confidence`,
-            detail: item.text,
+    try {
+      for (const zeroIndexedPage of pagesNeedingOcr) {
+        const page = zeroIndexedPage + 1;
+        try {
+          const items = await this.ocr!.recognize(buffer, page);
+          items.forEach((item, i) => {
+            document.facts.push({
+              id: `fact-ocr-text-${page}-${i}`,
+              kind: "ocr-text",
+              page,
+              rect: item.rect,
+              label: `OCR text · ${Math.round(item.confidence * 100)}% confidence`,
+              detail: item.text,
+            });
           });
-        });
-      } catch {
-        // Binary unavailable, unsupported image encoding, etc. — leave the
-        // page's OCR_LOW_CONFIDENCE fact as the only signal.
+        } catch (err) {
+          // Asset/runtime unavailable, unsupported image encoding, etc. —
+          // leave the page's OCR_LOW_CONFIDENCE fact as the only signal.
+          // Logs the failure reason only (never document content/text) —
+          // useful production observability for a silently-degraded page.
+          console.error(`[OCR] recognize failed for page ${page}:`, err instanceof Error ? err.message : err);
+        }
       }
+    } finally {
+      await this.ocr!.terminate?.().catch(() => {});
     }
   }
 }
