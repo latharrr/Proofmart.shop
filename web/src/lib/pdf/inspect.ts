@@ -86,10 +86,10 @@ export function classifyProcessingError(err: unknown): ProcessingError {
     return { code: "password-protected", message: "This PDF is password-protected. Remove the password and try again." };
   }
   if (lower.includes("unsupported") || lower.includes("not supported")) {
-    return { code: "unsupported", message: "This PDF uses a feature Colophon doesn't support yet." };
+    return { code: "unsupported", message: "This PDF uses a feature ProofMart doesn't support yet." };
   }
   if (lower.includes("parse") || lower.includes("invalid") || lower.includes("malformed") || lower.includes("corrupt") || lower.includes("eof")) {
-    return { code: "unreadable", message: "Colophon couldn't read this PDF — the file may be corrupted or truncated." };
+    return { code: "unreadable", message: "ProofMart couldn't read this PDF — the file may be corrupted or truncated." };
   }
   return { code: "processing-failed", message: "Processing failed unexpectedly. Try again or use a different file." };
 }

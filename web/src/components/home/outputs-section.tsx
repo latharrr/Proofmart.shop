@@ -111,7 +111,7 @@ export default function OutputsSection() {
                 }}
               >
                 <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", borderBottom: "1px solid #DDE1E4", paddingBottom: 10 }}>
-                  <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 15, letterSpacing: "-0.01em" }}>Colophon Dossier</div>
+                  <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 15, letterSpacing: "-0.01em" }}>ProofMart Dossier</div>
                   <div style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", letterSpacing: "0.08em" }}>REQ_8FK2 · 12 AUG 2026</div>
                 </div>
                 <div>

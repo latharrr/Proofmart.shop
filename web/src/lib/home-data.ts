@@ -69,7 +69,7 @@ export const INTEGRATIONS: Integration[] = [
   { name: "REST", kind: "sync", body: "POST a PDF. Receive the signed dossier on the same request. 30 s timeout." },
   { name: "Webhook", kind: "async · replay", body: "Attach a callback URL; the dossier posts back keyed by request_id. Replay any request from the dashboard." },
   { name: "CLI", kind: "terminal", body: "colophon scan file.pdf writes JSON to stdout and drops the dossier PDF next to the source." },
-  { name: "Verify", kind: "public key", body: "Every dossier is signed ed25519. Verify offline against the key at colophon.dev/.well-known/keys." },
+  { name: "Verify", kind: "public key", body: "Every dossier is signed ed25519. Verify offline against the key at proofmart.shop/.well-known/keys." },
 ];
 
 export interface PricingTier {
@@ -98,7 +98,7 @@ export const PRICING: PricingTier[] = [
     price: "₹0.42",
     unit: "per finding",
     scan: "₹6 / scan",
-    body: "For teams running Colophon in the underwriting loop.",
+    body: "For teams running ProofMart in the underwriting loop.",
     cta: "Book a pipeline review",
     included: ["Everything in Team", "Webhook retries", "Custom marker rules", "Priority email"],
     highlight: true,

@@ -13,7 +13,7 @@ import {
 import { PDFDocument } from "pdf-lib";
 import { classify, classifyProcessingError, validatePdfBytes } from "./inspect";
 import { normalizeDocument } from "./normalize";
-import { ProcessingFailure, type DocumentProcessor, type ProcessedDocument } from "./types";
+import { MAX_UPLOAD_PAGES, ProcessingFailure, type DocumentProcessor, type OCRProcessor, type ProcessedDocument } from "./types";
 
 export interface RawExtraction {
   markdown: PagesExtractionResult;
@@ -73,6 +73,15 @@ export type { PagesExtractionResult, PdfResult, StructureElementJs, TextItem };
  * caller needing to change.
  */
 export class PDFProcessor implements DocumentProcessor {
+  /**
+   * OCR is opt-in via constructor injection, not wired up by default — the
+   * one real implementation (`TesseractCliOcrProcessor`) needs the system
+   * `tesseract` binary, which Vercel's default serverless runtime doesn't
+   * bundle. Callers that have it (self-hosted/Docker) pass it explicitly;
+   * everyone else gets the same behavior as before OCR support existed.
+   */
+  constructor(private readonly ocr?: OCRProcessor) {}
+
   async process(buffer: Buffer, meta: { filename: string; sizeBytes: number }): Promise<ProcessedDocument> {
     const { document } = await this.processWithEvidence(buffer, meta);
     return document;
@@ -91,6 +100,12 @@ export class PDFProcessor implements DocumentProcessor {
 
     const classification = await classify(buffer);
     if (!classification.ok) throw new ProcessingFailure(classification.error);
+    if (classification.result.pageCount > MAX_UPLOAD_PAGES) {
+      throw new ProcessingFailure({
+        code: "too-large",
+        message: `Document has ${classification.result.pageCount} pages — the limit is ${MAX_UPLOAD_PAGES}.`,
+      });
+    }
 
     let raw: RawExtraction;
     try {
@@ -100,6 +115,39 @@ export class PDFProcessor implements DocumentProcessor {
     }
 
     const document = normalizeDocument(raw, classification.result, meta);
+    if (this.ocr) await this.applyOcr(document, buffer, classification.result.pagesNeedingOcr);
     return { document, raw };
+  }
+
+  /**
+   * Runs OCR only on the pages pdf-inspector itself flagged as needing it,
+   * merging results in as `ocr-text` facts (page, real coordinates, and
+   * confidence all preserved) — clearly distinguished by `kind` from
+   * `heading`/`link`/etc. facts, which come from the native text layer.
+   * Never throws: a page that fails to OCR (unsupported image encoding,
+   * binary unavailable) is simply skipped, leaving its existing
+   * OCR_LOW_CONFIDENCE-derived fact as the only signal for that page —
+   * no fabricated text, ever.
+   */
+  private async applyOcr(document: ProcessedDocument, buffer: Buffer, pagesNeedingOcr: number[]): Promise<void> {
+    for (const zeroIndexedPage of pagesNeedingOcr) {
+      const page = zeroIndexedPage + 1;
+      try {
+        const items = await this.ocr!.recognize(buffer, page);
+        items.forEach((item, i) => {
+          document.facts.push({
+            id: `fact-ocr-text-${page}-${i}`,
+            kind: "ocr-text",
+            page,
+            rect: item.rect,
+            label: `OCR text · ${Math.round(item.confidence * 100)}% confidence`,
+            detail: item.text,
+          });
+        });
+      } catch {
+        // Binary unavailable, unsupported image encoding, etc. — leave the
+        // page's OCR_LOW_CONFIDENCE fact as the only signal.
+      }
+    }
   }
 }

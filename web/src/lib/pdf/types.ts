@@ -36,7 +36,8 @@ export type FactKind =
   | "table"
   | "heading"
   | "link"
-  | "form-field";
+  | "form-field"
+  | "ocr-text";
 
 /**
  * A fact genuinely extracted from the document by pdf-inspector — never a
@@ -143,9 +144,23 @@ export interface DocumentProcessor {
   process(buffer: Buffer, meta: { filename: string; sizeBytes: number }): Promise<ProcessedDocument>;
 }
 
-/** Not implemented in Phase 1 — scanned/image pages are flagged (`needsOcr`) but not read. */
+export interface OCRTextItem {
+  text: string;
+  /** Rail-space rect (top-left origin, PDF points) — already mapped from the OCR engine's own pixel space. */
+  rect: PdfRect;
+  /** 0-1, as reported by the OCR engine. */
+  confidence: number;
+}
+
+/**
+ * Recognizes text on one OCR-needed page. `buffer` is the whole PDF's
+ * bytes — the implementation is responsible for extracting/rasterizing
+ * that one page's image content itself. See
+ * `lib/ocr/tesseract-cli-processor.ts` for the real (local, no-API-key)
+ * implementation and its documented limitations.
+ */
 export interface OCRProcessor {
-  recognize(buffer: Buffer, page: number): Promise<{ text: string; rect: PdfRect }[]>;
+  recognize(buffer: Buffer, page: number): Promise<OCRTextItem[]>;
 }
 
 // The Phase 1 placeholder `VerificationEngine` interface that used to live

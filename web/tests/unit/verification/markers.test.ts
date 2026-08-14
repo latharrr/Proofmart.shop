@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { balanceBreakMarker } from "@/lib/verification/markers/balance-break";
+import { crossPageTotalMismatchMarker } from "@/lib/verification/markers/cross-page-total-mismatch";
+import { dateSequenceAnomalyMarker } from "@/lib/verification/markers/date-sequence-anomaly";
 import { duplicateTransactionMarker } from "@/lib/verification/markers/duplicate-transaction";
 import { encodingAnomalyMarker } from "@/lib/verification/markers/encoding-anomaly";
 import { ocrLowConfidenceMarker } from "@/lib/verification/markers/ocr-low-confidence";
@@ -245,5 +247,136 @@ describe("DUPLICATE_TRANSACTION", () => {
     expect(outcome.findings).toHaveLength(1);
     expect(outcome.findings[0].verdict).toBe("REVIEW");
     expect(outcome.findings[0].evidence.coordinates).toHaveLength(4); // date+amount cell for each of 2 rows
+  });
+});
+
+describe("DATE_SEQUENCE_ANOMALY", () => {
+  const header = [textItem({ text: "Date", x: 72, y: 700, page: 1 })];
+
+  it("insufficient-data: no table on any page", () => {
+    const outcome = dateSequenceAnomalyMarker.run(ctx(doc({ pages: [page({ hasTable: false })] })));
+    expect(outcome.status).toBe("insufficient-data");
+  });
+
+  it("insufficient-data: fewer than two parseable dates", () => {
+    const context = ctx(
+      doc({ pages: [page({ hasTable: true })] }),
+      raw({ textItems: [...header, textItem({ text: "01 Apr", x: 72, y: 678, page: 1 })] }),
+    );
+    expect(dateSequenceAnomalyMarker.run(context).status).toBe("insufficient-data");
+  });
+
+  it("negative: strictly non-decreasing dates -> applicable, zero findings", () => {
+    const context = ctx(
+      doc({ pages: [page({ hasTable: true })] }),
+      raw({
+        textItems: [
+          ...header,
+          textItem({ text: "01 Apr", x: 72, y: 678, page: 1 }),
+          textItem({ text: "02 Apr", x: 72, y: 656, page: 1 }),
+          textItem({ text: "02 Apr", x: 72, y: 634, page: 1 }),
+          textItem({ text: "05 Apr", x: 72, y: 612, page: 1 }),
+        ],
+      }),
+    );
+    const outcome = dateSequenceAnomalyMarker.run(context);
+    expect(outcome).toEqual({ status: "applicable", findings: [] });
+  });
+
+  it("positive: an out-of-order date produces a REVIEW finding with real coordinates", () => {
+    const context = ctx(
+      doc({ pages: [page({ hasTable: true })] }),
+      raw({
+        textItems: [
+          ...header,
+          textItem({ text: "01 Apr", x: 72, y: 678, page: 1 }),
+          textItem({ text: "05 Apr", x: 72, y: 656, page: 1 }),
+          textItem({ text: "02 Apr", x: 72, y: 634, page: 1 }), // out of order
+        ],
+      }),
+    );
+    const outcome = dateSequenceAnomalyMarker.run(context);
+    expect(outcome.status).toBe("applicable");
+    if (outcome.status !== "applicable") return;
+    expect(outcome.findings).toHaveLength(1);
+    const [finding] = outcome.findings;
+    expect(finding.verdict).toBe("REVIEW");
+    expect(finding.evidence.coordinates).toHaveLength(2);
+    for (const c of finding.evidence.coordinates) expect(c.rect).not.toBeNull();
+  });
+
+  it("unparseable dates are skipped, not flagged", () => {
+    const context = ctx(
+      doc({ pages: [page({ hasTable: true })] }),
+      raw({
+        textItems: [
+          ...header,
+          textItem({ text: "not a date", x: 72, y: 678, page: 1 }),
+          textItem({ text: "also not a date", x: 72, y: 656, page: 1 }),
+        ],
+      }),
+    );
+    expect(dateSequenceAnomalyMarker.run(context).status).toBe("insufficient-data");
+  });
+});
+
+describe("CROSS_PAGE_TOTAL_MISMATCH", () => {
+  const ledgerHeader = (y: number, p: number) => [
+    textItem({ text: "Debit", x: 340, y, page: p }),
+    textItem({ text: "Credit", x: 420, y, page: p }),
+    textItem({ text: "Balance", x: 500, y, page: p }),
+  ];
+
+  function twoPageDoc(): ProcessedDocument {
+    return doc({ pages: [page({ page: 1, hasTable: true }), page({ page: 2, hasTable: true })] });
+  }
+
+  it("insufficient-data: only one page has a recognizable table", () => {
+    const context = ctx(
+      doc({ pages: [page({ page: 1, hasTable: true }), page({ page: 2, hasTable: false })] }),
+      raw({ textItems: [...ledgerHeader(700, 1), textItem({ text: "10000.00", x: 500, y: 678, page: 1 })] }),
+    );
+    expect(crossPageTotalMismatchMarker.run(context).status).toBe("insufficient-data");
+  });
+
+  it("negative: balance carries forward correctly across the page break -> applicable, zero findings", () => {
+    const context = ctx(
+      twoPageDoc(),
+      raw({
+        textItems: [
+          ...ledgerHeader(700, 1),
+          textItem({ text: "12000.00", x: 500, y: 678, page: 1 }),
+          ...ledgerHeader(700, 2),
+          textItem({ text: "1000.00", x: 340, y: 678, page: 2 }),
+          textItem({ text: "11000.00", x: 500, y: 678, page: 2 }),
+        ],
+      }),
+    );
+    const outcome = crossPageTotalMismatchMarker.run(context);
+    expect(outcome).toEqual({ status: "applicable", findings: [] });
+  });
+
+  it("positive: page 2's opening balance doesn't reconcile with page 1's closing balance -> FAIL with real coordinates", () => {
+    const context = ctx(
+      twoPageDoc(),
+      raw({
+        textItems: [
+          ...ledgerHeader(700, 1),
+          textItem({ text: "12000.00", x: 500, y: 678, page: 1 }),
+          ...ledgerHeader(700, 2),
+          textItem({ text: "1000.00", x: 340, y: 678, page: 2 }),
+          textItem({ text: "10000.00", x: 500, y: 678, page: 2 }), // should be 11000.00
+        ],
+      }),
+    );
+    const outcome = crossPageTotalMismatchMarker.run(context);
+    expect(outcome.status).toBe("applicable");
+    if (outcome.status !== "applicable") return;
+    expect(outcome.findings).toHaveLength(1);
+    const [finding] = outcome.findings;
+    expect(finding.verdict).toBe("FAIL");
+    expect(finding.severity).toBe("critical");
+    expect(finding.evidence.coordinates).toHaveLength(2);
+    for (const c of finding.evidence.coordinates) expect(c.rect).not.toBeNull();
   });
 });

@@ -39,7 +39,7 @@ export default function Hero() {
             <span style={{ color: "#43494F" }}>on the record.</span>
           </h1>
           <p style={{ fontFamily: SANS, fontSize: 17, lineHeight: 1.55, color: "#43494F", maxWidth: "44ch", margin: "0 0 32px" }}>
-            Colophon takes a PDF and returns a signed dossier of findings — each pinned to its pixel, each with the arithmetic. You read the rail,
+            ProofMart takes a PDF and returns a signed dossier of findings — each pinned to its pixel, each with the arithmetic. You read the rail,
             not the doc.
           </p>
           <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 40 }}>

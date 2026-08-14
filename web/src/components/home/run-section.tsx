@@ -53,7 +53,7 @@ export default function RunSection() {
             </div>
             <pre style={{ margin: 0, padding: "22px 20px", fontFamily: MONO, fontSize: 12, lineHeight: 1.75, color: "#F5F5F0", overflowX: "auto" }}>
               {"$ curl "}
-              <span style={{ color: "#A9BFD8" }}>https://api.colophon.dev/v1/analyze</span>
+              <span style={{ color: "#A9BFD8" }}>https://api.proofmart.shop/v1/analyze</span>
               {" \\\n    -H "}
               <span style={{ color: "#E2C48A" }}>&quot;Authorization: Bearer $CO_KEY&quot;</span>
               {" \\\n    -F "}
@@ -73,7 +73,7 @@ export default function RunSection() {
               {" OCR_LOW_CONFIDENCE   p4·r14\n\n"}
               <span style={{ color: "#767C83" }}>dossier → req_8fk2.dossier.pdf (signed)</span>
               {"\n"}
-              <span style={{ color: "#767C83" }}>verify  → colophon verify req_8fk2</span>
+              <span style={{ color: "#767C83" }}>verify  → proofmart verify req_8fk2</span>
             </pre>
           </div>
 

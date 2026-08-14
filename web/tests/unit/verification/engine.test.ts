@@ -4,6 +4,8 @@ import { VerificationEngine } from "@/lib/verification/engine";
 import {
   arithmeticInconsistencyPdf,
   cleanStatementPdf,
+  crossPageTotalMismatchPdf,
+  dateSequenceAnomalyPdf,
   duplicateTransactionPdf,
   nativeTextPdf,
   ocrLowConfidencePdf,
@@ -64,12 +66,39 @@ describe("VerificationEngine end-to-end", () => {
     expect(result.verdict).toBe("REVIEW");
   });
 
-  it("a simple text PDF with no table: OCR_LOW_CONFIDENCE and ENCODING_ANOMALY still run clean; arithmetic markers report insufficient-data; verdict CLEAR overall", async () => {
+  it("a simple text PDF with no table: OCR_LOW_CONFIDENCE and ENCODING_ANOMALY still run clean; arithmetic/semantic markers report insufficient-data; verdict INCONCLUSIVE overall (no content-bearing check could run, and the document doesn't match a supported kind)", async () => {
     const buf = await nativeTextPdf();
     const { result } = await verify(buf, "native.pdf");
     expect(result.markersRun).toContain("OCR_LOW_CONFIDENCE");
     expect(result.markersRun).toContain("ENCODING_ANOMALY");
     expect(result.markersSkipped.map((s) => s.markerId)).toContain("BALANCE_BREAK");
-    expect(result.verdict).toBe("CLEAR");
+    expect(result.documentKind).toBe("generic");
+    expect(result.verdict).toBe("INCONCLUSIVE");
+  });
+
+  it("date sequence anomaly: DATE_SEQUENCE_ANOMALY fires on an out-of-order row, verdict REVIEW", async () => {
+    const buf = await dateSequenceAnomalyPdf();
+    const { result } = await verify(buf, "dates.pdf");
+    const finding = result.findings.find((f) => f.markerId === "DATE_SEQUENCE_ANOMALY");
+    expect(finding).toBeDefined();
+    expect(finding?.verdict).toBe("REVIEW");
+    expect(result.verdict).toBe("REVIEW");
+  });
+
+  it("cross-page total mismatch: CROSS_PAGE_TOTAL_MISMATCH fires when page 2's opening balance doesn't carry forward from page 1's closing balance, verdict FAIL", async () => {
+    const buf = await crossPageTotalMismatchPdf();
+    const { result } = await verify(buf, "crosspage.pdf");
+    const finding = result.findings.find((f) => f.markerId === "CROSS_PAGE_TOTAL_MISMATCH");
+    expect(finding).toBeDefined();
+    expect(finding?.verdict).toBe("FAIL");
+    expect(finding?.evidence.coordinates.length).toBeGreaterThanOrEqual(2);
+    expect(finding?.evidence.coordinates.every((c) => c.rect !== null)).toBe(true);
+    expect(result.verdict).toBe("FAIL");
+  });
+
+  it("bank statement keyword text classifies as bank_statement, not generic", async () => {
+    const buf = await cleanStatementPdf();
+    const { result } = await verify(buf, "clean.pdf");
+    expect(result.documentKind).toBe("bank_statement");
   });
 });

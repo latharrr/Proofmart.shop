@@ -44,6 +44,48 @@ function validateFile(file: File): ProcessingError | null {
   return null;
 }
 
+/**
+ * Uploads directly to Vercel Blob and hands `/api/inspect` just the
+ * resulting URL — this is what lets production uploads exceed the
+ * platform's serverless request-body limit. Requires
+ * `BLOB_READ_WRITE_TOKEN` to be configured (see README).
+ */
+async function submitViaBlob(file: File): Promise<Response> {
+  const { upload } = await import("@vercel/blob/client");
+  const blob = await upload(file.name, file, { access: "public", handleUploadUrl: "/api/upload-token" });
+  return fetch("/api/inspect", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ blobUrl: blob.url, filename: file.name }),
+  });
+}
+
+function submitDirect(file: File): Promise<Response> {
+  const form = new FormData();
+  form.append("file", file);
+  return fetch("/api/inspect", { method: "POST", body: form });
+}
+
+/**
+ * Checks Blob availability first (a plain 200 either way — see
+ * /api/upload-token's GET handler) rather than attempting the upload and
+ * catching a failure: an HTTP error response gets logged to the console by
+ * the browser itself regardless of whether application code handles it, so
+ * every local-dev upload would otherwise log a spurious console error even
+ * though the app degrades correctly. When Blob isn't configured (e.g. local
+ * dev), this falls back to the direct-upload path that already worked
+ * before Blob support existed — not a fake success.
+ */
+async function submitForInspection(file: File): Promise<Response> {
+  try {
+    const { available } = await fetch("/api/upload-token").then((r) => r.json());
+    if (available) return await submitViaBlob(file);
+  } catch {
+    // Availability check itself failed — fall through to the direct path.
+  }
+  return submitDirect(file);
+}
+
 /** Best-effort mapping from pdf.js's own load-time exceptions to our error codes — a second, independent signal alongside the server's checks. */
 function classifyPdfjsError(err: unknown): ProcessingError {
   const name = err && typeof err === "object" && "name" in err ? String((err as { name: unknown }).name) : "";
@@ -51,7 +93,7 @@ function classifyPdfjsError(err: unknown): ProcessingError {
     return { code: "password-protected", message: "This PDF is password-protected. Remove the password and try again." };
   }
   if (name === "InvalidPDFException") {
-    return { code: "unreadable", message: "Colophon couldn't read this PDF — the file may be corrupted or truncated." };
+    return { code: "unreadable", message: "ProofMart couldn't read this PDF — the file may be corrupted or truncated." };
   }
   return { code: "processing-failed", message: "Processing failed unexpectedly. Try again or use a different file." };
 }
@@ -117,9 +159,7 @@ export function useLiveDocument(canvasRef: React.RefObject<HTMLCanvasElement | n
         pdfRef.current = pdf;
 
         setStage("extracting");
-        const form = new FormData();
-        form.append("file", file);
-        const res = await fetch("/api/inspect", { method: "POST", body: form });
+        const res = await submitForInspection(file);
         const payload = await res.json();
         if (requestIdRef.current !== requestId) return;
 

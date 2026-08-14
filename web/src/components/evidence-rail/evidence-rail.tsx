@@ -113,6 +113,7 @@ export default function EvidenceRail() {
             filename: live.document.filename,
             pdfType: live.document.pdfType,
             confidence: live.document.confidence,
+            documentKind: live.verification.documentKind,
             verdict: live.verification.verdict,
             findings: live.verification.findings,
             markersRun: live.verification.markersRun,
@@ -396,7 +397,7 @@ export default function EvidenceRail() {
             <span style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", letterSpacing: "0.12em", textAlign: "center" }}>↵</span>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: MONO, fontSize: 11, color: "#767C83" }}>
               <span>Tab · Enter to pin · Esc to clear</span>
-              <span>{isLive ? "local · not persisted" : "colophon.dev/d/req_8fk2"}</span>
+              <span>{isLive ? "local · not persisted" : "proofmart.shop/d/req_8fk2"}</span>
             </div>
           </div>
         </div>

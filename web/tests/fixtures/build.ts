@@ -249,3 +249,65 @@ export async function tableWithoutLedgerHeadersPdf(): Promise<Buffer> {
 export async function ocrLowConfidencePdf(): Promise<Buffer> {
   return scannedPdf();
 }
+
+/** Row 3's date (02 Apr) is earlier than row 2's (03 Apr) — arithmetic stays consistent throughout, isolating the DATE_SEQUENCE_ANOMALY signal from BALANCE_BREAK. */
+export function dateSequenceAnomalyRows(): LedgerRow[] {
+  return [
+    { date: "01 Apr", desc: "Opening", balance: "10000.00" },
+    { date: "03 Apr", desc: "Rent", debit: "3000.00", balance: "7000.00" },
+    { date: "02 Apr", desc: "Salary", credit: "5000.00", balance: "12000.00" }, // out of order
+    { date: "04 Apr", desc: "Groceries", debit: "1000.00", balance: "11000.00" },
+  ];
+}
+
+export async function dateSequenceAnomalyPdf(): Promise<Buffer> {
+  return buildLedgerPdf("Statement With Out-of-Order Date", dateSequenceAnomalyRows());
+}
+
+async function buildTwoPageLedgerPdf(title: string, page1Rows: LedgerRow[], page2Rows: LedgerRow[]): Promise<Buffer> {
+  const doc = await PDFDocument.create();
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const bold = await doc.embedFont(StandardFonts.HelveticaBold);
+  const headerY = 710;
+  const rowHeight = 22;
+  const headers: [keyof typeof LEDGER_COL_X, string][] = [
+    ["date", "Date"],
+    ["desc", "Description"],
+    ["debit", "Debit"],
+    ["credit", "Credit"],
+    ["balance", "Balance"],
+  ];
+
+  for (const [pageIndex, rows] of [page1Rows, page2Rows].entries()) {
+    const page = doc.addPage([PAGE.width, PAGE.height]);
+    page.drawText(`${title} (page ${pageIndex + 1})`, { x: 72, y: 750, size: 18, font: bold });
+    for (const [key, label] of headers) {
+      page.drawText(label, { x: LEDGER_COL_X[key], y: headerY, size: 10, font: bold });
+    }
+    rows.forEach((row, i) => {
+      const y = headerY - (i + 1) * rowHeight;
+      page.drawText(row.date, { x: LEDGER_COL_X.date, y, size: 9, font });
+      page.drawText(row.desc, { x: LEDGER_COL_X.desc, y, size: 9, font });
+      if (row.debit) page.drawText(row.debit, { x: LEDGER_COL_X.debit, y, size: 9, font });
+      if (row.credit) page.drawText(row.credit, { x: LEDGER_COL_X.credit, y, size: 9, font });
+      page.drawText(row.balance, { x: LEDGER_COL_X.balance, y, size: 9, font });
+    });
+  }
+
+  const bytes = await doc.save();
+  return Buffer.from(bytes);
+}
+
+/** Page 1 closes at 12000.00; page 2's first row claims 10000.00 after a 1000.00 debit (should be 11000.00) — a real carry-forward break across the page boundary that BALANCE_BREAK itself can't see (it resets per page). */
+export async function crossPageTotalMismatchPdf(): Promise<Buffer> {
+  const page1: LedgerRow[] = [
+    { date: "01 Apr", desc: "Opening", balance: "10000.00" },
+    { date: "02 Apr", desc: "Salary", credit: "5000.00", balance: "15000.00" },
+    { date: "03 Apr", desc: "Rent", debit: "3000.00", balance: "12000.00" },
+  ];
+  const page2: LedgerRow[] = [
+    { date: "04 Apr", desc: "Groceries", debit: "1000.00", balance: "10000.00" }, // should be 11000.00
+    { date: "05 Apr", desc: "Refund", credit: "500.00", balance: "10500.00" },
+  ];
+  return buildTwoPageLedgerPdf("Statement Split Across Pages", page1, page2);
+}

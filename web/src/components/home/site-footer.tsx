@@ -19,7 +19,7 @@ export default function SiteFooter() {
               <div style={{ width: 22, height: 22, background: "#0E1216", position: "relative" }}>
                 <div style={{ position: "absolute", inset: 5, border: "1.5px solid #F5F5F0" }} />
               </div>
-              <span style={{ fontFamily: SANS, fontWeight: 600, fontSize: 17 }}>Colophon</span>
+              <span style={{ fontFamily: SANS, fontWeight: 600, fontSize: 17 }}>ProofMart</span>
             </div>
             <p style={{ fontFamily: SANS, fontSize: 14, color: "#43494F", maxWidth: "40ch", lineHeight: 1.55 }}>
               Document forensics as a signed evidence graph. Built in Bengaluru.
@@ -41,7 +41,7 @@ export default function SiteFooter() {
           ))}
         </div>
         <div style={{ paddingTop: 22, display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: MONO, fontSize: 11, color: "#767C83" }}>
-          <span>© 2026 Colophon Systems · MIT No. 2026/COL/0041</span>
+          <span>© 2026 ProofMart Systems · MIT No. 2026/PMT/0041</span>
           <span>v0.9.14 · public beta</span>
         </div>
       </div>

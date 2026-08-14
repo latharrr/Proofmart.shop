@@ -95,3 +95,48 @@ export function cellCoordinate(raw: RawExtraction, page: number, item: TextItem)
   const pageHeight = (raw.pageSizes.get(page) ?? FALLBACK_PAGE_SIZE).heightPt;
   return { page, rect: toRailRect(item.x, item.y, item.width, item.height, pageHeight) };
 }
+
+const MONTHS: Record<string, number> = {
+  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+  jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+};
+
+/**
+ * Parses a statement-style date cell into a comparable numeric key (ms since
+ * epoch). Supports the formats real bank/statement tables actually use:
+ * `DD Mon[ YYYY]` (e.g. "01 Apr" or "01 Apr 2024"), `YYYY-MM-DD`, and
+ * `DD/MM/YYYY`. When no year is present, a fixed synthetic year is used —
+ * fine for checking relative (within-document) ordering, meaningless as an
+ * absolute date. Unrecognized formats return `null` and are skipped by
+ * callers rather than guessed at.
+ */
+export function parseLedgerDate(raw: string): number | null {
+  const trimmed = raw.trim();
+
+  const isoMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
+  if (isoMatch) {
+    const [, y, m, d] = isoMatch;
+    return Date.UTC(Number(y), Number(m) - 1, Number(d));
+  }
+
+  const slashMatch = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(trimmed);
+  if (slashMatch) {
+    const [, d, m, y] = slashMatch;
+    const day = Number(d);
+    const month = Number(m);
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+    return Date.UTC(Number(y), month - 1, day);
+  }
+
+  const dayMonthMatch = /^(\d{1,2})\s+([A-Za-z]{3,})\.?(?:\s+(\d{4}))?$/.exec(trimmed);
+  if (dayMonthMatch) {
+    const [, d, monthName, y] = dayMonthMatch;
+    const month = MONTHS[monthName.slice(0, 3).toLowerCase()];
+    if (month === undefined) return null;
+    const day = Number(d);
+    if (day < 1 || day > 31) return null;
+    return Date.UTC(y ? Number(y) : 2000, month, day);
+  }
+
+  return null;
+}

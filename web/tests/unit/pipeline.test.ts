@@ -36,6 +36,13 @@ describe("PDFProcessor (end-to-end: validate -> classify -> extract -> normalize
     expect(doc.pages.map((p) => p.page)).toEqual([1, 2, 3, 4, 5]);
   });
 
+  it("rejects a PDF with more pages than MAX_UPLOAD_PAGES, even though it's well under the byte-size limit", async () => {
+    const buf = await multiPagePdf(51);
+    await expect(new PDFProcessor().process(buf, { filename: "huge.pdf", sizeBytes: buf.length })).rejects.toMatchObject({
+      error: { code: "too-large" },
+    });
+  });
+
   it("flags a table on the table-heavy fixture", async () => {
     const buf = await tableHeavyPdf();
     const doc = await new PDFProcessor().process(buf, { filename: "ledger.pdf", sizeBytes: buf.length });

@@ -1,5 +1,6 @@
 import type { RawExtraction } from "@/lib/pdf/extract";
 import type { ProcessedDocument } from "@/lib/pdf/types";
+import type { DocumentKind } from "./document-kind";
 
 /**
  * The verification domain's own Verdict — intentionally redefined here
@@ -50,6 +51,8 @@ export interface VerificationResult {
   markersRun: string[];
   /** Marker ids that could not run against this document, and why. */
   markersSkipped: { markerId: string; reason: string }[];
+  /** Keyword-based document-type label — see `document-kind.ts`. Informational only; does not gate which markers run. */
+  documentKind: DocumentKind;
 }
 
 export interface MarkerContext {

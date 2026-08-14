@@ -15,9 +15,9 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Colophon — Document forensics API",
+  title: "ProofMart — Document forensics API",
   description:
-    "Colophon takes a PDF and returns a signed dossier of findings — each pinned to its pixel, each with the arithmetic.",
+    "ProofMart takes a PDF and returns a signed dossier of findings — each pinned to its pixel, each with the arithmetic.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

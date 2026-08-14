@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@firecrawl/pdf-inspector": "^1.14.2",
+    "@vercel/blob": "^2.8.0",
     "next": "16.3.1",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^5.4.624",

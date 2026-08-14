@@ -16,6 +16,7 @@ export const FACT_LABEL: Record<ExtractedFact["kind"], string> = {
   heading: "HEADING",
   link: "LINK",
   "form-field": "FORM FIELD",
+  "ocr-text": "OCR TEXT",
 };
 
 export function factsForPage(doc: ProcessedDocument, page: number): ExtractedFact[] {

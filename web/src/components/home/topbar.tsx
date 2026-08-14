@@ -27,7 +27,7 @@ export default function Topbar() {
           <div style={{ width: 22, height: 22, background: "#0E1216", position: "relative" }}>
             <div style={{ position: "absolute", inset: 5, border: "1.5px solid #F5F5F0" }} />
           </div>
-          <span style={{ fontFamily: SANS, fontWeight: 600, letterSpacing: "-0.01em", fontSize: 17 }}>Colophon</span>
+          <span style={{ fontFamily: SANS, fontWeight: 600, letterSpacing: "-0.01em", fontSize: 17 }}>ProofMart</span>
           <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.06em", marginLeft: 4 }}>V0.9 BETA</span>
         </div>
         <nav style={{ display: "flex", alignItems: "center", gap: 28, fontFamily: SANS, fontSize: 14, color: "#43494F" }}>
