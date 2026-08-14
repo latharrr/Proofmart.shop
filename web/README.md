@@ -63,7 +63,7 @@ See `lib/verification/registry.ts` for the implemented markers and the ones deli
 
 1. Import the repo into a new Vercel project (root: this `web/` directory if the repo has siblings).
 2. Attach a Vercel Blob store to the project (Storage tab) to get large-file uploads — optional, see above. OCR needs no setup of its own; every asset it uses is already in the deployment.
-3. Deploy. `/api/inspect` and `/api/upload-token` run on the Node.js runtime (required — `@firecrawl/pdf-inspector` is a native module and cannot run on Edge).
+3. Deploy. `/api/inspect` and `/api/upload-token` run on the Node.js runtime (required — `@firecrawl/pdf-inspector` is a native module and cannot run on Edge). `npm run build` builds with `--webpack`, not Turbopack — see the comment in `next.config.ts` for why (Turbopack's build-time page-data collection fails to load `@firecrawl/pdf-inspector`'s native binding on Vercel; webpack doesn't have this problem). If you change the build command in Vercel's project settings, make sure it still runs `npm run build` (or otherwise keeps `--webpack`), not a bare `next build`.
 
 ### Blob access level (known limitation)
 

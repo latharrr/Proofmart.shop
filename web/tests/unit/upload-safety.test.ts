@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isTrustedBlobUrl, sanitizeFilename } from "@/app/api/inspect/route";
+import { isTrustedBlobUrl, sanitizeFilename } from "@/lib/pdf/upload-safety";
 
 describe("isTrustedBlobUrl (SSRF guard on the {blobUrl} processing path)", () => {
   it("accepts a genuine Vercel Blob public storage URL", () => {
