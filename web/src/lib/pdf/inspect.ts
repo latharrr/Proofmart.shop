@@ -21,13 +21,13 @@ export function validatePdfBytes(buffer: Buffer, sizeBytes: number): ValidationR
   if (sizeBytes > MAX_UPLOAD_BYTES) {
     return {
       ok: false,
-      error: { code: "too-large", message: `File is ${(sizeBytes / (1024 * 1024)).toFixed(1)} MB — the limit is 20 MB.` },
+      error: { code: "too-large", message: `File is ${(sizeBytes / (1024 * 1024)).toFixed(1)} MB. The limit is 20 MB.` },
     };
   }
 
   const header = buffer.subarray(0, MAGIC_SEARCH_WINDOW).toString("latin1");
   if (!header.includes(PDF_MAGIC)) {
-    return { ok: false, error: { code: "invalid-file", message: "Not a PDF — no %PDF- header found." } };
+    return { ok: false, error: { code: "invalid-file", message: "Not a PDF. No %PDF- header found." } };
   }
 
   if (looksEncrypted(buffer)) {
@@ -96,7 +96,7 @@ export function classifyProcessingError(err: unknown): ProcessingError {
     return { code: "unsupported", message: "This PDF uses a feature ProofMart doesn't support yet." };
   }
   if (lower.includes("parse") || lower.includes("invalid") || lower.includes("malformed") || lower.includes("corrupt") || lower.includes("eof")) {
-    return { code: "unreadable", message: "ProofMart couldn't read this PDF — the file may be corrupted or truncated." };
+    return { code: "unreadable", message: "ProofMart couldn't read this PDF. The file may be corrupted or truncated." };
   }
   return { code: "processing-failed", message: "Processing failed unexpectedly. Try again or use a different file." };
 }

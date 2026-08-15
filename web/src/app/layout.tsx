@@ -14,16 +14,37 @@ const ibmPlexMono = IBM_Plex_Mono({
   weight: ["400", "500", "600"],
 });
 
+const TITLE = "ProofMart · Document forensics API";
+const DESCRIPTION =
+  "ProofMart takes a PDF and returns a signed dossier of findings, each pinned to its pixel, each with the arithmetic.";
+
 export const metadata: Metadata = {
-  title: "ProofMart — Document forensics API",
-  description:
-    "ProofMart takes a PDF and returns a signed dossier of findings — each pinned to its pixel, each with the arithmetic.",
+  metadataBase: new URL("https://proofmart.shop"),
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: "https://proofmart.shop",
+    siteName: "ProofMart",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${instrumentSans.variable} ${ibmPlexMono.variable}`}>
-      <body>{children}</body>
+      <body>
+        <a href="#main" className="pm-skip-link">
+          Skip to content
+        </a>
+        {children}
+      </body>
     </html>
   );
 }

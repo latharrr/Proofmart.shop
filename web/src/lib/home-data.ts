@@ -25,15 +25,15 @@ export const PIPELINE: PipelineStage[] = [
     i: "03",
     name: "Reason",
     ms: "2.9 s",
-    body: "Domain rules run over the run graph — arithmetic identities, template match, glyph metrics, semantic outliers.",
+    body: "Domain rules run over the run graph: arithmetic identities, template match, glyph metrics, semantic outliers.",
     signal: "markers · rules · verdict",
   },
   {
     i: "04",
-    name: "Attest",
+    name: "Decide",
     ms: "260 ms",
-    body: "Findings collapsed to a Merkle root, signed ed25519, and returned with a per-finding coordinate box for audit.",
-    signal: "signed · replay · webhook",
+    body: "Findings are ranked by verdict precedence, FAIL before REVIEW before CLEAR, and returned as JSON with a per-finding coordinate box for audit.",
+    signal: "verdict · findings · coordinates",
   },
 ];
 
@@ -48,16 +48,20 @@ export interface Marker {
   cites: string;
 }
 
+// Mirrors the live MARKER_REGISTRY in lib/verification/registry.ts exactly —
+// id, category, and verdict per marker. Keep both lists in sync: this page
+// claims to be the marker catalog, so it must never show a marker the
+// verification engine doesn't actually run.
 export const MARKERS: Marker[] = [
-  { id: "BALANCE_BREAK", cat: "Arithmetic", verdict: "FAIL", desc: "Running balance disagrees with prior ± net movement.", cites: "row · math · box" },
-  { id: "PRODUCER_MISMATCH", cat: "Provenance", verdict: "FAIL", desc: "PDF producer string is not on the issuer template roster.", cites: "metadata · roster" },
-  { id: "FONT_METRIC_SHIFT", cat: "Typography", verdict: "REVIEW", desc: "Glyph advance width departs from surrounding text run.", cites: "glyph · run · box" },
-  { id: "OCR_LOW_CONFIDENCE", cat: "Extraction", verdict: "REVIEW", desc: "Recognizer confidence below the 0.75 threshold on a cell used in reasoning.", cites: "cell · confidence" },
-  { id: "DUP_TXN_HASH", cat: "Semantic", verdict: "FAIL", desc: "Two transactions share amount, counterparty, and reference within a 3-day window.", cites: "rows · window" },
-  { id: "SIGNATURE_INVALID", cat: "Provenance", verdict: "FAIL", desc: "Detached digital signature does not validate against the issuer chain.", cites: "signature · chain" },
+  { id: "BALANCE_BREAK", cat: "Arithmetic", verdict: "FAIL", desc: "Running balance disagrees with prior balance plus credit minus debit in a reconstructed ledger table.", cites: "row · math · box" },
+  { id: "CROSS_PAGE_TOTAL_MISMATCH", cat: "Arithmetic", verdict: "FAIL", desc: "Running balance fails to carry forward correctly across a page break.", cites: "row · page · box" },
+  { id: "DATE_SEQUENCE_ANOMALY", cat: "Semantic", verdict: "REVIEW", desc: "A row's date is earlier than the row immediately before it in a reconstructed ledger.", cites: "row · date · box" },
+  { id: "DUPLICATE_TRANSACTION", cat: "Semantic", verdict: "REVIEW", desc: "Two or more rows share an identical date and amount.", cites: "rows · match" },
+  { id: "OCR_LOW_CONFIDENCE", cat: "Extraction", verdict: "REVIEW", desc: "Page classified as needing OCR: its text layer is unreliable or absent.", cites: "page · confidence" },
+  { id: "ENCODING_ANOMALY", cat: "Extraction", verdict: "REVIEW", desc: "Broken font encoding or CID mapping detected somewhere in the document.", cites: "document · encoding" },
 ];
 
-export const MARKER_TABS = ["All", "Arithmetic", "Provenance", "Typography", "Extraction", "Semantic"] as const;
+export const MARKER_TABS = ["All", "Arithmetic", "Semantic", "Extraction"] as const;
 
 export interface Integration {
   name: string;
@@ -66,10 +70,10 @@ export interface Integration {
 }
 
 export const INTEGRATIONS: Integration[] = [
-  { name: "REST", kind: "sync", body: "POST a PDF. Receive the signed dossier on the same request. 30 s timeout." },
-  { name: "Webhook", kind: "async · replay", body: "Attach a callback URL; the dossier posts back keyed by request_id. Replay any request from the dashboard." },
-  { name: "CLI", kind: "terminal", body: "colophon scan file.pdf writes JSON to stdout and drops the dossier PDF next to the source." },
-  { name: "Verify", kind: "public key", body: "Every dossier is signed ed25519. Verify offline against the key at proofmart.shop/.well-known/keys." },
+  { name: "Upload", kind: "live today", body: "The upload flow on this page. Drop, paste, or pick a PDF and get real findings back, no account required." },
+  { name: "Webhook", kind: "planned", body: "Callback delivery for async jobs, so you don't have to hold a connection open. Not yet built." },
+  { name: "CLI", kind: "planned", body: "A terminal client for scripted scans, so runs fit into an existing pipeline. Not yet built." },
+  { name: "Verify", kind: "planned", body: "Offline signature verification against a published key. Findings aren't signed yet, so there's no key to verify against." },
 ];
 
 export interface PricingTier {
@@ -91,7 +95,7 @@ export const PRICING: PricingTier[] = [
     scan: "₹8 / scan",
     body: "For teams verifying customer-supplied documents in a review queue.",
     cta: "Start with 500 free findings",
-    included: ["REST + webhook", "Signed dossier PDF", "Rail review app", "Email support"],
+    included: ["Web upload + JSON findings", "Rail review app", "Email support"],
   },
   {
     tier: "Growth",
@@ -100,7 +104,7 @@ export const PRICING: PricingTier[] = [
     scan: "₹6 / scan",
     body: "For teams running ProofMart in the underwriting loop.",
     cta: "Book a pipeline review",
-    included: ["Everything in Team", "Webhook retries", "Custom marker rules", "Priority email"],
+    included: ["Everything in Team", "Custom marker rules", "Priority email"],
     highlight: true,
   },
   {

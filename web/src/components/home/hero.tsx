@@ -4,7 +4,7 @@ import { MONO, SANS } from "@/lib/evidence-data";
 export default function Hero() {
   return (
     <section style={{ maxWidth: 1320, margin: "0 auto", padding: "72px 32px 40px" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 5fr) minmax(0, 7fr)", gap: 56, alignItems: "end" }}>
+      <div className="pm-hero-grid" style={{ display: "grid", gap: 56, alignItems: "end" }}>
         <div>
           <div
             style={{
@@ -22,10 +22,10 @@ export default function Hero() {
             DOCUMENT FORENSICS · API
           </div>
           <h1
+            className="pm-hero-title"
             style={{
               fontFamily: SANS,
               fontWeight: 500,
-              fontSize: 72,
               lineHeight: 0.98,
               letterSpacing: "-0.035em",
               margin: "0 0 24px",
@@ -39,12 +39,13 @@ export default function Hero() {
             <span style={{ color: "#43494F" }}>on the record.</span>
           </h1>
           <p style={{ fontFamily: SANS, fontSize: 17, lineHeight: 1.55, color: "#43494F", maxWidth: "44ch", margin: "0 0 32px" }}>
-            ProofMart takes a PDF and returns a signed dossier of findings — each pinned to its pixel, each with the arithmetic. You read the rail,
+            ProofMart takes a PDF and returns a structured report of findings, each pinned to its pixel, each with the arithmetic. You read the rail,
             not the doc.
           </p>
           <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 40 }}>
             <a
               href="#access"
+              className="pm-hoverable"
               style={{
                 fontFamily: MONO,
                 fontSize: 12,
@@ -59,6 +60,7 @@ export default function Hero() {
             </a>
             <a
               href="#run"
+              className="pm-hoverable"
               style={{
                 fontFamily: MONO,
                 fontSize: 12,
@@ -69,7 +71,7 @@ export default function Hero() {
                 borderRadius: 3,
               }}
             >
-              READ THE DOSSIER
+              READ THE RESPONSE
             </a>
           </div>
           <div style={{ paddingTop: 22, borderTop: "1px solid #DDE1E4", maxWidth: 520 }}>
@@ -120,7 +122,7 @@ export default function Hero() {
             <span>REQ_8FK2 · LIVE</span>
             <span>DRAG A PDF ONTO THE RAIL ↓</span>
           </div>
-          <div style={{ height: 640, boxShadow: "0 24px 60px -30px rgba(14,18,22,0.35)" }}>
+          <div className="pm-hero-rail" style={{ boxShadow: "0 24px 60px -30px rgba(14,18,22,0.35)" }}>
             <EvidenceRail />
           </div>
         </div>

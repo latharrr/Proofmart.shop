@@ -110,7 +110,7 @@ export class PDFProcessor implements DocumentProcessor {
     if (classification.result.pageCount > MAX_UPLOAD_PAGES) {
       throw new ProcessingFailure({
         code: "too-large",
-        message: `Document has ${classification.result.pageCount} pages — the limit is ${MAX_UPLOAD_PAGES}.`,
+        message: `Document has ${classification.result.pageCount} pages. The limit is ${MAX_UPLOAD_PAGES}.`,
       });
     }
 

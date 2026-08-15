@@ -5,9 +5,9 @@ export default function OutputsSection() {
     <section id="outputs" style={{ borderTop: "1px solid #DDE1E4", background: "#0E1216", color: "#F5F5F0" }}>
       <div style={{ maxWidth: 1320, margin: "0 auto", padding: "88px 32px" }}>
         <div
+          className="pm-split-grid-48"
           style={{
             display: "grid",
-            gridTemplateColumns: "minmax(0, 4fr) minmax(0, 8fr)",
             gap: 56,
             alignItems: "start",
             marginBottom: 48,
@@ -15,77 +15,79 @@ export default function OutputsSection() {
         >
           <div>
             <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.1em", marginBottom: 12 }}>§ 05 · OUTPUTS</div>
-            <h2 style={{ fontFamily: SANS, fontWeight: 500, fontSize: 44, lineHeight: 1.02, letterSpacing: "-0.025em", margin: "0 0 16px", color: "#F5F5F0" }}>
-              Two shapes.
+            <h2 className="pm-h2" style={{ fontFamily: SANS, fontWeight: 500, lineHeight: 1.02, letterSpacing: "-0.025em", margin: "0 0 16px", color: "#F5F5F0" }}>
+              The JSON is real.
               <br />
-              Same evidence.
+              The dossier is next.
             </h2>
           </div>
           <p style={{ fontFamily: SANS, fontSize: 17, lineHeight: 1.55, color: "#C2C7CC", maxWidth: "60ch", margin: "8px 0 0" }}>
-            The JSON is what your services read. The PDF dossier is what your reviewers sign. Both are produced from the same finding graph —
-            the two artifacts can never disagree.
+            The JSON below is what the API returns today. A signed PDF dossier your reviewers can countersign, built from the same finding
+            graph, is the next output we&rsquo;re shipping.
           </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: 32 }}>
+        <div className="pm-cols-2" style={{ display: "grid", gap: 32 }}>
           {/* JSON output */}
           <div style={{ background: "#14181D", border: "1px solid #2A2F35", borderRadius: 4, overflow: "hidden" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #2A2F35" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.08em" }}>POST /v1/analyze → 200 OK</span>
+                <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.08em" }}>POST /api/inspect → 200 OK</span>
               </div>
               <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83" }}>application/json</span>
             </div>
             <pre style={{ margin: 0, padding: "18px 20px", fontFamily: MONO, fontSize: 12, lineHeight: 1.65, color: "#F5F5F0", overflowX: "auto" }}>
-              <span style={{ color: "#767C83" }}>{"{\n  "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;request_id&quot;</span>
+              <span style={{ color: "#767C83" }}>{'{\n  "document": { '}</span>
+              <span style={{ color: "#A9BFD8" }}>&quot;filename&quot;</span>
               <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#E2C48A" }}>&quot;req_8fk2&quot;</span>
-              <span style={{ color: "#767C83" }}>{",\n  "}</span>
+              <span style={{ color: "#E2C48A" }}>&quot;hdfc_apr25_statement.pdf&quot;</span>
+              <span style={{ color: "#767C83" }}>{", "}</span>
+              <span style={{ color: "#A9BFD8" }}>&quot;pageCount&quot;</span>
+              <span style={{ color: "#767C83" }}>{": "}</span>
+              <span style={{ color: "#C9D1B6" }}>6</span>
+              <span style={{ color: "#767C83" }}>{" },\n  "}</span>
+              <span style={{ color: "#A9BFD8" }}>&quot;verification&quot;</span>
+              <span style={{ color: "#767C83" }}>{": {\n    "}</span>
               <span style={{ color: "#A9BFD8" }}>&quot;verdict&quot;</span>
               <span style={{ color: "#767C83" }}>{": "}</span>
               <span style={{ color: "#E38A82" }}>&quot;FAIL&quot;</span>
-              <span style={{ color: "#767C83" }}>{",\n  "}</span>
+              <span style={{ color: "#767C83" }}>{",\n    "}</span>
               <span style={{ color: "#A9BFD8" }}>&quot;findings&quot;</span>
-              <span style={{ color: "#767C83" }}>{": [\n    {\n      "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;marker&quot;</span>
+              <span style={{ color: "#767C83" }}>{": [{\n      "}</span>
+              <span style={{ color: "#A9BFD8" }}>&quot;markerId&quot;</span>
               <span style={{ color: "#767C83" }}>{": "}</span>
               <span style={{ color: "#E2C48A" }}>&quot;BALANCE_BREAK&quot;</span>
               <span style={{ color: "#767C83" }}>{",\n      "}</span>
+              <span style={{ color: "#A9BFD8" }}>&quot;verdict&quot;</span>
+              <span style={{ color: "#767C83" }}>{": "}</span>
+              <span style={{ color: "#E38A82" }}>&quot;FAIL&quot;</span>
+              <span style={{ color: "#767C83" }}>{",\n      "}</span>
+              <span style={{ color: "#A9BFD8" }}>&quot;evidence&quot;</span>
+              <span style={{ color: "#767C83" }}>{": { "}</span>
+              <span style={{ color: "#A9BFD8" }}>&quot;summary&quot;</span>
+              <span style={{ color: "#767C83" }}>{": "}</span>
+              <span style={{ color: "#E2C48A" }}>&quot;Running balance differs by -5,000.00&quot;</span>
+              <span style={{ color: "#767C83" }}>{",\n        "}</span>
+              <span style={{ color: "#A9BFD8" }}>&quot;coordinates&quot;</span>
+              <span style={{ color: "#767C83" }}>{": [{ "}</span>
               <span style={{ color: "#A9BFD8" }}>&quot;page&quot;</span>
               <span style={{ color: "#767C83" }}>{": "}</span>
               <span style={{ color: "#C9D1B6" }}>4</span>
-              <span style={{ color: "#767C83" }}>{",\n      "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;box&quot;</span>
-              <span style={{ color: "#767C83" }}>{": ["}</span>
+              <span style={{ color: "#767C83" }}>{", "}</span>
+              <span style={{ color: "#A9BFD8" }}>&quot;rect&quot;</span>
+              <span style={{ color: "#767C83" }}>{": { "}</span>
+              <span style={{ color: "#A9BFD8" }}>&quot;x&quot;</span>
+              <span style={{ color: "#767C83" }}>{": "}</span>
               <span style={{ color: "#C9D1B6" }}>548</span>
               <span style={{ color: "#767C83" }}>{", "}</span>
+              <span style={{ color: "#A9BFD8" }}>&quot;y&quot;</span>
+              <span style={{ color: "#767C83" }}>{": "}</span>
               <span style={{ color: "#C9D1B6" }}>528</span>
-              <span style={{ color: "#767C83" }}>{", "}</span>
-              <span style={{ color: "#C9D1B6" }}>68</span>
-              <span style={{ color: "#767C83" }}>{", "}</span>
-              <span style={{ color: "#C9D1B6" }}>22</span>
-              <span style={{ color: "#767C83" }}>{"],\n      "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;expected&quot;</span>
+              <span style={{ color: "#767C83" }}>{" } }]\n      }\n    }],\n    "}</span>
+              <span style={{ color: "#A9BFD8" }}>&quot;documentKind&quot;</span>
               <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#C9D1B6" }}>96710.00</span>
-              <span style={{ color: "#767C83" }}>{",\n      "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;found&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#C9D1B6" }}>91710.00</span>
-              <span style={{ color: "#767C83" }}>{",\n      "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;delta&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#C9D1B6" }}>-5000.00</span>
-              <span style={{ color: "#767C83" }}>{",\n      "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;confidence&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#C9D1B6" }}>1.00</span>
-              <span style={{ color: "#767C83" }}>{"\n    }\n  ],\n  "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;signature&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#E2C48A" }}>&quot;ed25519:8f…3c&quot;</span>
-              <span style={{ color: "#767C83" }}>{"\n}"}</span>
+              <span style={{ color: "#E2C48A" }}>&quot;bank_statement&quot;</span>
+              <span style={{ color: "#767C83" }}>{"\n  }\n}"}</span>
             </pre>
           </div>
 
@@ -93,7 +95,7 @@ export default function OutputsSection() {
           <div style={{ background: "#14181D", border: "1px solid #2A2F35", borderRadius: 4, overflow: "hidden" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #2A2F35" }}>
               <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.08em" }}>req_8fk2.dossier.pdf</span>
-              <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83" }}>signed · 3 pages</span>
+              <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83" }}>concept · not yet generated</span>
             </div>
             <div style={{ padding: 24, background: "#14181D", height: "100%", display: "flex", alignItems: "stretch" }}>
               <div
@@ -135,9 +137,9 @@ export default function OutputsSection() {
                   </div>
                 </div>
                 <div style={{ marginTop: "auto", paddingTop: 10, borderTop: "1px solid #DDE1E4", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ fontFamily: MONO, fontSize: 9, color: "#767C83", letterSpacing: "0.1em" }}>SIGNED ED25519 · 8F…3C</div>
-                  <div style={{ width: 44, height: 44, border: "1px solid #0E1216", display: "grid", placeItems: "center", fontFamily: MONO, fontSize: 8, letterSpacing: "0.1em" }}>
-                    SEAL
+                  <div style={{ fontFamily: MONO, fontSize: 9, color: "#767C83", letterSpacing: "0.1em" }}>SIGNATURE · PLANNED</div>
+                  <div style={{ width: 44, height: 44, border: "1px dashed #767C83", display: "grid", placeItems: "center", fontFamily: MONO, fontSize: 8, letterSpacing: "0.1em", color: "#767C83" }}>
+                    SOON
                   </div>
                 </div>
               </div>
@@ -146,7 +148,7 @@ export default function OutputsSection() {
         </div>
 
         <div style={{ marginTop: 24, display: "flex", alignItems: "center", gap: 24, fontFamily: MONO, fontSize: 11, color: "#767C83" }}>
-          <span>Both artifacts share the same finding_id — cross-referenceable in your audit trail.</span>
+          <span>The JSON above matches the live API response shape. The dossier PDF is a design target, not yet generated by the API.</span>
         </div>
       </div>
     </section>

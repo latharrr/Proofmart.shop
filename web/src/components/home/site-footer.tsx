@@ -6,9 +6,9 @@ export default function SiteFooter() {
     <footer style={{ borderTop: "1px solid #DDE1E4", background: "#FAFAF7" }}>
       <div style={{ maxWidth: 1320, margin: "0 auto", padding: "56px 32px 32px" }}>
         <div
+          className="pm-footer-grid"
           style={{
             display: "grid",
-            gridTemplateColumns: "minmax(0, 5fr) repeat(3, 1fr)",
             gap: 40,
             paddingBottom: 40,
             borderBottom: "1px solid #DDE1E4",
@@ -16,13 +16,13 @@ export default function SiteFooter() {
         >
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-              <div style={{ width: 22, height: 22, background: "#0E1216", position: "relative" }}>
+              <div aria-hidden="true" style={{ width: 22, height: 22, background: "#0E1216", position: "relative" }}>
                 <div style={{ position: "absolute", inset: 5, border: "1.5px solid #F5F5F0" }} />
               </div>
               <span style={{ fontFamily: SANS, fontWeight: 600, fontSize: 17 }}>ProofMart</span>
             </div>
             <p style={{ fontFamily: SANS, fontSize: 14, color: "#43494F", maxWidth: "40ch", lineHeight: 1.55 }}>
-              Document forensics as a signed evidence graph. Built in Bengaluru.
+              Document forensics as a structured evidence graph. Built in Bengaluru.
             </p>
           </div>
           {FOOTER.map((c) => (
@@ -31,7 +31,7 @@ export default function SiteFooter() {
               <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
                 {c.links.map((l) => (
                   <li key={l}>
-                    <a href="#" style={{ fontFamily: SANS, fontSize: 13, color: "#43494F" }}>
+                    <a href="#" className="pm-hoverable" style={{ fontFamily: SANS, fontSize: 13, color: "#43494F" }}>
                       {l}
                     </a>
                   </li>

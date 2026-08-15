@@ -47,7 +47,7 @@ export const encodingAnomalyMarker: Marker = {
           verdict: "REVIEW",
           evidence: {
             summary: "Encoding anomaly detected",
-            detail: "Some text in this document may not decode reliably — broken font encoding or CID mapping.",
+            detail: "Some text in this document may not decode reliably: broken font encoding or CID mapping.",
             coordinates: [],
           },
         },

@@ -39,7 +39,7 @@ function validateFile(file: File): ProcessingError | null {
   if (!looksLikePdf) return { code: "invalid-file", message: "Not a PDF file." };
   if (file.size === 0) return { code: "invalid-file", message: "The file is empty." };
   if (file.size > MAX_UPLOAD_BYTES) {
-    return { code: "too-large", message: `File is ${(file.size / (1024 * 1024)).toFixed(1)} MB — the limit is 20 MB.` };
+    return { code: "too-large", message: `File is ${(file.size / (1024 * 1024)).toFixed(1)} MB. The limit is 20 MB.` };
   }
   return null;
 }
@@ -93,7 +93,7 @@ function classifyPdfjsError(err: unknown): ProcessingError {
     return { code: "password-protected", message: "This PDF is password-protected. Remove the password and try again." };
   }
   if (name === "InvalidPDFException") {
-    return { code: "unreadable", message: "ProofMart couldn't read this PDF — the file may be corrupted or truncated." };
+    return { code: "unreadable", message: "ProofMart couldn't read this PDF. The file may be corrupted or truncated." };
   }
   return { code: "processing-failed", message: "Processing failed unexpectedly. Try again or use a different file." };
 }

@@ -115,7 +115,7 @@ function deriveFacts(raw: RawExtraction, classification: PdfClassification): Ext
     page: 1,
     rect: null,
     label: "Document type",
-    detail: `${classification.pdfType.toUpperCase()} · ${Math.round(classification.confidence * 100)}% confidence — detected from PDF structure (text layer, fonts, embedded images), not content.`,
+    detail: `${classification.pdfType.toUpperCase()} · ${Math.round(classification.confidence * 100)}% confidence. Detected from PDF structure (text layer, fonts, embedded images), not content.`,
   });
 
   if (raw.meta.title && raw.meta.title.trim().length > 0) {
@@ -136,7 +136,7 @@ function deriveFacts(raw: RawExtraction, classification: PdfClassification): Ext
       page: 1,
       rect: null,
       label: "Encoding issue detected",
-      detail: "Some text may not decode reliably — broken font encoding or CID mapping.",
+      detail: "Some text may not decode reliably: broken font encoding or CID mapping.",
     });
   }
 

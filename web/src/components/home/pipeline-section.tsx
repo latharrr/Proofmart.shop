@@ -6,9 +6,9 @@ export default function PipelineSection() {
     <section id="pipeline" style={{ borderTop: "1px solid #DDE1E4", background: "#FAFAF7" }}>
       <div style={{ maxWidth: 1320, margin: "0 auto", padding: "88px 32px" }}>
         <div
+          className="pm-split-grid-48"
           style={{
             display: "grid",
-            gridTemplateColumns: "minmax(0, 4fr) minmax(0, 8fr)",
             gap: 56,
             alignItems: "start",
             marginBottom: 56,
@@ -16,7 +16,7 @@ export default function PipelineSection() {
         >
           <div>
             <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.1em", marginBottom: 12 }}>§ 02 · PIPELINE</div>
-            <h2 style={{ fontFamily: SANS, fontWeight: 500, fontSize: 44, lineHeight: 1.02, letterSpacing: "-0.025em", margin: "0 0 16px" }}>
+            <h2 className="pm-h2" style={{ fontFamily: SANS, fontWeight: 500, lineHeight: 1.02, letterSpacing: "-0.025em", margin: "0 0 16px" }}>
               From bytes
               <br />
               to bounded evidence.
@@ -28,7 +28,7 @@ export default function PipelineSection() {
           </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0, borderTop: "1px solid #DDE1E4", borderBottom: "1px solid #DDE1E4" }}>
+        <div className="pm-cols-4" style={{ display: "grid", gap: 0, borderTop: "1px solid #DDE1E4", borderBottom: "1px solid #DDE1E4" }}>
           {PIPELINE.map((p, i) => (
             <div
               key={p.i}
@@ -50,6 +50,7 @@ export default function PipelineSection() {
               </div>
               {i < PIPELINE.length - 1 && (
                 <div
+                  className="pm-flow-arrow"
                   style={{
                     position: "absolute",
                     right: -6,

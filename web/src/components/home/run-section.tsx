@@ -4,17 +4,17 @@ const STEPS = [
   {
     step: "STEP 01 · SEND",
     title: "One multipart POST.",
-    body: "Files up to 50 pages, 20 MB. Timeout 30 s. Retries idempotent by content hash.",
+    body: "Files up to 50 pages, 20 MB. Timeout 30 s.",
   },
   {
     step: "STEP 02 · RECEIVE",
     title: "The full evidence graph.",
-    body: "Every finding carries page, box, expected/found, marker id — every value points back to the rail address you can screenshot.",
+    body: "Every finding carries page, box, expected/found, marker id: every value points back to the rail address you can screenshot.",
   },
   {
-    step: "STEP 03 · VERIFY",
-    title: "Ed25519, offline.",
-    body: "Anyone can verify a dossier against the published key — your auditor, a regulator, a customer — with no account.",
+    step: "STEP 03 · DECIDE",
+    title: "Deterministic, not guessed.",
+    body: "No LLM, no scoring model. A fixed precedence, FAIL beats REVIEW beats CLEAR, turns findings into one verdict, every time.",
   },
 ];
 
@@ -23,9 +23,9 @@ export default function RunSection() {
     <section id="run" style={{ borderTop: "1px solid #DDE1E4", background: "#FAFAF7" }}>
       <div style={{ maxWidth: 1320, margin: "0 auto", padding: "88px 32px" }}>
         <div
+          className="pm-split-grid-48"
           style={{
             display: "grid",
-            gridTemplateColumns: "minmax(0, 4fr) minmax(0, 8fr)",
             gap: 56,
             alignItems: "start",
             marginBottom: 40,
@@ -33,10 +33,10 @@ export default function RunSection() {
         >
           <div>
             <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.1em", marginBottom: 12 }}>§ 04 · RUN</div>
-            <h2 style={{ fontFamily: SANS, fontWeight: 500, fontSize: 44, lineHeight: 1.02, letterSpacing: "-0.025em", margin: "0 0 16px" }}>
+            <h2 className="pm-h2" style={{ fontFamily: SANS, fontWeight: 500, lineHeight: 1.02, letterSpacing: "-0.025em", margin: "0 0 16px" }}>
               One call.
               <br />
-              One signed dossier.
+              One structured response.
             </h2>
           </div>
           <p style={{ fontFamily: SANS, fontSize: 17, lineHeight: 1.55, color: "#43494F", maxWidth: "62ch", margin: "8px 0 0" }}>
@@ -45,7 +45,7 @@ export default function RunSection() {
           </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 3fr) minmax(0, 2fr)", gap: 20, alignItems: "start" }}>
+        <div className="pm-run-grid" style={{ display: "grid", gap: 20, alignItems: "start" }}>
           <div style={{ background: "#0E1216", color: "#E5E7EA", borderRadius: 4, overflow: "hidden" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #2A2F35" }}>
               <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.08em" }}>$ TERMINAL · SAMPLE</span>
@@ -59,7 +59,7 @@ export default function RunSection() {
               {" \\\n    -F "}
               <span style={{ color: "#E2C48A" }}>&quot;document=@hdfc_apr25.pdf&quot;</span>
               {"\n\n"}
-              <span style={{ color: "#767C83" }}>↳ 4.8s · signed dossier returned inline · SAMPLE</span>
+              <span style={{ color: "#767C83" }}>↳ 4.8s · verification returned inline · SAMPLE</span>
               {"\n"}
               <span style={{ color: "#E38A82" }}>✗ FAIL</span>
               {" · req_8fk2 · 4 findings\n   "}
@@ -70,10 +70,7 @@ export default function RunSection() {
               <span style={{ color: "#F2B04B" }}>~</span>
               {" FONT_METRIC_SHIFT    p4·r08\n   "}
               <span style={{ color: "#F2B04B" }}>~</span>
-              {" OCR_LOW_CONFIDENCE   p4·r14\n\n"}
-              <span style={{ color: "#767C83" }}>dossier → req_8fk2.dossier.pdf (signed)</span>
-              {"\n"}
-              <span style={{ color: "#767C83" }}>verify  → proofmart verify req_8fk2</span>
+              {" OCR_LOW_CONFIDENCE   p4·r14"}
             </pre>
           </div>
 

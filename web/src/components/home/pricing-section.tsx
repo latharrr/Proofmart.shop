@@ -6,9 +6,9 @@ export default function PricingSection() {
     <section id="pricing" style={{ borderTop: "1px solid #DDE1E4" }}>
       <div style={{ maxWidth: 1320, margin: "0 auto", padding: "88px 32px" }}>
         <div
+          className="pm-split-grid-48"
           style={{
             display: "grid",
-            gridTemplateColumns: "minmax(0, 4fr) minmax(0, 8fr)",
             gap: 56,
             marginBottom: 48,
             alignItems: "end",
@@ -16,19 +16,19 @@ export default function PricingSection() {
         >
           <div>
             <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.1em", marginBottom: 12 }}>§ 07 · PRICING</div>
-            <h2 style={{ fontFamily: SANS, fontWeight: 500, fontSize: 44, lineHeight: 1.02, letterSpacing: "-0.025em", margin: 0 }}>
+            <h2 className="pm-h2" style={{ fontFamily: SANS, fontWeight: 500, lineHeight: 1.02, letterSpacing: "-0.025em", margin: 0 }}>
               Per scan.
               <br />
               Per finding. Nothing else.
             </h2>
           </div>
           <p style={{ fontFamily: SANS, fontSize: 15, lineHeight: 1.55, color: "#43494F", maxWidth: "52ch", margin: 0 }}>
-            No seats, no minimums. A scan is one document up to 50 pages. Findings are metered when they change your decision — if we say CLEAR,
+            No seats, no minimums. A scan is one document up to 50 pages. Findings are metered when they change your decision: if we say CLEAR,
             it&rsquo;s free.
           </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 0, border: "1px solid #DDE1E4" }}>
+        <div className="pm-cols-3" style={{ display: "grid", gap: 0, border: "1px solid #DDE1E4" }}>
           {PRICING.map((p, i) => (
             <div
               key={p.tier}
@@ -69,6 +69,7 @@ export default function PricingSection() {
               </div>
               <a
                 href="#cta"
+                className="pm-hoverable"
                 style={{
                   marginTop: "auto",
                   fontFamily: MONO,

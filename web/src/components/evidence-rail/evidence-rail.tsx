@@ -171,7 +171,7 @@ export default function EvidenceRail() {
         : ""
     : "6 pages · 2.1 MB · 4.8s";
 
-  const findingsCountLabel = isLive ? (live.verification ? `${live.verification.findings.length} findings` : "—") : `${FINDINGS.length} markers`;
+  const findingsCountLabel = isLive ? (live.verification ? `${live.verification.findings.length} findings` : "·") : `${FINDINGS.length} markers`;
 
   const pageCount = isLive ? Math.max(1, live.document?.pageCount ?? 1) : 6;
   const currentPage = isLive ? live.page : 4;
@@ -195,7 +195,8 @@ export default function EvidenceRail() {
         border: dragActive ? "1px solid #0E1216" : "1px solid #DDE1E4",
         fontFamily: SANS,
         color: "#0E1216",
-        overflow: "hidden",
+        overflowX: "auto",
+        overflowY: "hidden",
       }}
     >
       <input ref={fileInputRef} type="file" accept="application/pdf,.pdf" style={{ display: "none" }} onChange={handleFilePicked} />
@@ -241,6 +242,7 @@ export default function EvidenceRail() {
           <button
             aria-label="Copy JSON"
             onClick={handleCopyJson}
+            className="pm-hoverable"
             style={{ fontFamily: MONO, fontSize: 11, color: "#43494F", padding: "4px 8px", border: "1px solid #DDE1E4", borderRadius: 3 }}
           >
             {copied ? "Copied" : "Copy JSON"}
@@ -248,6 +250,7 @@ export default function EvidenceRail() {
           <button
             aria-label={isLive ? "Clear document" : "Close"}
             onClick={() => live.reset()}
+            className="pm-hoverable"
             style={{ fontFamily: MONO, fontSize: 14, color: "#767C83", width: 22, height: 22, display: "grid", placeItems: "center" }}
           >
             ×
@@ -255,8 +258,12 @@ export default function EvidenceRail() {
         </div>
       </div>
 
-      {/* Split body */}
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 1fr)", flex: 1, minHeight: 0 }}>
+      {/* Split body. Deliberately not a stacking responsive grid like the
+          marketing sections above: both panels need real width to render
+          the document/findings legibly, so on narrow viewports this scrolls
+          horizontally at its proven desktop proportions rather than
+          reflowing into two height-constrained rows with no minimum size. */}
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 1fr)", flex: 1, minHeight: 0, minWidth: 560, overflowX: "auto" }}>
         {/* Document panel */}
         <div
           style={{
@@ -338,7 +345,7 @@ export default function EvidenceRail() {
             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
               <span aria-hidden="true" style={{ width: 6, height: 6, background: isLive ? "#1F6B4A" : "#B4231F", display: "inline-block" }} />
               <span style={{ letterSpacing: "0.02em" }}>
-                {isLive ? "UPLOADED · REAL DOCUMENT" : "SAMPLE · synthetic document — drop, paste, or click to try a real one"}
+                {isLive ? "UPLOADED · REAL DOCUMENT" : "SAMPLE · synthetic document. Drop, paste, or click to try a real one"}
               </span>
             </div>
           </div>
@@ -370,7 +377,7 @@ export default function EvidenceRail() {
           <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
             {isLive && live.stage !== "ready" && (
               <div style={{ padding: "24px 16px", fontFamily: MONO, fontSize: 11, color: "#767C83" }}>
-                {live.stage === "error" ? "No findings — processing failed." : "Findings will appear once processing completes."}
+                {live.stage === "error" ? "No findings. Processing failed." : "Findings will appear once processing completes."}
               </div>
             )}
 
@@ -435,6 +442,7 @@ function FindingRow({
   return (
     <button
       aria-describedby={addrId}
+      aria-pressed={isPinned}
       onMouseEnter={() => onHover(finding.id)}
       onMouseLeave={() => onHover(null)}
       onFocus={() => onHover(finding.id)}

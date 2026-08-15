@@ -85,7 +85,7 @@ export const dateSequenceAnomalyMarker: Marker = {
             verdict: "REVIEW",
             evidence: {
               summary: `Row date "${dateItem.text.trim()}" is earlier than the preceding row's date "${prevItem.text.trim()}"`,
-              detail: `Expected non-decreasing date order — row ${i - headerRowIndex} (${dateItem.text.trim()}) comes after row ${i - headerRowIndex - 1} (${prevItem.text.trim()}) but precedes it chronologically.`,
+              detail: `Expected non-decreasing date order. Row ${i - headerRowIndex} (${dateItem.text.trim()}) comes after row ${i - headerRowIndex - 1} (${prevItem.text.trim()}) but precedes it chronologically.`,
               coordinates: [cellCoordinate(raw, page, dateItem), cellCoordinate(raw, page, prevItem)],
             },
           });

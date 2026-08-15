@@ -11,6 +11,38 @@ body {
   margin: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid #0e1216;
+  outline-offset: 2px;
+}
+
+.pm-skip-link {
+  position: absolute;
+  left: 12px;
+  top: -48px;
+  z-index: 100;
+  padding: 10px 16px;
+  background: #0e1216;
+  color: #f5f5f0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  transition: top 160ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.pm-skip-link:focus {
+  top: 12px;
+}
+
 body {
   background: #ffffff;
   color: #0e1216;
@@ -40,4 +72,123 @@ button {
 ::selection {
   background: #0e1216;
   color: #f5f5f0;
+}
+
+/**
+ * Universal hover/press feedback via opacity rather than color/background
+ * swaps: every interactive element on this page already sets its own
+ * inline color/background (deliberately, per component), and an inline
+ * style always wins over a class regardless of pseudo-state, so a class
+ * that tried to override color/background on `:hover` would silently do
+ * nothing. `opacity` isn't set inline anywhere, so this is free to apply
+ * uniformly without touching a single existing inline value.
+ */
+.pm-hoverable {
+  transition: opacity 160ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.pm-hoverable:hover {
+  opacity: 0.72;
+}
+
+.pm-hoverable:active {
+  opacity: 0.5;
+}
+
+/**
+ * Responsive layout overrides.
+ *
+ * Every section on the marketing page is styled with inline `style`
+ * objects (see components/home/*), which is deliberate elsewhere in this
+ * codebase but can't express a media query. These classes carry only the
+ * handful of grid-column and font-size properties that need to change
+ * per breakpoint; each affected component omits that one property from
+ * its own inline style (an inline style always wins over a class,
+ * breakpoint or not) and applies the matching class name instead.
+ * Desktop values here match the inline styles they replace exactly, so
+ * nothing changes above 880px.
+ */
+.pm-nav-links {
+  display: flex;
+}
+
+.pm-hero-grid,
+.pm-split-grid-57 {
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+}
+
+.pm-split-grid-48 {
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+}
+
+.pm-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.pm-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.pm-cols-2 {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.pm-run-grid {
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+}
+
+.pm-footer-grid {
+  grid-template-columns: minmax(0, 5fr) repeat(3, 1fr);
+}
+
+.pm-hero-title {
+  font-size: 72px;
+}
+
+.pm-h2 {
+  font-size: 44px;
+}
+
+.pm-hero-rail {
+  height: 640px;
+}
+
+.pm-flow-arrow {
+  display: block;
+}
+
+@media (max-width: 880px) {
+  .pm-nav-links {
+    display: none;
+  }
+  .pm-hero-grid,
+  .pm-split-grid-48,
+  .pm-split-grid-57,
+  .pm-cols-4,
+  .pm-cols-3,
+  .pm-cols-2,
+  .pm-run-grid {
+    grid-template-columns: 1fr;
+  }
+  .pm-footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .pm-h2 {
+    font-size: 32px;
+  }
+  .pm-hero-rail {
+    height: 480px;
+  }
+  .pm-flow-arrow {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .pm-hero-title {
+    font-size: 40px;
+  }
+  .pm-footer-grid {
+    grid-template-columns: 1fr;
+  }
 }

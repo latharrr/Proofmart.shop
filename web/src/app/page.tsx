@@ -12,13 +12,15 @@ export default function Home() {
   return (
     <div style={{ width: "100%", minHeight: "100vh", background: "#FFFFFF", color: "#0E1216" }}>
       <Topbar />
-      <Hero />
-      <PipelineSection />
-      <MarkersSection />
-      <RunSection />
-      <OutputsSection />
-      <IntegrateSection />
-      <PricingSection />
+      <main id="main">
+        <Hero />
+        <PipelineSection />
+        <MarkersSection />
+        <RunSection />
+        <OutputsSection />
+        <IntegrateSection />
+        <PricingSection />
+      </main>
       <SiteFooter />
     </div>
   );

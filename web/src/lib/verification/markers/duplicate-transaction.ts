@@ -97,7 +97,7 @@ export const duplicateTransactionMarker: Marker = {
           verdict: "REVIEW",
           evidence: {
             summary: `${entries.length} transactions share date ${entries[0].dateText} and amount ${entries[0].amount.toFixed(2)}`,
-            detail: `Matched on identical date + amount across ${entries.length} rows — description was not compared.`,
+            detail: `Matched on identical date + amount across ${entries.length} rows. Description was not compared.`,
             coordinates: entries.flatMap((e) => e.coords),
           },
         });

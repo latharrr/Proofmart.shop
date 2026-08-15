@@ -15,9 +15,9 @@ export default function MarkersSection() {
     <section id="markers" style={{ borderTop: "1px solid #DDE1E4" }}>
       <div style={{ maxWidth: 1320, margin: "0 auto", padding: "88px 32px" }}>
         <div
+          className="pm-split-grid-57"
           style={{
             display: "grid",
-            gridTemplateColumns: "minmax(0, 5fr) minmax(0, 7fr)",
             gap: 56,
             marginBottom: 48,
             alignItems: "end",
@@ -25,7 +25,7 @@ export default function MarkersSection() {
         >
           <div>
             <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.1em", marginBottom: 12 }}>§ 03 · CATALOG</div>
-            <h2 style={{ fontFamily: SANS, fontWeight: 500, fontSize: 44, lineHeight: 1.02, letterSpacing: "-0.025em", margin: 0 }}>
+            <h2 className="pm-h2" style={{ fontFamily: SANS, fontWeight: 500, lineHeight: 1.02, letterSpacing: "-0.025em", margin: 0 }}>
               Every marker
               <br />
               is a rule with a citation.
@@ -38,6 +38,7 @@ export default function MarkersSection() {
                 <button
                   key={t}
                   onClick={() => setMarkerFilter(t)}
+                  className="pm-hoverable"
                   style={{
                     padding: "6px 12px",
                     fontFamily: MONO,
@@ -56,7 +57,7 @@ export default function MarkersSection() {
           </div>
         </div>
 
-        <div style={{ borderTop: "1px solid #DDE1E4" }}>
+        <div style={{ borderTop: "1px solid #DDE1E4", overflowX: "auto" }}>
           {filtered.map((m, i) => {
             const v = VERDICT[m.verdict];
             return (
@@ -69,6 +70,7 @@ export default function MarkersSection() {
                   alignItems: "center",
                   padding: "18px 0",
                   borderBottom: "1px solid #DDE1E4",
+                  minWidth: 640,
                 }}
               >
                 <div style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", letterSpacing: "0.1em" }}>{String(i + 1).padStart(2, "0")}</div>
@@ -91,7 +93,7 @@ export default function MarkersSection() {
 
         <div style={{ marginTop: 24, display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.04em" }}>
           <span>Six representative markers · full catalog under /docs/markers</span>
-          <a href="#catalog" style={{ color: "#0E1216" }}>
+          <a href="#catalog" className="pm-hoverable" style={{ color: "#0E1216" }}>
             read the catalog →
           </a>
         </div>

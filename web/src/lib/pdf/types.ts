@@ -20,7 +20,7 @@ export interface PdfClassification {
   confidence: number;
 }
 
-/** A rectangle in PDF points, top-left origin — the same convention pdf-inspector returns. */
+/** A rectangle in PDF points, top-left origin. pdf-inspector itself returns bottom-left-origin coordinates; `normalizeDocument`/`toRailRect` flip every rect into this convention before it reaches app code, so nothing downstream of extraction needs to know about the native PDF space. */
 export interface PdfRect {
   x: number;
   y: number;
