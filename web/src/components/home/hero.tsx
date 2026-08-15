@@ -103,7 +103,7 @@ export default function Hero() {
         </div>
 
         {/* Live rail */}
-        <div style={{ position: "relative" }}>
+        <div id="access" style={{ position: "relative", scrollMarginTop: 80 }}>
           <div
             style={{
               position: "absolute",

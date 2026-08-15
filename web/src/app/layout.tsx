@@ -16,7 +16,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 const TITLE = "ProofMart · Document forensics API";
 const DESCRIPTION =
-  "ProofMart takes a PDF and returns a signed dossier of findings, each pinned to its pixel, each with the arithmetic.";
+  "ProofMart takes a PDF and returns a structured report of findings, each pinned to its pixel, each with the arithmetic.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://proofmart.shop"),
