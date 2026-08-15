@@ -1,3 +1,4 @@
+import OpenScanButton from "@/components/home/open-scan-button";
 import { MONO, SANS } from "@/lib/evidence-data";
 
 const NAV_LINKS = [
@@ -44,8 +45,7 @@ export default function Topbar() {
           <a href="#signin" className="pm-hoverable" style={{ fontFamily: SANS, fontSize: 14, color: "#43494F" }}>
             Sign in
           </a>
-          <a
-            href="#access"
+          <OpenScanButton
             className="pm-hoverable"
             style={{
               fontFamily: MONO,
@@ -58,7 +58,7 @@ export default function Topbar() {
             }}
           >
             GET ACCESS →
-          </a>
+          </OpenScanButton>
         </div>
       </div>
     </header>

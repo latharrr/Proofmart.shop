@@ -1,4 +1,5 @@
 import EvidenceRail from "@/components/evidence-rail/evidence-rail";
+import OpenScanButton from "@/components/home/open-scan-button";
 import { MONO, SANS } from "@/lib/evidence-data";
 
 export default function Hero() {
@@ -43,8 +44,7 @@ export default function Hero() {
             not the doc.
           </p>
           <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 40 }}>
-            <a
-              href="#access"
+            <OpenScanButton
               className="pm-hoverable"
               style={{
                 fontFamily: MONO,
@@ -57,7 +57,7 @@ export default function Hero() {
               }}
             >
               START A SCAN →
-            </a>
+            </OpenScanButton>
             <a
               href="#run"
               className="pm-hoverable"

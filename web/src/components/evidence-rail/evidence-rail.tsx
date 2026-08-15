@@ -199,7 +199,14 @@ export default function EvidenceRail() {
         overflowY: "hidden",
       }}
     >
-      <input ref={fileInputRef} type="file" accept="application/pdf,.pdf" style={{ display: "none" }} onChange={handleFilePicked} />
+      <input
+        ref={fileInputRef}
+        id="pm-file-input"
+        type="file"
+        accept="application/pdf,.pdf"
+        style={{ display: "none" }}
+        onChange={handleFilePicked}
+      />
 
       {/* Rail header */}
       <div
