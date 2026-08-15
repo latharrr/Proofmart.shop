@@ -1,6 +1,8 @@
 # ProofMart
 
-Document forensics as a signed evidence graph — upload a PDF, get real extracted facts and real deterministic verification findings, each pinned to its coordinates on the page.
+Document forensics as a structured evidence graph — upload a PDF, get real extracted facts and real deterministic verification findings, each pinned to its coordinates on the page.
+
+**What this is today:** a working upload → classify → extract → OCR (when needed) → verify → Evidence Rail pipeline, returning real JSON. **What it is not (yet):** signed output, a generated PDF dossier, webhook delivery, a CLI, or a public documented API — see [What's not built yet](#whats-not-built-yet).
 
 ## Getting started
 
@@ -46,18 +48,38 @@ npm run test:unit     # vitest — unit tests
 npm run test:e2e      # playwright — browser tests (starts its own prod server on :3100)
 ```
 
+### Running Playwright locally
+
+`playwright.config.ts` and two unit tests (`tests/unit/ocr.test.ts`, `tests/unit/ocr-tesseract-js.test.ts`) hardcode `executablePath: "/opt/pw-browsers/chromium"` — a pre-installed Chromium path specific to the sandbox this project was originally developed in. On a machine without a browser at that exact path (most machines), `npm run test:e2e` and the two OCR tests that render a fixture via a real browser will fail with `browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium` — that's an environment gap, not a code defect; every other unit test is unaffected. To run them locally: `npx playwright install chromium`, find the installed binary under `~/Library/Caches/ms-playwright/` (macOS) or the platform equivalent, and temporarily point the three hardcoded paths at it. Don't commit that change — revert before pushing, so CI/deployment environments that do have the sandbox path keep working.
+
 ## Architecture
 
 ```
 Uploaded PDF
   → lib/pdf/inspect.ts    (validate, classify — @firecrawl/pdf-inspector)
   → lib/pdf/extract.ts    (positioned text, markdown — PDFProcessor)
+  → OCR (Tesseract.js, only on pages pdf-inspector flags as needing it)
   → lib/pdf/normalize.ts  (raw extraction → ProcessedDocument + ExtractedFact[])
   → lib/verification/     (Marker registry → VerificationFinding[] → Verdict)
   → Evidence Rail          (real coordinates, real verdict, real evidence)
 ```
 
-See `lib/verification/registry.ts` for the implemented markers and the ones deliberately not implemented (with reasons).
+### Verification markers
+
+Six markers are registered in `lib/verification/registry.ts` and actually run. The homepage's marker catalog (`lib/home-data.ts`'s `MARKERS`) must always mirror this list exactly — it did drift once (advertised three markers that were never implemented and silently omitted three real ones); if you add or remove a marker here, update that file too.
+
+| Marker | Category | Verdict on hit |
+|---|---|---|
+| `BALANCE_BREAK` | Arithmetic | FAIL |
+| `CROSS_PAGE_TOTAL_MISMATCH` | Arithmetic | FAIL |
+| `DATE_SEQUENCE_ANOMALY` | Semantic | REVIEW |
+| `DUPLICATE_TRANSACTION` | Semantic | REVIEW |
+| `OCR_LOW_CONFIDENCE` | Extraction | REVIEW |
+| `ENCODING_ANOMALY` | Extraction | REVIEW |
+
+Markers considered and deliberately **not** implemented (`PRODUCER_MISMATCH`, `FONT_METRIC_SHIFT`, column-inconsistency) are documented with reasons at the top of `registry.ts` — the evidence they'd need doesn't exist in the current pipeline, so nothing fabricates a substitute.
+
+Verdict precedence is fixed and explainable, no scoring model: a document is `INCONCLUSIVE` if zero markers had sufficient evidence to run at all, `FAIL` if any finding is FAIL, else `REVIEW` if any finding is REVIEW, else `CLEAR`. See `lib/verification/verdict.ts`.
 
 ### pdf-inspector version pin (important)
 
@@ -70,9 +92,25 @@ Two capabilities are given up by this pin, both handled explicitly rather than s
 
 ## Deploying on Vercel
 
-1. Import the repo into a new Vercel project (root: this `web/` directory if the repo has siblings).
-2. Attach a Vercel Blob store to the project (Storage tab) to get large-file uploads — optional, see above. OCR needs no setup of its own; every asset it uses is already in the deployment.
-3. Deploy. `/api/inspect` and `/api/upload-token` run on the Node.js runtime (required — `@firecrawl/pdf-inspector` is a native module and cannot run on Edge). `npm run build` uses the Turbopack default. **Do not add a `--webpack` flag to the build command** — it was tried as a (mis-diagnosed) fix for the glibc issue above, but it makes Vercel's Next.js builder stop recognizing serverless functions entirely, so `/api/inspect` 404s in production. See the comment at the top of `next.config.ts`.
+1. Import the repo into a new Vercel project. **Set Root Directory to `web`** (this Next.js app is not at the repo root — `chats/` and `project/` are siblings).
+2. **Set Framework Preset to Next.js explicitly.** Left unset, a real outage was traced to this: `vercel build` ran `npm run build` successfully (`next build` genuinely compiled and reported the correct route table) but with no framework recognized, Vercel didn't translate the `.next` output into servable functions/routes at all — `Deploying outputs...` completed in about a second (far too fast for a real Next.js app with two serverless functions and several MB of OCR assets), and every single route, including the deployment's own unique per-deploy URL, returned a platform-level `NOT_FOUND`, with zero runtime errors logged (because no request ever reached the function). The build log looking completely clean is exactly what makes this one easy to miss — check `framework` on the project (not just that the build "passed") if a fresh deploy 404s everywhere.
+3. **Turn off Vercel Authentication (Project Settings → Deployment Protection → Vercel Authentication)** unless you specifically want every visitor gated behind a Vercel login — it defaults to blocking `*.vercel.app` URLs entirely, which looks identical to "nothing deployed" from the outside.
+4. Attach a Vercel Blob store to the project (Storage tab) to get large-file uploads — optional, see above. OCR needs no setup of its own; every asset it uses is already in the deployment.
+5. Deploy. `/api/inspect` and `/api/upload-token` run on the Node.js runtime (required — `@firecrawl/pdf-inspector` is a native module and cannot run on Edge). `npm run build` uses the Turbopack default. **Do not add a `--webpack` flag to the build command** — it was tried as a (mis-diagnosed) fix for the glibc issue above, but it makes Vercel's Next.js builder stop recognizing serverless functions entirely, so `/api/inspect` 404s in production. See the comment at the top of `next.config.ts`.
+6. After deploying, sanity-check the live URL isn't just serving a cached/unrelated response: `curl -s -o /dev/null -w "%{http_code}" <url>/api/upload-token` should return `200` with `{"available": ...}`, not `404`.
+
+## What's not built yet
+
+The marketing page (`src/components/home/*`) once advertised several of these as live capabilities; that copy has since been corrected to say "planned," not shipped. Listing them here too so this doesn't quietly drift again:
+
+- **Signing.** No response is cryptographically signed. No `ed25519`/crypto-signing dependency exists in `package.json`.
+- **PDF dossier generation.** The API returns JSON only (`{ document, verification }`). No code generates a PDF report from a scan.
+- **Webhook delivery.** No callback/queue system exists.
+- **CLI.** No terminal client ships from this repo.
+- **Public versioned API.** `/api/inspect` is the same internal route the web UI itself calls — unauthenticated, unrate-limited, undocumented as a product surface. There is no `/v1/analyze` or equivalent.
+- **Auth / billing.** "Sign in" and "Get access" are anchors with no backend.
+
+`robots.ts` and `sitemap.ts` (Next.js metadata route conventions) exist at `src/app/` — `/robots.txt` and `/sitemap.xml` are real, served routes, not TODOs.
 
 ### Blob access level (known limitation)
 
