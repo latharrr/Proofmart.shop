@@ -1,0 +1,17 @@
+{
+  "name": "proofmart-cli",
+  "version": "0.1.0",
+  "description": "Command-line client for the ProofMart public API (/v1/verify, /v1/inspect, /v1/extract). Calls the API — does not run any document processing itself.",
+  "type": "module",
+  "bin": {
+    "proofmart": "./bin/proofmart.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}

@@ -59,6 +59,13 @@ export default async function AuthControls() {
       >
         API keys
       </Link>
+      <Link
+        href="/account/webhooks"
+        className="pm-hoverable"
+        style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.04em" }}
+      >
+        Webhooks
+      </Link>
       <form
         action={async () => {
           "use server";
