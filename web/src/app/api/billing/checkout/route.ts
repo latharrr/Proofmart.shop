@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { createRazorpayClient, isRazorpayConfigured } from "@/lib/billing/razorpay";
 import { PLANS } from "@/lib/billing/plans";
@@ -30,6 +30,10 @@ export async function POST() {
   const start = Date.now();
   const route = "/api/billing/checkout";
 
+  if (!isSupabaseConfigured()) {
+    logRequest({ requestId, route, method: "POST", status: 401, durationMs: Date.now() - start });
+    return errorResponse(requestId, "Not signed in.", 401);
+  }
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   const userId = data?.claims?.sub;

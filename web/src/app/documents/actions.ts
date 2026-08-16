@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { del, get } from "@vercel/blob";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { runVerify } from "@/lib/api/pipeline";
 import { ProcessingFailure } from "@/lib/pdf/types";
 import { failedDocumentInsert, hashDocumentBytes, readyDocumentInsert } from "@/lib/documents";
@@ -11,6 +11,7 @@ import { recordAuditEvent } from "@/lib/audit";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 async function requireUserId(): Promise<string> {
+  if (!isSupabaseConfigured()) redirect("/login");
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   const userId = data?.claims?.sub;

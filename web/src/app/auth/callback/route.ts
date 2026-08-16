@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { recordAuditEvent } from "@/lib/audit";
 
 /**
@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   let next = searchParams.get("next") ?? "/";
   if (!next.startsWith("/")) next = "/";
 
-  if (code) {
+  if (code && isSupabaseConfigured()) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {

@@ -1,5 +1,5 @@
 import { get } from "@vercel/blob";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
 // @vercel/blob's get() is Node-only (same constraint as /api/inspect).
 export const runtime = "nodejs";
@@ -15,6 +15,7 @@ export const runtime = "nodejs";
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
+  if (!isSupabaseConfigured()) return Response.json({ error: "Not signed in." }, { status: 401 });
   const supabase = await createClient();
   const { data: claims } = await supabase.auth.getClaims();
   if (!claims?.claims) return Response.json({ error: "Not signed in." }, { status: 401 });

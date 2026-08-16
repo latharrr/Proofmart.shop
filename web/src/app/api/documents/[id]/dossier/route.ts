@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { signVerificationResult, type SignedPayload } from "@/lib/signing/sign";
 import { generateDossierPdf } from "@/lib/dossier/generate-pdf";
 import type { DocumentRow } from "@/lib/documents";
@@ -29,6 +29,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const start = Date.now();
 
   try {
+    if (!isSupabaseConfigured()) return errorResponse(requestId, "Not signed in.", 401);
     const supabase = await createClient();
     const { data: claims } = await supabase.auth.getClaims();
     const userId = claims?.claims?.sub;

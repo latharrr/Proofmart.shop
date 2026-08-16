@@ -2,7 +2,7 @@
 
 import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { checkUrlShape } from "@/lib/webhooks/url-safety";
 import { recordAuditEvent } from "@/lib/audit";
 
@@ -12,6 +12,7 @@ import { recordAuditEvent } from "@/lib/audit";
 const MAX_WEBHOOKS_PER_USER = 10;
 
 async function currentUserId(): Promise<string | null> {
+  if (!isSupabaseConfigured()) return null;
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   const sub = data?.claims?.sub;

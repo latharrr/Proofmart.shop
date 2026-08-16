@@ -2,10 +2,11 @@
 
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { recordAuditEvent } from "@/lib/audit";
 
 export async function login(formData: FormData) {
+  if (!isSupabaseConfigured()) redirect(`/login?error=${encodeURIComponent("Sign-in is not available right now.")}`);
   const supabase = await createClient();
 
   const email = formData.get("email") as string;
@@ -22,6 +23,7 @@ export async function login(formData: FormData) {
 }
 
 export async function signInWithGoogle() {
+  if (!isSupabaseConfigured()) redirect(`/login?error=${encodeURIComponent("Sign-in is not available right now.")}`);
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 

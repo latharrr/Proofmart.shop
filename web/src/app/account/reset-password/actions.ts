@@ -2,10 +2,11 @@
 
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { recordAuditEvent } from "@/lib/audit";
 
 export async function requestPasswordReset(formData: FormData) {
+  if (!isSupabaseConfigured()) redirect("/account/reset-password?sent=1");
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
