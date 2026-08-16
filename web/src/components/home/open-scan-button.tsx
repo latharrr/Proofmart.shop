@@ -3,12 +3,14 @@
 import type { CSSProperties, ReactNode } from "react";
 
 /**
- * Opens the Evidence Rail's real file picker directly, by id, rather than
- * linking to an anchor. The rail sits beside this button in the hero on
- * desktop, so scrolling to it is a no-op there — a CTA literally called
- * "start a scan" needs to visibly do something regardless of viewport.
- * Scrolls #access (the rail's wrapper) into view first so the
- * uploading/ready state is on screen once the native file dialog closes.
+ * Scrolls the Evidence Rail into view rather than linking to an anchor. The
+ * rail sits beside this button in the hero on desktop, so scrolling to it is
+ * a no-op there — a CTA literally called "start a scan" needs to visibly do
+ * something regardless of viewport. Deliberately does NOT auto-open the
+ * native file picker: popping the OS file dialog the instant someone clicks
+ * a nav button is jarring and skips past the rail's own drop-zone UI
+ * (drag/paste/click hints). Landing on the rail and letting the user choose
+ * how to add a file is the minimal, calmer version of this CTA.
  */
 export default function OpenScanButton({
   children,
@@ -26,7 +28,6 @@ export default function OpenScanButton({
       style={style}
       onClick={() => {
         document.getElementById("access")?.scrollIntoView({ behavior: "smooth", block: "center" });
-        (document.getElementById("pm-file-input") as HTMLInputElement | null)?.click();
       }}
     >
       {children}

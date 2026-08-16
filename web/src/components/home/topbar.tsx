@@ -1,3 +1,4 @@
+import AuthControls from "@/components/home/auth-controls";
 import OpenScanButton from "@/components/home/open-scan-button";
 import { MONO, SANS } from "@/lib/evidence-data";
 
@@ -10,7 +11,7 @@ const NAV_LINKS = [
   { href: "#pricing", label: "Pricing" },
 ];
 
-export default function Topbar() {
+export default async function Topbar() {
   return (
     <header
       style={{
@@ -42,9 +43,7 @@ export default function Topbar() {
           </a>
         </nav>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <a href="#signin" className="pm-hoverable" style={{ fontFamily: SANS, fontSize: 14, color: "#43494F" }}>
-            Sign in
-          </a>
+          <AuthControls />
           <OpenScanButton
             className="pm-hoverable"
             style={{

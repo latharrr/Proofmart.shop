@@ -1,18 +1,33 @@
 import { test, expect } from "@playwright/test";
+import { rail } from "./helpers";
 
-test("START A SCAN opens the real file picker", async ({ page }) => {
+// Both CTAs deliberately stopped auto-opening the native file picker (see
+// open-scan-button.tsx) — popping the OS dialog the instant someone clicks a
+// nav button skipped past the rail's own drag/paste/click affordances. They
+// now only scroll the rail into view; the rail's own document panel (covered
+// by tests/e2e/helpers.ts's `upload()`, exercised throughout the other e2e
+// specs) is what actually opens the picker.
+
+test("START A SCAN scrolls the Evidence Rail into view without opening the file picker", async ({ page }) => {
   await page.goto("/");
-  const chooserPromise = page.waitForEvent("filechooser");
+  let fileChooserFired = false;
+  page.once("filechooser", () => {
+    fileChooserFired = true;
+  });
+
   await page.getByRole("button", { name: "START A SCAN →" }).click();
-  const chooser = await chooserPromise;
-  expect(chooser.isMultiple()).toBe(false);
-  const input = chooser.element();
-  expect(await input.getAttribute("accept")).toBe("application/pdf,.pdf");
+  await expect(rail(page)).toBeInViewport();
+  expect(fileChooserFired).toBe(false);
 });
 
-test("GET ACCESS (topbar) opens the real file picker", async ({ page }) => {
+test("GET ACCESS (topbar) scrolls the Evidence Rail into view without opening the file picker", async ({ page }) => {
   await page.goto("/");
-  const chooserPromise = page.waitForEvent("filechooser");
+  let fileChooserFired = false;
+  page.once("filechooser", () => {
+    fileChooserFired = true;
+  });
+
   await page.getByRole("button", { name: "GET ACCESS →" }).click();
-  await chooserPromise;
+  await expect(rail(page)).toBeInViewport();
+  expect(fileChooserFired).toBe(false);
 });
