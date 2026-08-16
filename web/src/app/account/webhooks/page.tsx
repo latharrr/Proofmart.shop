@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { MONO, SANS } from "@/lib/evidence-data";
 import CreateWebhookForm from "./create-webhook-form";
 import { deleteWebhook, toggleWebhook } from "./actions";
@@ -23,6 +23,7 @@ interface DeliveryRow {
 const STATUS_COLOR: Record<string, string> = { pending: "#767C83", success: "#1F6B4A", failed: "#B4231F", exhausted: "#B4231F" };
 
 export default async function WebhooksPage() {
+  if (!isSupabaseConfigured()) redirect("/login");
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) redirect("/login");

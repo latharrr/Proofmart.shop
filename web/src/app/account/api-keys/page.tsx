@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { MONO, SANS } from "@/lib/evidence-data";
 import CreateKeyForm from "./create-key-form";
 import { revokeApiKey } from "./actions";
@@ -15,6 +15,7 @@ interface ApiKeyRow {
 }
 
 export default async function ApiKeysPage() {
+  if (!isSupabaseConfigured()) redirect("/login");
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) redirect("/login");

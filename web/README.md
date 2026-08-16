@@ -2,7 +2,7 @@
 
 Document forensics as a structured evidence graph — upload a PDF, get real extracted facts and real deterministic verification findings, each pinned to its coordinates on the page.
 
-**What this is today:** a working upload → classify → extract → OCR (when needed) → verify → Evidence Rail pipeline, returning real JSON. **What it is not (yet):** signed output, a generated PDF dossier, webhook delivery, a CLI, or a public documented API — see [What's not built yet](#whats-not-built-yet).
+**What this is today:** a working upload → classify → extract → OCR (when needed) → verify → Evidence Rail pipeline, with a signed-in user's results saved and retrievable later (web and API), a cryptographically signed PDF dossier per result, webhook delivery, a CLI, and a public documented `/v1/*` API with API keys and a placeholder-priced billing scaffold — see [What's not built yet](#whats-not-built-yet) for what's still missing.
 
 ## Getting started
 
@@ -105,15 +105,16 @@ Two capabilities are given up by this pin, both handled explicitly rather than s
 
 ## What's not built yet
 
-The marketing page (`src/components/home/*`) once advertised several of these as live capabilities; that copy has since been corrected to say "planned," not shipped. Listing them here too so this doesn't quietly drift again:
+This section previously listed signing, dossier generation, webhooks, the CLI, and document history/retrieval as unbuilt — all of those shipped (Gates 5-7) and this section had gone stale in the opposite direction of the marketing-copy drift below (understating what's real instead of overstating it). Corrected; what's actually still missing:
 
-- **Signing.** No response is cryptographically signed. No `ed25519`/crypto-signing dependency exists in `package.json`.
-- **PDF dossier generation.** The API returns JSON only. No code generates a PDF report from a scan.
-- **Webhook delivery.** No callback/queue system exists.
-- **CLI.** No terminal client ships from this repo.
-- **Document history, rerun, search, billing.** Not built yet. `api_usage_events` already records every `/v1/*` call (event type, which key, which user) ahead of that work, but there's no `documents` table yet — a scan's result isn't persisted or retrievable after the response that returned it, from either the UI or the API. `GET /v1/documents/:id` and `/result` are consequently **not implemented** — building them without real persistence would mean fabricating a capability, so they don't exist rather than existing as a stub.
+- **Live payments.** The Razorpay billing scaffold (`lib/billing/`, `/api/billing/checkout`, `/api/billing/webhook`, `/account/billing`) is real, functional code, but has never been exercised against a real Razorpay account — no `RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET`/`RAZORPAY_WEBHOOK_SECRET` were available while building it, and the plan pricing in `lib/billing/plans.ts` is a **placeholder**, not a number confirmed with the business. Every route degrades to a clear "not configured" response rather than crashing when these env vars are unset — see `.env.example`.
+- **Google OAuth provider.** Needs a Google Cloud OAuth client configured in the Supabase dashboard (Authentication → Providers → Google) — see [Auth](#auth). Not settable from code.
+- **Production SMTP.** Supabase's built-in email sender is testing-only and rate-limits aggressively (confirmed: hit `429` after two live signups in one session) — see [Auth](#auth).
+- **Rate limiting on `/v1/*` billing quota vs. abuse limiting.** `lib/rate-limit.ts` enforces a per-minute abuse limit on every `/v1/*` route regardless of plan; `lib/billing/usage.ts` additionally enforces a monthly plan quota, but only on `/v1/verify` so far — `/v1/inspect` and `/v1/extract` are metered by the abuse limiter only, not yet gated by plan.
 
-`robots.ts` and `sitemap.ts` (Next.js metadata route conventions) exist at `src/app/` — `/robots.txt` and `/sitemap.xml` are real, served routes, not TODOs.
+The marketing page (`src/components/home/*`) once advertised capabilities as live before they were built; that copy was corrected to say "planned" at the time, then to say "shipped" once each actually shipped (Gates 5-8, then again after the Gate 6/7 dossier/webhook/CLI copy was found still saying "planned" post-launch). If you're reading this after adding a new capability, check that page too — it has drifted from reality in both directions before.
+
+`robots.ts`, `sitemap.ts`, and `opengraph-image.tsx` (Next.js metadata route conventions) exist at `src/app/` — `/robots.txt`, `/sitemap.xml`, and `/opengraph-image` are real, served routes, not TODOs. (`/opengraph-image` built cleanly and is registered in the routes manifest, but returned 404 under a local `next start` in the environment this was built in — flagged for a real check against the live Vercel deployment before trusting it renders.)
 
 ### Auth
 
@@ -149,7 +150,9 @@ Every response is `{ document, classification, verdict, findings, facts, process
 
 Key validation (`lib/api/auth.ts`) uses a Supabase **service-role** client — the caller has no user session, just a bearer key, so there's no `auth.uid()` for RLS to key off. **`SUPABASE_SERVICE_ROLE_KEY` is required for `/v1/*` to authenticate anything** (see `.env.example` — never exposed to the browser, bypasses RLS entirely). Without it, every `/v1/*` call returns `503 service_unavailable`, not a crash — verified locally by removing the var and confirming the graceful response rather than assuming it.
 
-Not built: rate limiting (the auth layer already resolves caller→key→user before any processing runs, which is where a limiter would plug in — no half-built limiter that looks real but doesn't limit anything), and `GET /v1/documents/:id`/`/result` (no persistence layer yet — see "What's not built yet").
+Rate limiting: `lib/rate-limit.ts` (per-minute, per-key abuse guard, all three routes) plus `lib/billing/usage.ts` (monthly plan quota, `/v1/verify` only so far — see "What's not built yet").
+
+Document retrieval: `GET /v1/documents` (list, supports `status`/`verdict`/`limit`/`before` query params), `GET /v1/documents/:id` (metadata), and `GET /v1/documents/:id/result` (the full `/v1/verify`-shaped result envelope) — all scoped to the calling key's own account, 404 (not 403) on another account's document id. Only documents saved via the signed-in web flow are retrievable this way; `/v1/verify` itself doesn't persist a row (it never has — persistence is opt-in via signing in and using the web UI's upload flow, not a side effect of calling the public API).
 
 ### Blob storage is private
 

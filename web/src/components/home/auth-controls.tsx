@@ -68,6 +68,13 @@ export default async function AuthControls() {
       >
         Webhooks
       </Link>
+      <Link
+        href="/account/billing"
+        className="pm-hoverable"
+        style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.04em" }}
+      >
+        Billing
+      </Link>
       <form
         action={async () => {
           "use server";

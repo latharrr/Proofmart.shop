@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { MONO, SANS, VERDICT } from "@/lib/evidence-data";
 import { formatBytes } from "@/lib/pdf/rail-adapter";
 import type { DocumentRow } from "@/lib/documents";
@@ -13,6 +13,7 @@ const STATUS_LABEL: Record<DocumentRow["status"], string> = {
 };
 
 export default async function DocumentsPage() {
+  if (!isSupabaseConfigured()) redirect("/login");
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) redirect("/login");

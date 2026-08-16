@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { MONO, SANS } from "@/lib/evidence-data";
 import type { DocumentRow } from "@/lib/documents";
 import SavedDocumentViewer from "@/components/documents/saved-document-viewer";
@@ -9,6 +9,7 @@ import { deleteDocument, rerunDocument } from "../actions";
 export default async function DocumentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
+  if (!isSupabaseConfigured()) redirect("/login");
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) redirect("/login");

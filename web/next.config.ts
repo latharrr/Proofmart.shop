@@ -23,11 +23,19 @@ const isDev = process.env.NODE_ENV === "development";
 // exposure: nothing here ever injects raw, attacker-controlled markup.
 const CSP = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  // https://checkout.razorpay.com/v1/checkout.js is loaded on /account/billing
+  // only (see create-checkout-button.tsx) to open Razorpay's own hosted
+  // checkout — allowed globally here for the same reason 'unsafe-inline'
+  // already is: a nonce-based CSP isn't compatible with this app's
+  // inline-style/no-CSS-in-JS architecture (see comment above), so a
+  // per-route CSP isn't practical either.
+  `script-src 'self' 'unsafe-inline' https://checkout.razorpay.com${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self'",
-  `connect-src 'self' https://*.blob.vercel-storage.com${supabaseOrigin ? ` ${supabaseOrigin}` : ""}`,
+  `connect-src 'self' https://*.blob.vercel-storage.com https://api.razorpay.com https://lumberjack.razorpay.com${supabaseOrigin ? ` ${supabaseOrigin}` : ""}`,
+  // Razorpay's checkout renders inside an iframe it injects itself.
+  "frame-src https://api.razorpay.com https://checkout.razorpay.com",
   "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",

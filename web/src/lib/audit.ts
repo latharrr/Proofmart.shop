@@ -16,7 +16,8 @@ export type AuditEventType =
   | "webhook_updated"
   | "webhook_deleted"
   | "password_reset_requested"
-  | "password_updated";
+  | "password_updated"
+  | "billing_upgraded";
 
 /**
  * Records a structured audit event — metadata only (ids, counts, booleans),

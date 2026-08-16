@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import AuthShell from "@/components/auth/auth-shell";
 import * as s from "@/components/auth/auth-styles";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { updatePassword } from "./actions";
 
 export default async function UpdatePasswordPage({
@@ -11,6 +11,7 @@ export default async function UpdatePasswordPage({
 }) {
   const { error } = await searchParams;
 
+  if (!isSupabaseConfigured()) redirect("/account/reset-password");
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) {
