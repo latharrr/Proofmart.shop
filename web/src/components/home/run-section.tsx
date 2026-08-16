@@ -53,24 +53,24 @@ export default function RunSection() {
             </div>
             <pre style={{ margin: 0, padding: "22px 20px", fontFamily: MONO, fontSize: 12, lineHeight: 1.75, color: "#F5F5F0", overflowX: "auto" }}>
               {"$ curl "}
-              <span style={{ color: "#A9BFD8" }}>https://api.proofmart.shop/v1/analyze</span>
+              <span style={{ color: "#A9BFD8" }}>https://proofmart.shop/v1/verify</span>
               {" \\\n    -H "}
-              <span style={{ color: "#E2C48A" }}>&quot;Authorization: Bearer $CO_KEY&quot;</span>
+              <span style={{ color: "#E2C48A" }}>&quot;Authorization: Bearer $PROOFMART_API_KEY&quot;</span>
               {" \\\n    -F "}
-              <span style={{ color: "#E2C48A" }}>&quot;document=@hdfc_apr25.pdf&quot;</span>
+              <span style={{ color: "#E2C48A" }}>&quot;file=@hdfc_apr25.pdf&quot;</span>
               {"\n\n"}
               <span style={{ color: "#767C83" }}>↳ 4.8s · verification returned inline · SAMPLE</span>
               {"\n"}
               <span style={{ color: "#E38A82" }}>✗ FAIL</span>
               {" · req_8fk2 · 4 findings\n   "}
               <span style={{ color: "#E38A82" }}>×</span>
-              {" BALANCE_BREAK        p4·r17\n   "}
+              {" BALANCE_BREAK             p4·r17\n   "}
               <span style={{ color: "#E38A82" }}>×</span>
-              {" PRODUCER_MISMATCH    p4·r03\n   "}
+              {" CROSS_PAGE_TOTAL_MISMATCH p3→p4\n   "}
               <span style={{ color: "#F2B04B" }}>~</span>
-              {" FONT_METRIC_SHIFT    p4·r08\n   "}
+              {" DUPLICATE_TRANSACTION     p2·r04\n   "}
               <span style={{ color: "#F2B04B" }}>~</span>
-              {" OCR_LOW_CONFIDENCE   p4·r14"}
+              {" OCR_LOW_CONFIDENCE        p4·r14"}
             </pre>
           </div>
 

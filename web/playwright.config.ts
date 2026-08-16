@@ -8,12 +8,6 @@ export default defineConfig({
   reporter: [["list"]],
   use: {
     baseURL: "http://127.0.0.1:3100",
-    launchOptions: {
-      // Explicit path to the sandbox's pre-installed Chromium — sidesteps
-      // Playwright's browser-revision lookup, which can mismatch the
-      // globally installed version.
-      executablePath: "/opt/pw-browsers/chromium",
-    },
   },
   webServer: {
     command: "npm run start -- -p 3100",

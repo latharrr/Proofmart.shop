@@ -12,7 +12,7 @@ const PAGE = { width: 612, height: 792 };
 
 /** Renders real text to a PNG via a real browser, for use as a page-covering scanned image — same technique used elsewhere in this suite for OCR fixtures. */
 async function renderTextPng(lines: string[]): Promise<Buffer> {
-  const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+  const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 850, height: 300 } });
   const spans = lines.map((l, i) => `<div style="position:absolute;left:20px;top:${20 + i * 60}px;font:32px sans-serif;">${l}</div>`).join("");
   await page.setContent(`<div style="position:relative;width:850px;height:300px;background:white;">${spans}</div>`);

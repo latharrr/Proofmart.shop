@@ -1,6 +1,6 @@
 import { expect, test, type BrowserContext } from "@playwright/test";
 import { PDFDocument } from "pdf-lib";
-import { collectConsoleErrors, rail, upload, waitUntilReady } from "./helpers";
+import { collectConsoleErrors, rail, resetAnonRateLimit, upload, waitUntilReady } from "./helpers";
 
 /**
  * Renders real text to a PNG via a second page in the same browser context
@@ -25,6 +25,10 @@ async function scannedPdfWithText(context: BrowserContext, lines: string[]): Pro
 }
 
 test.describe("OCR (real Tesseract.js, bundled local assets)", () => {
+  test.beforeEach(async () => {
+    await resetAnonRateLimit();
+  });
+
   // This is the one test in the suite that exercises the actual OCR code
   // path end to end through the real production build (this project's e2e
   // suite runs against `npm run start`'s compiled output, not source run

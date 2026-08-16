@@ -68,7 +68,7 @@ export default function PricingSection() {
                 ))}
               </div>
               <a
-                href="#cta"
+                href="/signup"
                 className="pm-hoverable"
                 style={{
                   marginTop: "auto",

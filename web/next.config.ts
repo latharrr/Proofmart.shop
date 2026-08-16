@@ -64,6 +64,7 @@ const SECURITY_HEADERS = [
 // detected as serverless functions, and outputFileTracingIncludes below
 // still traces every OCR asset correctly under Turbopack.
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   // Native/multi-file packages that must stay on disk as real files and be
   // loaded via Node's require, not bundled into a single webpack/turbopack
   // chunk: @firecrawl/pdf-inspector is a native (napi-rs) module;

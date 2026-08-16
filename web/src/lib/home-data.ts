@@ -71,9 +71,9 @@ export interface Integration {
 
 export const INTEGRATIONS: Integration[] = [
   { name: "Upload", kind: "live today", body: "The upload flow on this page. Drop, paste, or pick a PDF and get real findings back, no account required." },
-  { name: "Webhook", kind: "planned", body: "Callback delivery for async jobs, so you don't have to hold a connection open. Not yet built." },
-  { name: "CLI", kind: "planned", body: "A terminal client for scripted scans, so runs fit into an existing pipeline. Not yet built." },
-  { name: "Verify", kind: "planned", body: "Offline signature verification against a published key. Findings aren't signed yet, so there's no key to verify against." },
+  { name: "API", kind: "live today", body: "/v1/verify, /v1/inspect, /v1/extract — the same engine this page calls, behind an API key you create at /account/api-keys." },
+  { name: "Webhook", kind: "live today", body: "Register a URL at /account/webhooks and every /v1/verify call delivers an HMAC-signed verification.completed/failed callback, retried on failure." },
+  { name: "CLI", kind: "live today", body: "proofmart verify|inspect|extract file.pdf — a small dependency-free client for the same public API, nothing more." },
 ];
 
 export interface PricingTier {

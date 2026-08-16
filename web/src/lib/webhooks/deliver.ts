@@ -66,6 +66,13 @@ export async function attemptDelivery(supabase: SupabaseClient, deliveryId: stri
     try {
       const res = await fetch(endpoint.url, {
         method: "POST",
+        // Manual, not "follow" (fetch's default): a 3xx response is a live
+        // network round-trip this server would otherwise make automatically,
+        // to a destination that never went through resolveAndCheck above —
+        // exactly the SSRF gap that check exists to close. A receiving
+        // endpoint that wants to move should update its registered URL, not
+        // rely on us following a redirect to wherever it points today.
+        redirect: "manual",
         headers: {
           "content-type": "application/json",
           "x-proofmart-event": delivery.event_type,
@@ -75,8 +82,12 @@ export async function attemptDelivery(supabase: SupabaseClient, deliveryId: stri
         body: rawBody,
         signal: AbortSignal.timeout(10_000),
       });
-      responseStatus = res.status;
-      if (!res.ok) errorMessage = `Receiving endpoint returned HTTP ${res.status}.`;
+      if (res.type === "opaqueredirect" || (res.status >= 300 && res.status < 400)) {
+        errorMessage = "Receiving endpoint returned a redirect, which is not followed (SSRF protection).";
+      } else {
+        responseStatus = res.status;
+        if (!res.ok) errorMessage = `Receiving endpoint returned HTTP ${res.status}.`;
+      }
     } catch (err) {
       errorMessage = err instanceof Error && err.name === "TimeoutError" ? "Request timed out after 10s." : "Network error delivering webhook.";
     }

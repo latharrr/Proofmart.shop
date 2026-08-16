@@ -1,8 +1,12 @@
 import { expect, test } from "@playwright/test";
 import { emptyBytes, malformedPdfBytes, multiPagePdf, nativeTextPdf, tableHeavyPdf } from "../fixtures/build";
-import { canvasDataUrl, collectConsoleErrors, rail, upload, visibleImageRect, waitUntilReady } from "./helpers";
+import { canvasDataUrl, collectConsoleErrors, rail, resetAnonRateLimit, upload, visibleImageRect, waitUntilReady } from "./helpers";
 
 test.describe("live document upload", () => {
+  test.beforeEach(async () => {
+    await resetAnonRateLimit();
+  });
+
   test("uploading a real PDF replaces the sample with real findings", async ({ page }) => {
     const errors = collectConsoleErrors(page);
     await page.goto("/");

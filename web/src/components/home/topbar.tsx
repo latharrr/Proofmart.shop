@@ -38,9 +38,6 @@ export default async function Topbar() {
               {l.label}
             </a>
           ))}
-          <a href="#docs" className="pm-hoverable" style={{ fontFamily: MONO, fontSize: 12, color: "#767C83" }}>
-            docs ↗
-          </a>
         </nav>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <AuthControls />

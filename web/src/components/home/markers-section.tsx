@@ -91,11 +91,8 @@ export default function MarkersSection() {
           })}
         </div>
 
-        <div style={{ marginTop: 24, display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.04em" }}>
-          <span>Six representative markers · full catalog under /docs/markers</span>
-          <a href="#catalog" className="pm-hoverable" style={{ color: "#0E1216" }}>
-            read the catalog →
-          </a>
+        <div style={{ marginTop: 24, fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.04em" }}>
+          <span>These are the only six markers the verification engine runs today. No others exist yet.</span>
         </div>
       </div>
     </section>

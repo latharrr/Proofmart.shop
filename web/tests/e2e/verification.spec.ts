@@ -1,8 +1,12 @@
 import { expect, test } from "@playwright/test";
 import { arithmeticInconsistencyPdf, cleanStatementPdf, duplicateTransactionPdf } from "../fixtures/build";
-import { collectConsoleErrors, rail, upload, waitUntilReady } from "./helpers";
+import { collectConsoleErrors, rail, resetAnonRateLimit, upload, waitUntilReady } from "./helpers";
 
 test.describe("verification engine — real findings on real documents", () => {
+  test.beforeEach(async () => {
+    await resetAnonRateLimit();
+  });
+
   test("an arithmetic inconsistency produces a real FAIL verdict with a colored finding and real evidence", async ({ page }) => {
     const errors = collectConsoleErrors(page);
     await page.goto("/");
@@ -80,6 +84,6 @@ test.describe("verification engine — real findings on real documents", () => {
     await expect(rail(page).getByText("hdfc_apr25_statement.pdf")).toBeVisible();
     await expect(rail(page)).toContainText("FAIL");
     await expect(rail(page).getByText("BALANCE_BREAK")).toBeVisible();
-    await expect(rail(page).getByText("PRODUCER_MISMATCH")).toBeVisible();
+    await expect(rail(page).getByText("CROSS_PAGE_TOTAL_MISMATCH")).toBeVisible();
   });
 });

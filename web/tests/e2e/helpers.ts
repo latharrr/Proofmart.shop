@@ -1,4 +1,38 @@
+import { createClient } from "@supabase/supabase-js";
+import { existsSync, readFileSync } from "node:fs";
 import { expect, type Locator, type Page } from "@playwright/test";
+
+function loadEnvLocal(): Record<string, string> {
+  if (!existsSync(".env.local")) return {};
+  return Object.fromEntries(
+    readFileSync(".env.local", "utf8")
+      .split("\n")
+      .filter((l) => l.includes("=") && !l.trim().startsWith("#"))
+      .map((l) => {
+        const i = l.indexOf("=");
+        return [l.slice(0, i).trim(), l.slice(i + 1).trim()];
+      }),
+  );
+}
+
+/**
+ * Every spec in this suite uploads through the same loopback IP, so the
+ * real, Postgres-backed anonymous rate limiter (10 uploads / 600s per IP —
+ * lib/rate-limit.ts) sees one long-lived test run as a single visitor
+ * making far more requests than any one real anonymous session would in
+ * that window. Reset its bucket before each upload-driving test so the
+ * suite exercises "does the limiter correctly gate a real request",
+ * not "does this specific run's request count exceed a real production
+ * limit" — call this in `beforeEach`, not the limiter itself.
+ */
+export async function resetAnonRateLimit() {
+  const env = { ...loadEnvLocal(), ...process.env };
+  const url = env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceKey) return;
+  const supabase = createClient(url, serviceKey);
+  await supabase.from("rate_limits").delete().like("key", "%127.0.0.1%");
+}
 
 export function collectConsoleErrors(page: Page): string[] {
   const errors: string[] = [];

@@ -15,16 +15,16 @@ export default function IntegrateSection() {
           }}
         >
           <div>
-            <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.1em", marginBottom: 12 }}>§ 06 · ROADMAP</div>
+            <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.1em", marginBottom: 12 }}>§ 06 · INTEGRATE</div>
             <h2 className="pm-h2" style={{ fontFamily: SANS, fontWeight: 500, lineHeight: 1.02, letterSpacing: "-0.025em", margin: 0, color: "#F5F5F0" }}>
-              One way in today.
+              Four ways in.
               <br />
-              Three more building.
+              Same engine, every time.
             </h2>
           </div>
           <p style={{ fontFamily: SANS, fontSize: 17, lineHeight: 1.55, color: "#C2C7CC", maxWidth: "60ch", margin: "8px 0 0" }}>
-            The upload flow above is how ProofMart works right now. Webhook delivery, a CLI, and offline signature verification are on the
-            roadmap, not shipped yet.
+            The upload flow above, the public API, webhook delivery, and the CLI all run through the same verification engine — one
+            processing path, not a marketing demo backed by something thinner.
           </p>
         </div>
         <div className="pm-cols-4" style={{ display: "grid", gap: 0, borderTop: "1px solid #2A2F35" }}>
