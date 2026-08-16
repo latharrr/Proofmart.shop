@@ -20,11 +20,16 @@ export function sanitizeFilename(name: string): string {
  * arbitrary client-supplied URL — without this check, `{ blobUrl }` would
  * be a server-side-request-forgery vector (the server would fetch whatever
  * URL a client sent it).
+ *
+ * `.private.` (not `.public.`) — uploads go through a Private Blob store
+ * (see upload-token/route.ts), so this is what a real uploaded blob's host
+ * actually looks like now; a `.public.` URL here would mean either a
+ * misconfigured store or a spoofed/stale reference, not a legitimate upload.
  */
 export function isTrustedBlobUrl(url: string): boolean {
   try {
     const { hostname, protocol } = new URL(url);
-    return protocol === "https:" && hostname.endsWith(".public.blob.vercel-storage.com");
+    return protocol === "https:" && hostname.endsWith(".private.blob.vercel-storage.com");
   } catch {
     return false;
   }

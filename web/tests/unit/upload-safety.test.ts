@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { isTrustedBlobUrl, sanitizeFilename } from "@/lib/pdf/upload-safety";
 
 describe("isTrustedBlobUrl (SSRF guard on the {blobUrl} processing path)", () => {
-  it("accepts a genuine Vercel Blob public storage URL", () => {
-    expect(isTrustedBlobUrl("https://abc123.public.blob.vercel-storage.com/statement-xyz.pdf")).toBe(true);
+  it("accepts a genuine Vercel Blob private storage URL", () => {
+    expect(isTrustedBlobUrl("https://abc123.private.blob.vercel-storage.com/statement-xyz.pdf")).toBe(true);
   });
 
   it("rejects an arbitrary external host", () => {
@@ -11,11 +11,11 @@ describe("isTrustedBlobUrl (SSRF guard on the {blobUrl} processing path)", () =>
   });
 
   it("rejects a host merely containing the trusted suffix as a substring, not as its actual domain", () => {
-    expect(isTrustedBlobUrl("https://public.blob.vercel-storage.com.evil.com/x.pdf")).toBe(false);
+    expect(isTrustedBlobUrl("https://private.blob.vercel-storage.com.evil.com/x.pdf")).toBe(false);
   });
 
   it("rejects plain http (not https)", () => {
-    expect(isTrustedBlobUrl("http://abc123.public.blob.vercel-storage.com/x.pdf")).toBe(false);
+    expect(isTrustedBlobUrl("http://abc123.private.blob.vercel-storage.com/x.pdf")).toBe(false);
   });
 
   it("rejects internal/local addresses an attacker might try for SSRF", () => {

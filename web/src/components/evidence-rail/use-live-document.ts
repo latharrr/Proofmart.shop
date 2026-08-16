@@ -45,14 +45,17 @@ function validateFile(file: File): ProcessingError | null {
 }
 
 /**
- * Uploads directly to Vercel Blob and hands `/api/inspect` just the
- * resulting URL — this is what lets production uploads exceed the
- * platform's serverless request-body limit. Requires
- * `BLOB_READ_WRITE_TOKEN` to be configured (see README).
+ * Uploads directly to Vercel Blob (via a presigned PUT the server issues
+ * per-request, never a bearer token in flight — see upload-token/route.ts)
+ * and hands `/api/inspect` just the resulting URL. This is what lets
+ * production uploads exceed the platform's serverless request-body limit,
+ * and — since the connected store is Private — keeps the file
+ * unreachable by anyone who doesn't hold the server's own credential.
+ * Requires `BLOB_READ_WRITE_TOKEN` (or OIDC) to be configured (see README).
  */
 async function submitViaBlob(file: File): Promise<Response> {
-  const { upload } = await import("@vercel/blob/client");
-  const blob = await upload(file.name, file, { access: "public", handleUploadUrl: "/api/upload-token" });
+  const { uploadPresigned } = await import("@vercel/blob/client");
+  const blob = await uploadPresigned(file.name, file, { access: "private", handleUploadUrl: "/api/upload-token" });
   return fetch("/api/inspect", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

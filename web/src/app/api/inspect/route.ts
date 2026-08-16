@@ -1,4 +1,4 @@
-import { del } from "@vercel/blob";
+import { del, get } from "@vercel/blob";
 import { PDFProcessor } from "@/lib/pdf/extract";
 import type { ProcessingError, ProcessingErrorCode } from "@/lib/pdf/types";
 import { ProcessingFailure } from "@/lib/pdf/types";
@@ -30,9 +30,16 @@ async function readFromBlob(request: Request): Promise<{ buffer: Buffer; filenam
   if (typeof blobUrl !== "string" || !isTrustedBlobUrl(blobUrl)) {
     return errorResponse({ code: "invalid-file", message: "Missing or unrecognized upload reference." });
   }
-  const res = await fetch(blobUrl);
-  if (!res.ok) return errorResponse({ code: "unreadable", message: "Could not retrieve the uploaded file." });
-  const buffer = Buffer.from(await res.arrayBuffer());
+  // A private blob's own URL 401s on a bare fetch — it requires the
+  // server's real read-write credential (BLOB_READ_WRITE_TOKEN/OIDC),
+  // which get() attaches automatically as a Bearer token. This is exactly
+  // what makes the blob private: nothing without that credential, plain
+  // URL knowledge included, can read it.
+  const result = await get(blobUrl, { access: "private" }).catch(() => null);
+  if (!result || result.statusCode !== 200) {
+    return errorResponse({ code: "unreadable", message: "Could not retrieve the uploaded file." });
+  }
+  const buffer = Buffer.from(await new Response(result.stream).arrayBuffer());
   const filename = typeof body?.filename === "string" ? sanitizeFilename(body.filename) : "upload.pdf";
   return { buffer, filename, blobUrl };
 }
