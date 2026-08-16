@@ -17,6 +17,8 @@ Open [http://localhost:3000](http://localhost:3000). Uploading a PDF works out o
 
 | Variable | Required | Purpose |
 |---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes, for auth | Supabase project API URL. See [Auth](#auth). Without this + the publishable key, `/login` and `/signup` will error. |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes, for auth | Supabase publishable key — safe to expose to the browser. See [Auth](#auth). |
 | `BLOB_READ_WRITE_TOKEN` | No (recommended in production) | Enables direct browser → [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) uploads via `/api/upload-token`, bypassing the platform's serverless request-body size limit (~4.5 MB) for larger PDFs. Set automatically when a Blob store is attached to the Vercel project — **the store must be created as Private**, see [Blob storage is private](#blob-storage-is-private). Without it, uploads fall back to posting the file directly to `/api/inspect` — this works for files under the body-size limit and is exactly how local dev runs. |
 | `BLOB_WEBHOOK_PUBLIC_KEY` | Only if `BLOB_READ_WRITE_TOKEN` is set | Required for `/api/upload-token`'s presigned-upload flow to function at all. Set alongside `BLOB_READ_WRITE_TOKEN` by the standard "Connect to Project" flow. |
 
@@ -97,8 +99,9 @@ Two capabilities are given up by this pin, both handled explicitly rather than s
 2. **Set Framework Preset to Next.js explicitly.** Left unset, a real outage was traced to this: `vercel build` ran `npm run build` successfully (`next build` genuinely compiled and reported the correct route table) but with no framework recognized, Vercel didn't translate the `.next` output into servable functions/routes at all — `Deploying outputs...` completed in about a second (far too fast for a real Next.js app with two serverless functions and several MB of OCR assets), and every single route, including the deployment's own unique per-deploy URL, returned a platform-level `NOT_FOUND`, with zero runtime errors logged (because no request ever reached the function). The build log looking completely clean is exactly what makes this one easy to miss — check `framework` on the project (not just that the build "passed") if a fresh deploy 404s everywhere.
 3. **Turn off Vercel Authentication (Project Settings → Deployment Protection → Vercel Authentication)** unless you specifically want every visitor gated behind a Vercel login — it defaults to blocking `*.vercel.app` URLs entirely, which looks identical to "nothing deployed" from the outside.
 4. Attach a Vercel Blob store to the project (Storage tab) to get large-file uploads — optional, see above, but **if you do, create it as Private, not Public** (see [Blob storage is private](#blob-storage-is-private)) and use the "Connect to Project" flow so `BLOB_WEBHOOK_PUBLIC_KEY` gets set alongside `BLOB_READ_WRITE_TOKEN`. OCR needs no setup of its own; every asset it uses is already in the deployment.
-5. Deploy. `/api/inspect` and `/api/upload-token` run on the Node.js runtime (required — `@firecrawl/pdf-inspector` is a native module and cannot run on Edge). `npm run build` uses the Turbopack default. **Do not add a `--webpack` flag to the build command** — it was tried as a (mis-diagnosed) fix for the glibc issue above, but it makes Vercel's Next.js builder stop recognizing serverless functions entirely, so `/api/inspect` 404s in production. See the comment at the top of `next.config.ts`.
-6. After deploying, sanity-check the live URL isn't just serving a cached/unrelated response: `curl -s -o /dev/null -w "%{http_code}" <url>/api/upload-token` should return `200` with `{"available": ...}`, not `404`.
+5. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (Project Settings → Environment Variables) — see [Auth](#auth) for values and the separate Supabase-dashboard configuration (redirect URL allowlist, Google provider, SMTP) that env vars alone don't cover.
+6. Deploy. Vercel only injects newly-added/changed env vars into deployments built **after** they're saved — an already-live deployment won't pick up a var you just added until the next build. `/api/inspect` and `/api/upload-token` run on the Node.js runtime (required — `@firecrawl/pdf-inspector` is a native module and cannot run on Edge). `npm run build` uses the Turbopack default. **Do not add a `--webpack` flag to the build command** — it was tried as a (mis-diagnosed) fix for the glibc issue above, but it makes Vercel's Next.js builder stop recognizing serverless functions entirely, so `/api/inspect` 404s in production. See the comment at the top of `next.config.ts`.
+7. After deploying, sanity-check the live URL isn't just serving a cached/unrelated response: `curl -s -o /dev/null -w "%{http_code}" <url>/api/upload-token` should return `200` with `{"available": ...}`, not `404`.
 
 ## What's not built yet
 
@@ -109,9 +112,27 @@ The marketing page (`src/components/home/*`) once advertised several of these as
 - **Webhook delivery.** No callback/queue system exists.
 - **CLI.** No terminal client ships from this repo.
 - **Public versioned API.** `/api/inspect` is the same internal route the web UI itself calls — unauthenticated, unrate-limited, undocumented as a product surface. There is no `/v1/analyze` or equivalent.
-- **Auth / billing.** "Sign in" and "Get access" are anchors with no backend.
+- **API keys, usage tracking, document history, billing.** Not built yet. The database (see "Auth" below) does have `api_keys` and `api_usage_events` tables provisioned and RLS-secured ahead of that work, but nothing in the app reads or writes them yet.
 
 `robots.ts` and `sitemap.ts` (Next.js metadata route conventions) exist at `src/app/` — `/robots.txt` and `/sitemap.xml` are real, served routes, not TODOs.
+
+### Auth
+
+Real sign up / sign in / sign out / password reset, via [Supabase Auth](https://supabase.com/docs/guides/auth) (`@supabase/ssr` + `@supabase/supabase-js`) — email+password and Google OAuth. Not a NextAuth/Auth.js setup (an earlier pass built one; it's been fully replaced, not layered alongside this).
+
+- `src/lib/supabase/client.ts` / `server.ts` — the two client factories (browser / Server Components+Actions+Route Handlers), copied from Supabase's own current docs, not hand-rolled.
+- `src/lib/supabase/proxy.ts` + `src/proxy.ts` — refreshes the session cookie on every request. **`proxy.ts`, not `middleware.ts`** — this Next.js version (16) renamed the convention; see `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md`.
+- `src/app/login`, `src/app/signup`, `src/app/account/reset-password`, `src/app/account/update-password` — the actual pages, styled to match the marketing site's existing system (inline styles, MONO/SANS tokens), not a generic auth-library UI.
+- `src/app/auth/callback/route.ts` — one shared PKCE code-exchange route for all three flows that mail/redirect a `?code=` link: Google OAuth, signup confirmation, and password reset (`?next=/account/update-password`).
+- Authorization checks use `getClaims()`, not `getSession()` — per Supabase's own guidance, `getSession()` reads from storage without revalidating the JWT and shouldn't be trusted for authorization; `getClaims()` verifies the token (locally against the project's JWKS) every time.
+
+**Required env vars** (see `.env.example`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Both are meant to be public (Supabase's security model is Row Level Security on the database, not a secret key).
+
+**Dashboard configuration required beyond env vars** (project: `proofmart`, `ap-south-1`) — none of this is settable from code:
+
+1. **Redirect URL allowlist** (Authentication → URL Configuration): add `http://localhost:3000/**` for local dev and the deployed domain(s) (`https://proofmart-shop.vercel.app/**`, plus `proofmart.shop` once/if that domain is ever pointed at this project). Every `emailRedirectTo`/`redirectTo` value in the code above must match an allowed pattern or Supabase silently ignores it.
+2. **Google provider** (Authentication → Providers → Google): needs a Google Cloud OAuth client (Console → APIs & Services → Credentials → OAuth client ID → Web application) whose Authorized redirect URI is Supabase's own callback — `https://llfhgspktwacuvlmxigy.supabase.co/auth/v1/callback` — **not** this app's `/auth/callback`. Paste that client's ID + secret into the Supabase provider settings. Until this is done, "Continue with Google" errors; email+password is unaffected.
+3. **Custom SMTP** (Authentication → Emails → SMTP Settings): Supabase's built-in email sender is for testing only and rate-limits aggressively — confirmed directly: two live signup attempts against the real project during this pass hit `email rate limit exceeded (429)` on the second call. Real user signups/password resets need a real SMTP provider configured here before this is production-usable, not just code-complete.
 
 ### Blob storage is private
 
