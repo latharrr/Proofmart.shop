@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { MONO, SANS } from "@/lib/evidence-data";
+import { recordAuditEvent } from "@/lib/audit";
 
 // Server component: reads the session on the server (getClaims — verifies
 // the JWT locally/against Supabase's JWKS, not the unrevalidated
@@ -29,6 +30,7 @@ export default async function AuthControls() {
   }
 
   const email = typeof claims.email === "string" ? claims.email : "Account";
+  const userId = typeof claims.sub === "string" ? claims.sub : null;
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -71,6 +73,7 @@ export default async function AuthControls() {
           "use server";
           const supabase = await createClient();
           await supabase.auth.signOut();
+          await recordAuditEvent({ userId, eventType: "sign_out" });
           revalidatePath("/", "layout");
           redirect("/");
         }}

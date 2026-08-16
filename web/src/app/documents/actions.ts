@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 import { runVerify } from "@/lib/api/pipeline";
 import { ProcessingFailure } from "@/lib/pdf/types";
 import { failedDocumentInsert, hashDocumentBytes, readyDocumentInsert } from "@/lib/documents";
+import { recordAuditEvent } from "@/lib/audit";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 async function requireUserId(): Promise<string> {
   const supabase = await createClient();
@@ -26,6 +28,7 @@ export async function deleteDocument(id: string): Promise<void> {
   if (doc?.storage_pathname) void del(doc.storage_pathname).catch(() => {});
 
   await supabase.from("documents").delete().eq("id", id).eq("user_id", userId);
+  await recordAuditEvent({ userId, eventType: "document_deleted", metadata: { documentId: id } });
   revalidatePath("/documents");
 }
 
@@ -37,6 +40,12 @@ export async function deleteDocument(id: string): Promise<void> {
  */
 export async function rerunDocument(id: string): Promise<void> {
   const userId = await requireUserId();
+
+  // Re-running invokes the full pipeline again (same cost as a fresh
+  // upload) — same abuse-guard shape as /api/inspect's signed-in limit.
+  const allowed = await checkRateLimit(`rerun:user:${userId}`, 600, 30);
+  if (!allowed) return;
+
   const supabase = await createClient();
 
   const { data: doc } = await supabase.from("documents").select("filename, size_bytes, storage_pathname").eq("id", id).eq("user_id", userId).maybeSingle();
@@ -63,6 +72,7 @@ export async function rerunDocument(id: string): Promise<void> {
       })
       .eq("id", id)
       .eq("user_id", userId);
+    await recordAuditEvent({ userId, eventType: "document_rerun", metadata: { documentId: id, verdict: verification.verdict } });
   } catch (err) {
     const error = err instanceof ProcessingFailure ? err.error : { code: "processing-failed", message: "Unexpected server error while processing the PDF." };
     // A re-run that fails keeps the stored file (unlike a first-time upload

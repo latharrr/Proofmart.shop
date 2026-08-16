@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { recordAuditEvent } from "@/lib/audit";
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
@@ -10,12 +11,13 @@ export async function login(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     redirect(`/login?error=${encodeURIComponent(error.message)}`);
   }
 
+  await recordAuditEvent({ userId: data.user.id, eventType: "sign_in", metadata: { method: "password" } });
   redirect("/");
 }
 

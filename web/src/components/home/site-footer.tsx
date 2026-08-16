@@ -1,5 +1,12 @@
+import Link from "next/link";
 import { MONO, SANS } from "@/lib/evidence-data";
 import { FOOTER } from "@/lib/home-data";
+
+// Only this one footer link goes anywhere real right now — the rest are
+// placeholder copy from the original marketing handoff (out of scope for
+// this change; see the footer's other links). "Trust & security" now has
+// a real, truthful destination behind it, so it gets a real href.
+const REAL_HREFS: Record<string, string> = { "Trust & security": "/security" };
 
 export default function SiteFooter() {
   return (
@@ -29,13 +36,22 @@ export default function SiteFooter() {
             <div key={c.h}>
               <div style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", letterSpacing: "0.12em", marginBottom: 14 }}>{c.h.toUpperCase()}</div>
               <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
-                {c.links.map((l) => (
-                  <li key={l}>
-                    <a href="#" className="pm-hoverable" style={{ fontFamily: SANS, fontSize: 13, color: "#43494F" }}>
-                      {l}
-                    </a>
-                  </li>
-                ))}
+                {c.links.map((l) => {
+                  const href = REAL_HREFS[l];
+                  return (
+                    <li key={l}>
+                      {href ? (
+                        <Link href={href} className="pm-hoverable" style={{ fontFamily: SANS, fontSize: 13, color: "#43494F" }}>
+                          {l}
+                        </Link>
+                      ) : (
+                        <a href="#" className="pm-hoverable" style={{ fontFamily: SANS, fontSize: 13, color: "#43494F" }}>
+                          {l}
+                        </a>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}

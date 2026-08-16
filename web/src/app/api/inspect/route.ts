@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { del, get } from "@vercel/blob";
 import { runVerify } from "@/lib/api/pipeline";
 import type { ProcessingError, ProcessingErrorCode } from "@/lib/pdf/types";
@@ -5,11 +6,22 @@ import { ProcessingFailure } from "@/lib/pdf/types";
 import { isTrustedBlobUrl, sanitizeFilename } from "@/lib/pdf/upload-safety";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { failedDocumentInsert, hashDocumentBytes, readyDocumentInsert } from "@/lib/documents";
+import { checkRateLimit, clientIp } from "@/lib/rate-limit";
+import { logRequest } from "@/lib/observability/log";
+import { recordAuditEvent } from "@/lib/audit";
 
 // @firecrawl/pdf-inspector is a native (napi-rs) module — it cannot run on
 // the Edge runtime or in the browser, only in a Node.js server process.
 export const runtime = "nodejs";
 export const maxDuration = 60;
+
+// This is the anonymous public demo's core path — the one endpoint anyone
+// on the internet can hit with zero auth, running an expensive OCR/PDF
+// pipeline each time. Anonymous callers get a tighter per-IP limit than a
+// signed-in user gets per-account, since an IP is a much weaker identity to
+// rely on but is what's actually available pre-auth.
+const RATE_LIMIT_ANON = { windowSeconds: 600, limit: 10 };
+const RATE_LIMIT_USER = { windowSeconds: 600, limit: 30 };
 
 const STATUS_BY_CODE: Record<ProcessingErrorCode, number> = {
   "invalid-file": 400,
@@ -20,15 +32,15 @@ const STATUS_BY_CODE: Record<ProcessingErrorCode, number> = {
   "processing-failed": 500,
 };
 
-function errorResponse(error: ProcessingError) {
-  return Response.json({ error }, { status: STATUS_BY_CODE[error.code] });
+function errorResponse(requestId: string, error: ProcessingError) {
+  return Response.json({ error, requestId }, { status: STATUS_BY_CODE[error.code] });
 }
 
-async function readFromBlob(request: Request): Promise<{ buffer: Buffer; filename: string; blobUrl: string } | Response> {
+async function readFromBlob(requestId: string, request: Request): Promise<{ buffer: Buffer; filename: string; blobUrl: string } | Response> {
   const body = await request.json().catch(() => null);
   const blobUrl = body?.blobUrl;
   if (typeof blobUrl !== "string" || !isTrustedBlobUrl(blobUrl)) {
-    return errorResponse({ code: "invalid-file", message: "Missing or unrecognized upload reference." });
+    return errorResponse(requestId, { code: "invalid-file", message: "Missing or unrecognized upload reference." });
   }
   // A private blob's own URL 401s on a bare fetch — it requires the
   // server's real read-write credential (BLOB_READ_WRITE_TOKEN/OIDC),
@@ -37,45 +49,55 @@ async function readFromBlob(request: Request): Promise<{ buffer: Buffer; filenam
   // URL knowledge included, can read it.
   const result = await get(blobUrl, { access: "private" }).catch(() => null);
   if (!result || result.statusCode !== 200) {
-    return errorResponse({ code: "unreadable", message: "Could not retrieve the uploaded file." });
+    return errorResponse(requestId, { code: "unreadable", message: "Could not retrieve the uploaded file." });
   }
   const buffer = Buffer.from(await new Response(result.stream).arrayBuffer());
   const filename = typeof body?.filename === "string" ? sanitizeFilename(body.filename) : "upload.pdf";
   return { buffer, filename, blobUrl };
 }
 
-async function readFromFormData(request: Request): Promise<{ buffer: Buffer; filename: string; blobUrl: null } | Response> {
+async function readFromFormData(requestId: string, request: Request): Promise<{ buffer: Buffer; filename: string; blobUrl: null } | Response> {
   let form: FormData;
   try {
     form = await request.formData();
   } catch {
-    return errorResponse({ code: "invalid-file", message: "Expected a multipart/form-data upload." });
+    return errorResponse(requestId, { code: "invalid-file", message: "Expected a multipart/form-data upload." });
   }
   const file = form.get("file");
   if (!(file instanceof File)) {
-    return errorResponse({ code: "invalid-file", message: "No file provided under the 'file' field." });
+    return errorResponse(requestId, { code: "invalid-file", message: "No file provided under the 'file' field." });
   }
   const buffer = Buffer.from(await file.arrayBuffer());
   return { buffer, filename: sanitizeFilename(file.name), blobUrl: null };
 }
 
 export async function POST(request: Request) {
-  const contentType = request.headers.get("content-type") ?? "";
-  const input = contentType.includes("application/json") ? await readFromBlob(request) : await readFromFormData(request);
-  if (input instanceof Response) return input;
+  const requestId = randomUUID();
+  const start = Date.now();
 
-  const { buffer, filename, blobUrl } = input;
-
-  // Signed-in users get their result saved to "My documents" automatically
-  // (see the `documents` table migration) — anonymous callers, and any
-  // request served while Supabase itself isn't configured, keep today's
-  // fully ephemeral behavior. isSupabaseConfigured() must be checked before
-  // createClient() — createClient() throws synchronously without the env
-  // vars it needs, and this route is the anonymous public demo's core path,
-  // which has to keep working with zero Supabase config (see README).
+  // Determined before touching the request body: it doesn't depend on it
+  // (session comes from a cookie), and checking the rate limit first means
+  // a rate-limited caller's upload is never parsed at all.
   const supabase = isSupabaseConfigured() ? await createClient() : null;
   const claims = supabase ? (await supabase.auth.getClaims()).data?.claims : null;
   const userId = typeof claims?.sub === "string" ? claims.sub : null;
+
+  const rateLimitKey = userId ? `inspect:user:${userId}` : `inspect:ip:${clientIp(request)}`;
+  const rateLimitConfig = userId ? RATE_LIMIT_USER : RATE_LIMIT_ANON;
+  const allowed = await checkRateLimit(rateLimitKey, rateLimitConfig.windowSeconds, rateLimitConfig.limit);
+  if (!allowed) {
+    logRequest({ requestId, route: "/api/inspect", method: "POST", status: 429, durationMs: Date.now() - start, userId: userId ?? undefined, failureCategory: "rate_limited" });
+    return Response.json(
+      { error: { code: "rate-limited", message: `Too many requests. Limit: ${rateLimitConfig.limit} per ${rateLimitConfig.windowSeconds}s.` }, requestId },
+      { status: 429 },
+    );
+  }
+
+  const contentType = request.headers.get("content-type") ?? "";
+  const input = contentType.includes("application/json") ? await readFromBlob(requestId, request) : await readFromFormData(requestId, request);
+  if (input instanceof Response) return input;
+
+  const { buffer, filename, blobUrl } = input;
 
   let persistedFile = false;
   try {
@@ -105,9 +127,21 @@ export async function POST(request: Request) {
           documentHash: hashDocumentBytes(buffer),
         }),
       });
+      await recordAuditEvent({ userId, eventType: "document_uploaded", metadata: { sizeBytes: buffer.byteLength, pageCount: document.pageCount } });
+      await recordAuditEvent({ userId, eventType: "verification_completed", metadata: { verdict: verification.verdict, findingsCount: verification.findings.length } });
     }
 
-    return Response.json({ document, verification });
+    logRequest({
+      requestId,
+      route: "/api/inspect",
+      method: "POST",
+      status: 200,
+      durationMs: Date.now() - start,
+      userId: userId ?? undefined,
+      processingTimeMs: document.processingTimeMs,
+      pageCount: document.pageCount,
+    });
+    return Response.json({ document, verification, requestId });
   } catch (err) {
     const error =
       err instanceof ProcessingFailure ? err.error : ({ code: "processing-failed", message: "Unexpected server error while processing the PDF." } as const);
@@ -115,8 +149,18 @@ export async function POST(request: Request) {
       await supabase
         .from("documents")
         .insert({ user_id: userId, ...failedDocumentInsert({ filename, sizeBytes: buffer.byteLength, errorCode: error.code, errorMessage: error.message }) });
+      await recordAuditEvent({ userId, eventType: "document_uploaded", metadata: { sizeBytes: buffer.byteLength, failed: true, errorCode: error.code } });
     }
-    return errorResponse(error);
+    logRequest({
+      requestId,
+      route: "/api/inspect",
+      method: "POST",
+      status: STATUS_BY_CODE[error.code],
+      durationMs: Date.now() - start,
+      userId: userId ?? undefined,
+      failureCategory: error.code,
+    });
+    return errorResponse(requestId, error);
   } finally {
     // Best-effort cleanup — an upload that wasn't saved to a document
     // shouldn't linger in Blob storage (these can be real financial

@@ -1,6 +1,7 @@
 import { issueSignedToken } from "@vercel/blob";
 import { handleUploadPresigned, type HandleUploadPresignedBody } from "@vercel/blob/client";
 import { MAX_UPLOAD_BYTES } from "@/lib/pdf/types";
+import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 
 // Presigned-upload flow, not handleUpload/upload — see upload-safety.ts and
 // isTrustedBlobUrl's comment. handleUpload's client-token flow has no
@@ -25,7 +26,18 @@ export function GET() {
   });
 }
 
+// Same shape as /api/inspect's anonymous limit — a token issued here is a
+// real (if short-lived, size/type-constrained) write credential against
+// Blob storage, so it needs the same abuse guard as the upload path itself,
+// not just the processing step that follows it.
+const RATE_LIMIT = { windowSeconds: 600, limit: 10 };
+
 export async function POST(request: Request) {
+  const allowed = await checkRateLimit(`upload-token:ip:${clientIp(request)}`, RATE_LIMIT.windowSeconds, RATE_LIMIT.limit);
+  if (!allowed) {
+    return Response.json({ error: `Too many requests. Limit: ${RATE_LIMIT.limit} per ${RATE_LIMIT.windowSeconds}s.` }, { status: 429 });
+  }
+
   const body = (await request.json()) as HandleUploadPresignedBody;
 
   try {
@@ -54,6 +66,11 @@ export async function POST(request: Request) {
     });
     return Response.json(jsonResponse);
   } catch (err) {
-    return Response.json({ error: err instanceof Error ? err.message : "Upload token generation failed." }, { status: 400 });
+    // Never forward the raw exception message — it's the @vercel/blob SDK's
+    // own error text, not something written with "safe to show a client"
+    // in mind. Logged server-side (Vercel captures stdout automatically,
+    // see lib/observability/log.ts) for real debugging.
+    console.error("[upload-token] handleUploadPresigned failed:", err instanceof Error ? err.message : err);
+    return Response.json({ error: "Upload token generation failed." }, { status: 400 });
   }
 }

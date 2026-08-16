@@ -1,5 +1,6 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { attemptDelivery } from "@/lib/webhooks/deliver";
+import { pruneExpiredRows } from "@/lib/retention";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -8,11 +9,14 @@ const BATCH_SIZE = 25;
 
 /**
  * Retries deliveries the immediate `after()` attempt (see dispatch.ts)
- * didn't finish successfully. Vercel Cron calls this on a schedule (see
- * vercel.json) and automatically sends `Authorization: Bearer $CRON_SECRET`
- * when CRON_SECRET is configured — this route refuses every request when
- * that env var isn't set, rather than running as an open endpoint anyone
- * could use to make this server issue repeated outbound requests.
+ * didn't finish successfully, then prunes expired rows from bookkeeping
+ * tables (see lib/retention.ts) — one daily cron job doing both rather than
+ * two, since Vercel Cron on some plans caps how many jobs a project can
+ * schedule at all. Vercel calls this on a schedule (see vercel.json) and
+ * automatically sends `Authorization: Bearer $CRON_SECRET` when
+ * CRON_SECRET is configured — this route refuses every request when that
+ * env var isn't set, rather than running as an open endpoint anyone could
+ * use to make this server issue repeated outbound requests.
  */
 export async function POST(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
@@ -37,10 +41,11 @@ export async function POST(request: Request) {
     .or(`next_retry_at.is.null,next_retry_at.lte.${nowIso}`)
     .limit(BATCH_SIZE);
 
-  if (!due || due.length === 0) return Response.json({ attempted: 0 });
+  const attempted = due?.length ?? 0;
+  if (attempted > 0) await Promise.all(due!.map((row) => attemptDelivery(supabase, row.id)));
 
-  await Promise.all(due.map((row) => attemptDelivery(supabase, row.id)));
-  return Response.json({ attempted: due.length });
+  const pruned = await pruneExpiredRows(supabase);
+  return Response.json({ attempted, pruned });
 }
 
 // Vercel Cron issues GET by default for scheduled triggers unless a method
