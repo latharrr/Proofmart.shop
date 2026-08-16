@@ -40,6 +40,8 @@ export function extractEnvelope(document: ProcessedDocument, documentKind: Docum
   };
 }
 
+export type VerifyEnvelope = ReturnType<typeof verifyEnvelope>;
+
 export function verifyEnvelope(document: ProcessedDocument, verification: VerificationResult) {
   return {
     document: { filename: document.filename, sizeBytes: document.sizeBytes, pageCount: document.pageCount, title: document.title },

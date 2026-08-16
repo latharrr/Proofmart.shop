@@ -4,6 +4,7 @@
  * the rail's generic `RailFinding` shape. No native/server imports — this
  * is what the rail itself calls while rendering.
  */
+import type { VerifyEnvelope } from "@/lib/api/envelope";
 import type { VerificationFinding, VerificationResult } from "@/lib/verification/types";
 import type { ExtractedFact, ProcessedDocument, RailFinding } from "./types";
 
@@ -116,6 +117,42 @@ export function summaryChips(doc: ProcessedDocument): SummaryChip[] {
 /** Clamps a page-navigation step to `[1, totalPages]` — shared by the live-document hook and its tests. */
 export function clampPage(current: number, totalPages: number, delta: number): number {
   return Math.min(Math.max(1, totalPages), Math.max(1, current + delta));
+}
+
+/**
+ * Reconstructs the `{ document, verification }` shape `railFindingsForPage`
+ * and `verdictCounts` expect from a saved `VerifyEnvelope` — the exact
+ * inverse of `verifyEnvelope`. Lets a saved document reuse the same rail
+ * rendering code a live one does, rather than a second findings-panel
+ * implementation. `document` is `null` only if the envelope predates a
+ * document ever finishing processing (shouldn't happen for a `ready` row).
+ */
+export function envelopeToRailInputs(envelope: VerifyEnvelope): { document: ProcessedDocument | null; verification: VerificationResult | null } {
+  if (!envelope.document || !envelope.classification || !envelope.verdict || !envelope.processing) {
+    return { document: null, verification: null };
+  }
+  const document: ProcessedDocument = {
+    source: "upload",
+    filename: envelope.document.filename,
+    sizeBytes: envelope.document.sizeBytes,
+    pdfType: envelope.classification.pdfType,
+    confidence: envelope.classification.confidence,
+    pageCount: envelope.document.pageCount,
+    processingTimeMs: envelope.processing.processingTimeMs,
+    title: envelope.document.title,
+    hasEncodingIssues: envelope.classification.hasEncodingIssues,
+    isComplexLayout: envelope.classification.isComplexLayout,
+    pages: envelope.processing.pages,
+    facts: envelope.facts,
+  };
+  const verification: VerificationResult = {
+    verdict: envelope.verdict,
+    findings: envelope.findings,
+    markersRun: envelope.processing.markersRun,
+    markersSkipped: envelope.processing.markersSkipped,
+    documentKind: envelope.classification.documentKind,
+  };
+  return { document, verification };
 }
 
 export function formatBytes(bytes: number): string {

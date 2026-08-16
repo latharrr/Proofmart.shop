@@ -3,6 +3,8 @@ import { runVerify } from "@/lib/api/pipeline";
 import type { ProcessingError, ProcessingErrorCode } from "@/lib/pdf/types";
 import { ProcessingFailure } from "@/lib/pdf/types";
 import { isTrustedBlobUrl, sanitizeFilename } from "@/lib/pdf/upload-safety";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { failedDocumentInsert, hashDocumentBytes, readyDocumentInsert } from "@/lib/documents";
 
 // @firecrawl/pdf-inspector is a native (napi-rs) module — it cannot run on
 // the Edge runtime or in the browser, only in a Node.js server process.
@@ -64,6 +66,18 @@ export async function POST(request: Request) {
 
   const { buffer, filename, blobUrl } = input;
 
+  // Signed-in users get their result saved to "My documents" automatically
+  // (see the `documents` table migration) — anonymous callers, and any
+  // request served while Supabase itself isn't configured, keep today's
+  // fully ephemeral behavior. isSupabaseConfigured() must be checked before
+  // createClient() — createClient() throws synchronously without the env
+  // vars it needs, and this route is the anonymous public demo's core path,
+  // which has to keep working with zero Supabase config (see README).
+  const supabase = isSupabaseConfigured() ? await createClient() : null;
+  const claims = supabase ? (await supabase.auth.getClaims()).data?.claims : null;
+  const userId = typeof claims?.sub === "string" ? claims.sub : null;
+
+  let persistedFile = false;
   try {
     // Same engine invocation /v1/verify runs (lib/api/pipeline.ts) — the
     // web UI and the public API are two callers of one pipeline, not two
@@ -73,14 +87,40 @@ export async function POST(request: Request) {
     // network, so it works unmodified on Vercel's default Node.js
     // serverless runtime.
     const { document, verification } = await runVerify(buffer, { filename, sizeBytes: buffer.byteLength });
+
+    if (userId && supabase) {
+      // Only keep the blob when there's actually one to keep — a direct
+      // (non-Blob) upload has nothing to persist a reference to, so the
+      // saved document still records real findings, just with no stored
+      // PDF to reopen or re-run against later.
+      persistedFile = blobUrl !== null;
+      await supabase.from("documents").insert({
+        user_id: userId,
+        ...readyDocumentInsert({
+          filename,
+          sizeBytes: buffer.byteLength,
+          document,
+          verification,
+          storagePathname: persistedFile ? blobUrl : null,
+          documentHash: hashDocumentBytes(buffer),
+        }),
+      });
+    }
+
     return Response.json({ document, verification });
   } catch (err) {
-    if (err instanceof ProcessingFailure) return errorResponse(err.error);
-    return errorResponse({ code: "processing-failed", message: "Unexpected server error while processing the PDF." });
+    const error =
+      err instanceof ProcessingFailure ? err.error : ({ code: "processing-failed", message: "Unexpected server error while processing the PDF." } as const);
+    if (userId && supabase) {
+      await supabase
+        .from("documents")
+        .insert({ user_id: userId, ...failedDocumentInsert({ filename, sizeBytes: buffer.byteLength, errorCode: error.code, errorMessage: error.message }) });
+    }
+    return errorResponse(error);
   } finally {
-    // Best-effort cleanup — a processed upload shouldn't linger in Blob
-    // storage (these can be real financial documents). Never fails the
-    // request over a cleanup error.
-    if (blobUrl) void del(blobUrl).catch(() => {});
+    // Best-effort cleanup — an upload that wasn't saved to a document
+    // shouldn't linger in Blob storage (these can be real financial
+    // documents). Never fails the request over a cleanup error.
+    if (blobUrl && !persistedFile) void del(blobUrl).catch(() => {});
   }
 }

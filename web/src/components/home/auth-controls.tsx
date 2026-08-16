@@ -46,6 +46,13 @@ export default async function AuthControls() {
         {email}
       </span>
       <Link
+        href="/documents"
+        className="pm-hoverable"
+        style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.04em" }}
+      >
+        My documents
+      </Link>
+      <Link
         href="/account/api-keys"
         className="pm-hoverable"
         style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.04em" }}
