@@ -108,11 +108,10 @@ Two capabilities are given up by this pin, both handled explicitly rather than s
 The marketing page (`src/components/home/*`) once advertised several of these as live capabilities; that copy has since been corrected to say "planned," not shipped. Listing them here too so this doesn't quietly drift again:
 
 - **Signing.** No response is cryptographically signed. No `ed25519`/crypto-signing dependency exists in `package.json`.
-- **PDF dossier generation.** The API returns JSON only (`{ document, verification }`). No code generates a PDF report from a scan.
+- **PDF dossier generation.** The API returns JSON only. No code generates a PDF report from a scan.
 - **Webhook delivery.** No callback/queue system exists.
 - **CLI.** No terminal client ships from this repo.
-- **Public versioned API.** `/api/inspect` is the same internal route the web UI itself calls — unauthenticated, unrate-limited, undocumented as a product surface. There is no `/v1/analyze` or equivalent.
-- **API keys, usage tracking, document history, billing.** Not built yet. The database (see "Auth" below) does have `api_keys` and `api_usage_events` tables provisioned and RLS-secured ahead of that work, but nothing in the app reads or writes them yet.
+- **Document history, rerun, search, billing.** Not built yet. `api_usage_events` already records every `/v1/*` call (event type, which key, which user) ahead of that work, but there's no `documents` table yet — a scan's result isn't persisted or retrievable after the response that returned it, from either the UI or the API. `GET /v1/documents/:id` and `/result` are consequently **not implemented** — building them without real persistence would mean fabricating a capability, so they don't exist rather than existing as a stub.
 
 `robots.ts` and `sitemap.ts` (Next.js metadata route conventions) exist at `src/app/` — `/robots.txt` and `/sitemap.xml` are real, served routes, not TODOs.
 
@@ -133,6 +132,24 @@ Real sign up / sign in / sign out / password reset, via [Supabase Auth](https://
 1. **Redirect URL allowlist** (Authentication → URL Configuration): add `http://localhost:3000/**` for local dev and the deployed domain(s) (`https://proofmart-shop.vercel.app/**`, plus `proofmart.shop` once/if that domain is ever pointed at this project). Every `emailRedirectTo`/`redirectTo` value in the code above must match an allowed pattern or Supabase silently ignores it.
 2. **Google provider** (Authentication → Providers → Google): needs a Google Cloud OAuth client (Console → APIs & Services → Credentials → OAuth client ID → Web application) whose Authorized redirect URI is Supabase's own callback — `https://llfhgspktwacuvlmxigy.supabase.co/auth/v1/callback` — **not** this app's `/auth/callback`. Paste that client's ID + secret into the Supabase provider settings. Until this is done, "Continue with Google" errors; email+password is unaffected.
 3. **Custom SMTP** (Authentication → Emails → SMTP Settings): Supabase's built-in email sender is for testing only and rate-limits aggressively — confirmed directly: two live signup attempts against the real project during this pass hit `email rate limit exceeded (429)` on the second call. Real user signups/password resets need a real SMTP provider configured here before this is production-usable, not just code-complete.
+
+### Public API + API keys
+
+`/v1/verify`, `/v1/inspect`, `/v1/extract` — a real, independent public API, not the same route the web UI calls. All three run through `lib/api/pipeline.ts`, which `/api/inspect` (the UI's own route) also calls — one engine with three depths, not a second engine built for the API:
+
+| Route | Runs | Response has |
+|---|---|---|
+| `POST /v1/inspect` | classification only | `classification` |
+| `POST /v1/extract` | + extraction, OCR on scanned pages | + `document`, `facts`, `processing` |
+| `POST /v1/verify` | + every verification marker | + `verdict`, `findings` |
+
+Every response is `{ document, classification, verdict, findings, facts, processing, requestId }` — fields that don't apply at a given depth are `null`/`[]`, never guessed at. All three take `multipart/form-data` with a `file` field (`curl -F "file=@doc.pdf"`) and require `Authorization: Bearer <api key>`.
+
+**API keys**: created/listed/revoked at `/account/api-keys` (linked from the topbar once signed in). A key is shown in full exactly once, at creation — only its SHA-256 hash and an 16-char display prefix (`pm_live_ab12cd34…`) are ever stored (`lib/api-keys.ts`). Revoking sets `revoked_at` rather than deleting the row, so `created_at`/`last_used_at` stay visible. Every `/v1/*` call is recorded in `api_usage_events` (event type, which key, which user) — read-only to its owner via RLS, write-only via the service-role key server-side, so a client can never fabricate its own usage history (see the migration in the "Phase B" commit).
+
+Key validation (`lib/api/auth.ts`) uses a Supabase **service-role** client — the caller has no user session, just a bearer key, so there's no `auth.uid()` for RLS to key off. **`SUPABASE_SERVICE_ROLE_KEY` is required for `/v1/*` to authenticate anything** (see `.env.example` — never exposed to the browser, bypasses RLS entirely). Without it, every `/v1/*` call returns `503 service_unavailable`, not a crash — verified locally by removing the var and confirming the graceful response rather than assuming it.
+
+Not built: rate limiting (the auth layer already resolves caller→key→user before any processing runs, which is where a limiter would plug in — no half-built limiter that looks real but doesn't limit anything), and `GET /v1/documents/:id`/`/result` (no persistence layer yet — see "What's not built yet").
 
 ### Blob storage is private
 

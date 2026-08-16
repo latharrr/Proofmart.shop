@@ -45,6 +45,13 @@ export default async function AuthControls() {
       >
         {email}
       </span>
+      <Link
+        href="/account/api-keys"
+        className="pm-hoverable"
+        style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.04em" }}
+      >
+        API keys
+      </Link>
       <form
         action={async () => {
           "use server";

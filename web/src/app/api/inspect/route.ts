@@ -1,10 +1,8 @@
 import { del, get } from "@vercel/blob";
-import { PDFProcessor } from "@/lib/pdf/extract";
+import { runVerify } from "@/lib/api/pipeline";
 import type { ProcessingError, ProcessingErrorCode } from "@/lib/pdf/types";
 import { ProcessingFailure } from "@/lib/pdf/types";
 import { isTrustedBlobUrl, sanitizeFilename } from "@/lib/pdf/upload-safety";
-import { TesseractJsOcrProcessor } from "@/lib/ocr";
-import { VerificationEngine } from "@/lib/verification/engine";
 
 // @firecrawl/pdf-inspector is a native (napi-rs) module — it cannot run on
 // the Edge runtime or in the browser, only in a Node.js server process.
@@ -67,17 +65,14 @@ export async function POST(request: Request) {
   const { buffer, filename, blobUrl } = input;
 
   try {
-    // TesseractJsOcrProcessor bundles every asset it needs (worker script,
-    // WASM core, English trained data — see lib/ocr/tesseract-js.ts) and
-    // never fetches anything over the network, so it works unmodified on
-    // Vercel's default Node.js serverless runtime. A fresh instance per
-    // request means a fresh worker per processing job, torn down by
-    // PDFProcessor.applyOcr's `finally` once every OCR-needing page in this
-    // document is done — never throws out of PDFProcessor's OCR step
-    // either way (see applyOcr's try/catch).
-    const processor = new PDFProcessor(new TesseractJsOcrProcessor());
-    const { document, raw } = await processor.processWithEvidence(buffer, { filename, sizeBytes: buffer.byteLength });
-    const verification = new VerificationEngine().run({ document, raw });
+    // Same engine invocation /v1/verify runs (lib/api/pipeline.ts) — the
+    // web UI and the public API are two callers of one pipeline, not two
+    // pipelines. TesseractJsOcrProcessor bundles every asset it needs
+    // (worker script, WASM core, English trained data — see
+    // lib/ocr/tesseract-js.ts) and never fetches anything over the
+    // network, so it works unmodified on Vercel's default Node.js
+    // serverless runtime.
+    const { document, verification } = await runVerify(buffer, { filename, sizeBytes: buffer.byteLength });
     return Response.json({ document, verification });
   } catch (err) {
     if (err instanceof ProcessingFailure) return errorResponse(err.error);
