@@ -1,17 +1,20 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { MONO, SANS } from "@/lib/evidence-data";
 
 // Server component: reads the session on the server (getClaims — verifies
 // the JWT locally/against Supabase's JWKS, not the unrevalidated
 // getSession) and renders either a "Sign in" link or the signed-in user's
 // email with a "Sign out" button (a zero-JS server-action form).
+//
+// This renders on every page via Topbar, so a missing Supabase config
+// (env vars not yet set, e.g. on a fresh Vercel deploy) must degrade to
+// the signed-out state, not crash every page on the site — createClient()
+// itself would throw synchronously if it ran.
 export default async function AuthControls() {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  const claims = data?.claims;
+  const claims = isSupabaseConfigured() ? (await (await createClient()).auth.getClaims()).data?.claims : null;
 
   if (!claims) {
     return (

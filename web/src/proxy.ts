@@ -1,7 +1,13 @@
-import { type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { updateSession } from "@/lib/supabase/proxy";
 
 export async function proxy(request: NextRequest) {
+  // createServerClient (inside updateSession) throws synchronously if
+  // Supabase isn't configured yet — this runs on nearly every request
+  // (see the matcher below), so an unconfigured deploy must pass requests
+  // through untouched, not 500 on every single page.
+  if (!isSupabaseConfigured()) return NextResponse.next();
   return await updateSession(request);
 }
 

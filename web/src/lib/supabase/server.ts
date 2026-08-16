@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+export { isSupabaseConfigured } from "./config";
+
 // For Server Components, Server Actions, and Route Handlers. A fresh client
 // per call is intentional/cheap (server-side it just configures a fetch
 // call) — it needs this request's own cookies, so it can't be a singleton.
