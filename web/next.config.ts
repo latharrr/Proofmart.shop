@@ -112,8 +112,31 @@ const nextConfig: NextConfig = {
   // fail-fast guard in ocr/tesseract-js.ts caught it and degraded to
   // "OCR needed" with no extracted text rather than hanging, but OCR
   // itself never actually ran.
+  //
+  // Same blind spot applies to tesseract.js's own npm dependencies:
+  // `require("bmp-js")` etc. inside src/ are ordinary bare-specifier
+  // requires Next's tracer resolves fine for statically-imported code,
+  // but this worker thread is spawned by file path
+  // (worker_threads.Worker), outside the app's static import graph
+  // entirely, so nothing pulls its transitive deps in automatically —
+  // confirmed live in production as a second crash, `Cannot find module
+  // 'bmp-js'`, immediately after the constants/ fix above landed. Listed
+  // explicitly by grepping every bare `require(...)` under
+  // tesseract.js/src (`grep -rhoE "require\(['\"][a-zA-Z][^'\"]*['\"]\)"`)
+  // and cross-referencing Node builtins out — this is every remaining one.
   outputFileTracingIncludes: {
-    "/api/inspect": ["node_modules/tesseract.js/src/**/*", "node_modules/tesseract.js-core/**/*", "src/lib/ocr/tessdata/**/*"],
+    "/api/inspect": [
+      "node_modules/tesseract.js/src/**/*",
+      "node_modules/tesseract.js-core/**/*",
+      "node_modules/bmp-js/**/*",
+      "node_modules/idb-keyval/**/*",
+      "node_modules/is-url/**/*",
+      "node_modules/node-fetch/**/*",
+      "node_modules/regenerator-runtime/**/*",
+      "node_modules/wasm-feature-detect/**/*",
+      "node_modules/zlibjs/**/*",
+      "src/lib/ocr/tessdata/**/*",
+    ],
   },
   async headers() {
     return [{ source: "/(.*)", headers: SECURITY_HEADERS }];
