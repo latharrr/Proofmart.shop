@@ -3,10 +3,18 @@ import type { NextConfig } from "next";
 // Extra origins the *browser* genuinely needs to talk to beyond this app's
 // own domain: the presigned direct-to-Blob upload PUT (see
 // upload-token/route.ts and use-live-document.ts's submitViaBlob) goes
-// straight from the browser to Vercel Blob's storage host, never through
-// this server. Supabase's own project URL is included too even though no
-// Client Component currently imports lib/supabase/client.ts — cheap to
-// allow now rather than a silent CSP break the day something does.
+// straight from the browser to Vercel Blob. `@vercel/blob`'s client
+// `uploadPresigned`/`upload()` (confirmed on the installed 2.8.0 by reading
+// `getApiUrl()` in its own dist/chunk-*.js) actually PUTs to
+// `https://vercel.com/api/blob` — a delegation-token proxy endpoint, not
+// the `*.blob.vercel-storage.com` storage host directly — so that origin
+// has to be allowed too, or the browser's own CSP silently blocks every
+// upload (`connect-src` violation) and the UI hangs at "EXTRACTING…"
+// forever with no console error surfaced to a casual glance. Reproduced
+// live against production before adding this. Supabase's own project URL
+// is included too even though no Client Component currently imports
+// lib/supabase/client.ts — cheap to allow now rather than a silent CSP
+// break the day something does.
 const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin : "";
 const isDev = process.env.NODE_ENV === "development";
 
@@ -33,7 +41,7 @@ const CSP = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self'",
-  `connect-src 'self' https://*.blob.vercel-storage.com https://api.razorpay.com https://lumberjack.razorpay.com${supabaseOrigin ? ` ${supabaseOrigin}` : ""}`,
+  `connect-src 'self' https://*.blob.vercel-storage.com https://vercel.com https://api.razorpay.com https://lumberjack.razorpay.com${supabaseOrigin ? ` ${supabaseOrigin}` : ""}`,
   // Razorpay's checkout renders inside an iframe it injects itself.
   "frame-src https://api.razorpay.com https://checkout.razorpay.com",
   "worker-src 'self' blob:",
