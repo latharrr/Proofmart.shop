@@ -97,8 +97,23 @@ const nextConfig: NextConfig = {
   // require()/import() Next's own tracer can follow on its own: the worker
   // script is loaded by path at runtime (worker_threads.Worker), and the
   // trained-data path is built from a runtime string, not a source literal.
+  //
+  // The glob covers all of tesseract.js's `src/` (196KB, not just
+  // `src/worker-script/`) because the worker thread's own files reach
+  // outside that directory via relative require()s Next's tracer can't
+  // follow either — e.g. worker-script/utils/dump.js requires
+  // `../../constants/imageType` (src/constants/imageType.js) and
+  // worker-script/node/getCore.js requires `../../constants/OEM`
+  // (src/constants/OEM.js). A `worker-script/**/*`-only glob (this file's
+  // prior version) shipped a function missing src/constants entirely:
+  // confirmed live in production as `Uncaught Exception: Error: Cannot
+  // find module '../../constants/imageType'`, which crashed the worker's
+  // Node process (exit 129) on every OCR attempt — the app's own
+  // fail-fast guard in ocr/tesseract-js.ts caught it and degraded to
+  // "OCR needed" with no extracted text rather than hanging, but OCR
+  // itself never actually ran.
   outputFileTracingIncludes: {
-    "/api/inspect": ["node_modules/tesseract.js/src/worker-script/**/*", "node_modules/tesseract.js-core/**/*", "src/lib/ocr/tessdata/**/*"],
+    "/api/inspect": ["node_modules/tesseract.js/src/**/*", "node_modules/tesseract.js-core/**/*", "src/lib/ocr/tessdata/**/*"],
   },
   async headers() {
     return [{ source: "/(.*)", headers: SECURITY_HEADERS }];
