@@ -3,14 +3,18 @@ import "server-only";
 import { createServiceClient } from "@/lib/supabase/service";
 import { PLANS, type PlanId } from "@/lib/billing/plans";
 
+/** Every /v1/* pipeline call counts against the same monthly plan quota — verify is the most expensive, but inspect/extract still run the native PDF parser and (for extract) OCR, so metering verify alone let a caller do unlimited inspect/extract work on any plan. */
+const METERED_EVENT_TYPES = ["verify_request", "inspect_request", "extract_request"] as const;
+
 /**
- * The billing quota — how many /v1/verify calls a user's plan actually
- * allows this calendar month. Separate from lib/rate-limit.ts's per-minute
- * limiter, which exists for every caller regardless of plan (abuse
- * protection, not a product feature). Fails OPEN (allows the request) if
- * Supabase isn't configured, matching every other guard in this codebase —
- * a quota check that can 500 the request path it's attached to is worse
- * than one that occasionally under-enforces during an outage.
+ * The billing quota — how many /v1/* pipeline calls a user's plan actually
+ * allows this calendar month, combined across verify/inspect/extract.
+ * Separate from lib/rate-limit.ts's per-minute limiter, which exists for
+ * every caller regardless of plan (abuse protection, not a product
+ * feature). Fails OPEN (allows the request) if Supabase isn't configured,
+ * matching every other guard in this codebase — a quota check that can
+ * 500 the request path it's attached to is worse than one that
+ * occasionally under-enforces during an outage.
  */
 export async function checkUsageQuota(userId: string): Promise<{ allowed: boolean; plan: PlanId; used: number; limit: number }> {
   const supabase = createServiceClient();
@@ -28,7 +32,7 @@ export async function checkUsageQuota(userId: string): Promise<{ allowed: boolea
     .from("api_usage_events")
     .select("id", { count: "exact", head: true })
     .eq("user_id", userId)
-    .eq("event_type", "verify_request")
+    .in("event_type", METERED_EVENT_TYPES)
     .gte("created_at", monthStart.toISOString());
 
   if (error || count === null) return { allowed: true, plan, used: 0, limit };

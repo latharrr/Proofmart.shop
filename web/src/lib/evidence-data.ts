@@ -94,3 +94,7 @@ export function fmt(n: number | null | undefined): string {
 
 export const MONO = "var(--font-mono), ui-monospace, monospace";
 export const SANS = "var(--font-sans), system-ui, sans-serif";
+
+// Single source of truth for the version shown in the topbar and footer —
+// they used to show two different numbers on the same page.
+export const APP_VERSION = "0.9.14";

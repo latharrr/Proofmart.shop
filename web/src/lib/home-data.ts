@@ -118,5 +118,5 @@ export interface FooterColumn {
 export const FOOTER: FooterColumn[] = [
   { h: "Product", links: ["Pipeline", "Marker catalog", "Dossier format", "Changelog", "Status page"] },
   { h: "Developers", links: ["REST reference", "Webhooks", "CLI", "Verify signatures", "Sample vault"] },
-  { h: "Company", links: ["Manifesto", "Trust & security", "Careers · 4", "Press kit", "Contact"] },
+  { h: "Company", links: ["Manifesto", "Trust & security", "Careers", "Press kit", "Contact"] },
 ];

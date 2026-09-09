@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   const quota = await checkUsageQuota(auth.userId);
   if (!quota.allowed) {
     logRequest({ requestId, route: "/v1/verify", method: "POST", status: 402, durationMs: Date.now() - start, apiKeyId: auth.apiKeyId, userId: auth.userId, failureCategory: "quota_exceeded" });
-    return jsonError(requestId, 402, "quota_exceeded", `Monthly ${quota.plan} plan limit reached (${quota.used}/${quota.limit} /v1/verify calls). Upgrade at /account/billing.`);
+    return jsonError(requestId, 402, "quota_exceeded", `Monthly ${quota.plan} plan limit reached (${quota.used}/${quota.limit} /v1 calls). Upgrade at /account/billing.`);
   }
 
   const input = await readMultipartFile(request);

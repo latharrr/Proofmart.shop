@@ -157,6 +157,68 @@ test("run: a network failure exits 1 without throwing", async () => {
   assert.equal(code, 1);
 });
 
+test("run: list — GETs /v1/documents with query params and no body, prints a summary", async () => {
+  let capturedUrl, capturedInit, logged;
+  logged = "";
+  const body = { documents: [{ id: "doc_1", filename: "a.pdf", status: "ready", verdict: "CLEAR" }], nextCursor: null };
+  const code = await run(["list", "--status", "ready", "--limit", "5", "--api-key", "pm_live_x", "--base-url", "https://example.test"], {
+    fetchImpl: async (url, init) => {
+      capturedUrl = url;
+      capturedInit = init;
+      return new Response(JSON.stringify(body), { status: 200 });
+    },
+    log: (s) => (logged += s),
+    logError: () => {},
+  });
+  assert.equal(code, 0);
+  assert.equal(String(capturedUrl), "https://example.test/v1/documents?status=ready&limit=5");
+  assert.equal(capturedInit.headers.Authorization, "Bearer pm_live_x");
+  assert.equal(capturedInit.body, undefined);
+});
+
+test("run: list with no documents reports that plainly", () => {
+  assert.equal(summarize("list", { documents: [] }), "No documents.");
+});
+
+test("run: get — fetches /v1/documents/:id and prints metadata", async () => {
+  let capturedUrl;
+  const body = { document: { id: "doc_1", filename: "a.pdf", status: "ready", verdict: "CLEAR", findings_count: 2, created_at: "2026-01-01T00:00:00Z" } };
+  let logged = "";
+  const code = await run(["get", "doc_1", "--api-key", "pm_live_x", "--base-url", "https://example.test"], {
+    fetchImpl: async (url) => {
+      capturedUrl = url;
+      return new Response(JSON.stringify(body), { status: 200 });
+    },
+    log: (s) => (logged += s),
+    logError: () => {},
+  });
+  assert.equal(code, 0);
+  assert.equal(capturedUrl, "https://example.test/v1/documents/doc_1");
+  assert.match(logged, /id:\s+doc_1/);
+});
+
+test("run: get --result fetches /v1/documents/:id/result and reuses the verify summary", async () => {
+  let capturedUrl;
+  const body = { verdict: "CLEAR", findings: [] };
+  let logged = "";
+  const code = await run(["get", "doc_1", "--result", "--api-key", "pm_live_x", "--base-url", "https://example.test"], {
+    fetchImpl: async (url) => {
+      capturedUrl = url;
+      return new Response(JSON.stringify(body), { status: 200 });
+    },
+    log: (s) => (logged += s),
+    logError: () => {},
+  });
+  assert.equal(code, 0);
+  assert.equal(capturedUrl, "https://example.test/v1/documents/doc_1/result");
+  assert.match(logged, /verdict:\s+CLEAR/);
+});
+
+test("run: get with no id exits 1", async () => {
+  const code = await run(["get"], { log: () => {}, logError: () => {} });
+  assert.equal(code, 1);
+});
+
 test("run: defaults to the real ProofMart domain when --base-url is omitted", async () => {
   let capturedUrl;
   await run(["inspect", "file.pdf", "--api-key", "pm_live_x"], {

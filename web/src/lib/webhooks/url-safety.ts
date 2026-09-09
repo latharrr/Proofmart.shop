@@ -32,14 +32,17 @@ function isPrivateIPv4(ip: string): boolean {
   if (a === 192 && b === 168) return true; // private
   if (a === 169 && b === 254) return true; // link-local (incl. cloud metadata 169.254.169.254)
   if (a === 0) return true; // "this network"
+  if (a === 100 && b >= 64 && b <= 127) return true; // carrier-grade NAT (100.64.0.0/10)
   return false;
 }
 
 function isPrivateIPv6(ip: string): boolean {
   const lower = ip.toLowerCase();
   if (lower === "::1") return true; // loopback
+  if (lower === "::") return true; // unspecified
   if (lower.startsWith("fe80:") || lower.startsWith("fe80::")) return true; // link-local
   if (lower.startsWith("fc") || lower.startsWith("fd")) return true; // unique local (fc00::/7)
+  if (lower.startsWith("ff")) return true; // multicast (ff00::/8)
   if (lower.startsWith("::ffff:")) return isPrivateIPv4(lower.slice("::ffff:".length)); // IPv4-mapped
   return false;
 }

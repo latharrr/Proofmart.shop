@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { MONO, SANS } from "@/lib/evidence-data";
 import CreateKeyForm from "./create-key-form";
+import ConfirmSubmitButton from "@/components/confirm-submit-button";
 import { revokeApiKey } from "./actions";
 
 interface ApiKeyRow {
@@ -14,17 +15,26 @@ interface ApiKeyRow {
   revoked_at: string | null;
 }
 
-export default async function ApiKeysPage() {
+const PAGE_SIZE = 25;
+
+export default async function ApiKeysPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   if (!isSupabaseConfigured()) redirect("/login");
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) redirect("/login");
 
-  const { data: keys } = await supabase
+  const { page: pageParam } = await searchParams;
+  const page = Math.max(1, Number(pageParam) || 1);
+  const from = (page - 1) * PAGE_SIZE;
+
+  const { data: keys, count } = await supabase
     .from("api_keys")
-    .select("id, name, key_prefix, created_at, last_used_at, revoked_at")
+    .select("id, name, key_prefix, created_at, last_used_at, revoked_at", { count: "exact" })
     .order("created_at", { ascending: false })
+    .range(from, from + PAGE_SIZE - 1)
     .returns<ApiKeyRow[]>();
+
+  const hasMore = (count ?? 0) > from + PAGE_SIZE;
 
   return (
     <div style={{ minHeight: "100vh", background: "#FFFFFF" }}>
@@ -77,8 +87,8 @@ export default async function ApiKeysPage() {
                 </div>
                 {!key.revoked_at && (
                   <form action={revokeApiKey.bind(null, key.id)}>
-                    <button
-                      type="submit"
+                    <ConfirmSubmitButton
+                      confirmMessage={`Revoke "${key.name}"? Anything using this key will stop working immediately — this can't be undone.`}
                       className="pm-hoverable"
                       style={{
                         fontFamily: MONO,
@@ -92,11 +102,28 @@ export default async function ApiKeysPage() {
                       }}
                     >
                       Revoke
-                    </button>
+                    </ConfirmSubmitButton>
                   </form>
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {(page > 1 || hasMore) && (
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20, fontFamily: MONO, fontSize: 12 }}>
+            {page > 1 ? (
+              <Link href={`/account/api-keys?page=${page - 1}`} className="pm-hoverable" style={{ color: "#0E1216" }}>
+                ← Newer
+              </Link>
+            ) : (
+              <span />
+            )}
+            {hasMore && (
+              <Link href={`/account/api-keys?page=${page + 1}`} className="pm-hoverable" style={{ color: "#0E1216" }}>
+                Older →
+              </Link>
+            )}
           </div>
         )}
       </div>

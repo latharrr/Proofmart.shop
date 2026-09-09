@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { MONO, SANS } from "@/lib/evidence-data";
 import CreateWebhookForm from "./create-webhook-form";
+import ConfirmSubmitButton from "@/components/confirm-submit-button";
 import { deleteWebhook, toggleWebhook } from "./actions";
 
 interface WebhookRow {
@@ -34,11 +35,15 @@ export default async function WebhooksPage() {
     .order("created_at", { ascending: false })
     .returns<WebhookRow[]>();
 
+  // Bounded, but scaled to webhook count — a flat limit(20) shared across
+  // every webhook let one noisy endpoint crowd out the rest; each webhook
+  // only ever displays its own most recent 5 below.
+  const deliveryFetchLimit = Math.min(200, Math.max(20, (webhooks?.length ?? 0) * 20));
   const { data: deliveries } = await supabase
     .from("webhook_deliveries")
     .select("webhook_endpoint_id, event_type, status, attempt_count, created_at")
     .order("created_at", { ascending: false })
-    .limit(20)
+    .limit(deliveryFetchLimit)
     .returns<DeliveryRow[]>();
 
   const deliveriesByWebhook = new Map<string, DeliveryRow[]>();
@@ -91,9 +96,13 @@ export default async function WebhooksPage() {
                         </button>
                       </form>
                       <form action={deleteWebhook.bind(null, hook.id)}>
-                        <button type="submit" className="pm-hoverable" style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", background: "none", border: "1px solid #DDE1E4", borderRadius: 3, padding: "6px 10px", cursor: "pointer" }}>
+                        <ConfirmSubmitButton
+                          confirmMessage={`Delete the webhook for ${hook.url}? It will stop receiving events immediately — this can't be undone.`}
+                          className="pm-hoverable"
+                          style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", background: "none", border: "1px solid #DDE1E4", borderRadius: 3, padding: "6px 10px", cursor: "pointer" }}
+                        >
                           Delete
-                        </button>
+                        </ConfirmSubmitButton>
                       </form>
                     </div>
                   </div>

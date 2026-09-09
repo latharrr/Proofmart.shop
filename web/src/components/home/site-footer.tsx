@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MONO, SANS } from "@/lib/evidence-data";
+import { APP_VERSION, MONO, SANS } from "@/lib/evidence-data";
 import { FOOTER } from "@/lib/home-data";
 
 // Only this one footer link goes anywhere real right now — the rest are
@@ -58,7 +58,7 @@ export default function SiteFooter() {
         </div>
         <div style={{ paddingTop: 22, display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: MONO, fontSize: 11, color: "#767C83" }}>
           <span>© 2026 ProofMart Systems · MIT No. 2026/PMT/0041</span>
-          <span>v0.9.14 · public beta</span>
+          <span>v{APP_VERSION} · public beta</span>
         </div>
       </div>
     </footer>

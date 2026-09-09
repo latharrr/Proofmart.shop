@@ -4,6 +4,7 @@ import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { MONO, SANS, VERDICT } from "@/lib/evidence-data";
 import { formatBytes } from "@/lib/pdf/rail-adapter";
 import type { DocumentRow } from "@/lib/documents";
+import ConfirmSubmitButton from "@/components/confirm-submit-button";
 import { deleteDocument, rerunDocument } from "./actions";
 
 const STATUS_LABEL: Record<DocumentRow["status"], string> = {
@@ -12,17 +13,26 @@ const STATUS_LABEL: Record<DocumentRow["status"], string> = {
   error: "ERROR",
 };
 
-export default async function DocumentsPage() {
+const PAGE_SIZE = 25;
+
+export default async function DocumentsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   if (!isSupabaseConfigured()) redirect("/login");
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) redirect("/login");
 
-  const { data: docs } = await supabase
+  const { page: pageParam } = await searchParams;
+  const page = Math.max(1, Number(pageParam) || 1);
+  const from = (page - 1) * PAGE_SIZE;
+
+  const { data: docs, count } = await supabase
     .from("documents")
-    .select("id, filename, size_bytes, status, verdict, document_kind, findings_count, error_message, created_at")
+    .select("id, filename, size_bytes, status, verdict, document_kind, findings_count, error_message, created_at", { count: "exact" })
     .order("created_at", { ascending: false })
+    .range(from, from + PAGE_SIZE - 1)
     .returns<Pick<DocumentRow, "id" | "filename" | "size_bytes" | "status" | "verdict" | "document_kind" | "findings_count" | "error_message" | "created_at">[]>();
+
+  const hasMore = (count ?? 0) > from + PAGE_SIZE;
 
   return (
     <div style={{ minHeight: "100vh", background: "#FFFFFF" }}>
@@ -106,18 +116,35 @@ export default async function DocumentsPage() {
                       </button>
                     </form>
                     <form action={deleteDocument.bind(null, doc.id)}>
-                      <button
-                        type="submit"
+                      <ConfirmSubmitButton
+                        confirmMessage={`Delete "${doc.filename}"? The stored file and its findings will be permanently removed — this can't be undone.`}
                         className="pm-hoverable"
                         style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", background: "none", border: "1px solid #DDE1E4", borderRadius: 3, padding: "6px 10px", cursor: "pointer" }}
                       >
                         Delete
-                      </button>
+                      </ConfirmSubmitButton>
                     </form>
                   </div>
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {(page > 1 || hasMore) && (
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20, fontFamily: MONO, fontSize: 12 }}>
+            {page > 1 ? (
+              <Link href={`/documents?page=${page - 1}`} className="pm-hoverable" style={{ color: "#0E1216" }}>
+                ← Newer
+              </Link>
+            ) : (
+              <span />
+            )}
+            {hasMore && (
+              <Link href={`/documents?page=${page + 1}`} className="pm-hoverable" style={{ color: "#0E1216" }}>
+                Older →
+              </Link>
+            )}
           </div>
         )}
       </div>

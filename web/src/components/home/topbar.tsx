@@ -1,6 +1,6 @@
 import AuthControls from "@/components/home/auth-controls";
 import OpenScanButton from "@/components/home/open-scan-button";
-import { MONO, SANS } from "@/lib/evidence-data";
+import { APP_VERSION, MONO, SANS } from "@/lib/evidence-data";
 
 const NAV_LINKS = [
   { href: "#pipeline", label: "Pipeline" },
@@ -30,7 +30,7 @@ export default async function Topbar() {
             <div style={{ position: "absolute", inset: 5, border: "1.5px solid #F5F5F0" }} />
           </div>
           <span style={{ fontFamily: SANS, fontWeight: 600, letterSpacing: "-0.01em", fontSize: 17 }}>ProofMart</span>
-          <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.06em", marginLeft: 4 }}>V0.9 BETA</span>
+          <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.06em", marginLeft: 4 }}>V{APP_VERSION} BETA</span>
         </div>
         <nav aria-label="Primary" className="pm-nav-links" style={{ alignItems: "center", gap: 28, fontFamily: SANS, fontSize: 14, color: "#43494F" }}>
           {NAV_LINKS.map((l) => (

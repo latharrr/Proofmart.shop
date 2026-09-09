@@ -5,6 +5,7 @@ import { runInspect } from "@/lib/api/pipeline";
 import { jsonError, jsonOk, processingFailureStatus, readMultipartFile } from "@/lib/api/route-helpers";
 import { ProcessingFailure } from "@/lib/pdf/types";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { checkUsageQuota } from "@/lib/billing/usage";
 import { logRequest } from "@/lib/observability/log";
 
 export const runtime = "nodejs";
@@ -32,6 +33,12 @@ export async function POST(request: Request) {
   if (!allowed) {
     logRequest({ requestId, route: "/v1/inspect", method: "POST", status: 429, durationMs: Date.now() - start, apiKeyId: auth.apiKeyId, userId: auth.userId, failureCategory: "rate_limited" });
     return jsonError(requestId, 429, "rate_limited", `Too many requests. Limit: ${RATE_LIMIT.limit} per ${RATE_LIMIT.windowSeconds}s.`);
+  }
+
+  const quota = await checkUsageQuota(auth.userId);
+  if (!quota.allowed) {
+    logRequest({ requestId, route: "/v1/inspect", method: "POST", status: 402, durationMs: Date.now() - start, apiKeyId: auth.apiKeyId, userId: auth.userId, failureCategory: "quota_exceeded" });
+    return jsonError(requestId, 402, "quota_exceeded", `Monthly ${quota.plan} plan limit reached (${quota.used}/${quota.limit} /v1 calls). Upgrade at /account/billing.`);
   }
 
   const input = await readMultipartFile(request);

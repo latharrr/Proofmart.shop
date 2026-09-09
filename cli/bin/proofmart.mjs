@@ -15,7 +15,9 @@ import { basename } from "node:path";
 
 export const VERSION = "0.1.0";
 export const DEFAULT_BASE_URL = "https://proofmart.shop";
-const COMMANDS = new Set(["verify", "inspect", "extract"]);
+const UPLOAD_COMMANDS = new Set(["verify", "inspect", "extract"]);
+const RETRIEVAL_COMMANDS = new Set(["list", "get"]);
+const COMMANDS = new Set([...UPLOAD_COMMANDS, ...RETRIEVAL_COMMANDS]);
 
 export function helpText() {
   return `proofmart ${VERSION} — command-line client for the ProofMart public API
@@ -24,18 +26,27 @@ Usage:
   proofmart verify <file.pdf> [options]
   proofmart inspect <file.pdf> [options]
   proofmart extract <file.pdf> [options]
+  proofmart list [--status <s>] [--verdict <v>] [--limit <n>] [--before <iso>]
+  proofmart get <document-id> [--result]
 
 Options:
   --api-key <key>    API key (defaults to $PROOFMART_API_KEY)
   --base-url <url>   API base URL (defaults to $PROOFMART_BASE_URL, or ${DEFAULT_BASE_URL})
   --json             Print the full raw JSON response instead of a summary
   --output <path>    Also write the JSON response to a file
+  --status <s>       list: filter by status (processing|ready|error)
+  --verdict <v>      list: filter by verdict (CLEAR|REVIEW|FAIL|INCONCLUSIVE)
+  --limit <n>        list: max documents to return (default 20, max 100)
+  --before <iso>     list: only documents created before this ISO timestamp
+  --result           get: fetch the full verification result instead of metadata
   -h, --help         Show this help
   -v, --version      Show the CLI version
 
 Examples:
   proofmart verify statement.pdf --api-key pm_live_...
   PROOFMART_API_KEY=pm_live_... proofmart verify statement.pdf --json --output result.json
+  proofmart list --status ready --limit 5
+  proofmart get 3fa1c2e0-... --result
 `;
 }
 
@@ -47,6 +58,11 @@ export function parseArgs(argv) {
     else if (a === "--api-key") args.apiKey = argv[++i];
     else if (a === "--base-url") args.baseUrl = argv[++i];
     else if (a === "--output") args.output = argv[++i];
+    else if (a === "--status") args.status = argv[++i];
+    else if (a === "--verdict") args.verdict = argv[++i];
+    else if (a === "--limit") args.limit = argv[++i];
+    else if (a === "--before") args.before = argv[++i];
+    else if (a === "--result") args.result = true;
     else if (a === "-h" || a === "--help") args.help = true;
     else if (a === "-v" || a === "--version") args.version = true;
     else args._.push(a);
@@ -65,6 +81,27 @@ export function summarize(command, body) {
   if (command === "inspect") {
     const c = body.classification ?? {};
     return [`type:       ${c.pdfType}`, `pages:      ${c.pageCount}`, `confidence: ${c.confidence}`].join("\n");
+  }
+  if (command === "list") {
+    const docs = body.documents ?? [];
+    if (docs.length === 0) return "No documents.";
+    const lines = docs.map((d) => `${String(d.status).padEnd(10)} ${String(d.verdict ?? "-").padEnd(12)} ${d.filename}  (${d.id})`);
+    if (body.nextCursor) lines.push(`\n(more: --before ${body.nextCursor})`);
+    return lines.join("\n");
+  }
+  if (command === "get") {
+    if (body.document) {
+      const d = body.document;
+      return [
+        `id:        ${d.id}`,
+        `filename:  ${d.filename}`,
+        `status:    ${d.status}`,
+        `verdict:   ${d.verdict ?? "-"}`,
+        `findings:  ${d.findings_count}`,
+        `created:   ${d.created_at}`,
+      ].join("\n");
+    }
+    return summarize("verify", body); // --result returns a /v1/verify-shaped envelope
   }
   return [`pages:  ${body.document?.pageCount}`, `facts:  ${body.facts?.length ?? 0}`, `title:  ${body.document?.title ?? "(none)"}`].join("\n");
 }
@@ -86,14 +123,18 @@ export async function run(argv, { fetchImpl = fetch, readFileImpl = readFile, wr
   }
 
   const command = args._[0];
-  const file = args._[1];
   if (!COMMANDS.has(command)) {
     logError(`Unknown command: ${command ?? "(none)"}\n`);
     log(helpText());
     return 1;
   }
-  if (!file) {
+  if (UPLOAD_COMMANDS.has(command) && !args._[1]) {
     logError("Missing <file.pdf> argument.\n");
+    log(helpText());
+    return 1;
+  }
+  if (command === "get" && !args._[1]) {
+    logError("Missing <document-id> argument.\n");
     log(helpText());
     return 1;
   }
@@ -105,23 +146,47 @@ export async function run(argv, { fetchImpl = fetch, readFileImpl = readFile, wr
   }
   const baseUrl = args.baseUrl ?? process.env.PROOFMART_BASE_URL ?? DEFAULT_BASE_URL;
 
-  let bytes;
-  try {
-    bytes = await readFileImpl(file);
-  } catch (err) {
-    logError(`Could not read ${file}: ${err.message}`);
-    return 1;
-  }
-
-  const form = new FormData();
-  form.append("file", new Blob([bytes], { type: "application/pdf" }), basename(file));
-
   let response;
-  try {
-    response = await fetchImpl(`${baseUrl}/v1/${command}`, { method: "POST", headers: { Authorization: `Bearer ${apiKey}` }, body: form });
-  } catch (err) {
-    logError(`Request failed: ${err.message}`);
-    return 1;
+  if (command === "list") {
+    const url = new URL(`${baseUrl}/v1/documents`);
+    if (args.status) url.searchParams.set("status", args.status);
+    if (args.verdict) url.searchParams.set("verdict", args.verdict);
+    if (args.limit) url.searchParams.set("limit", args.limit);
+    if (args.before) url.searchParams.set("before", args.before);
+    try {
+      response = await fetchImpl(url, { headers: { Authorization: `Bearer ${apiKey}` } });
+    } catch (err) {
+      logError(`Request failed: ${err.message}`);
+      return 1;
+    }
+  } else if (command === "get") {
+    const id = args._[1];
+    const path = args.result ? `/v1/documents/${id}/result` : `/v1/documents/${id}`;
+    try {
+      response = await fetchImpl(`${baseUrl}${path}`, { headers: { Authorization: `Bearer ${apiKey}` } });
+    } catch (err) {
+      logError(`Request failed: ${err.message}`);
+      return 1;
+    }
+  } else {
+    const file = args._[1];
+    let bytes;
+    try {
+      bytes = await readFileImpl(file);
+    } catch (err) {
+      logError(`Could not read ${file}: ${err.message}`);
+      return 1;
+    }
+
+    const form = new FormData();
+    form.append("file", new Blob([bytes], { type: "application/pdf" }), basename(file));
+
+    try {
+      response = await fetchImpl(`${baseUrl}/v1/${command}`, { method: "POST", headers: { Authorization: `Bearer ${apiKey}` }, body: form });
+    } catch (err) {
+      logError(`Request failed: ${err.message}`);
+      return 1;
+    }
   }
 
   const body = await response.json().catch(() => null);

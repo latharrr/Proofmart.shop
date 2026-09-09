@@ -176,13 +176,6 @@ export interface OCRProcessor {
 // here has been superseded by the real thing: `Marker` / `VerificationEngine`
 // / `VerificationResult` in `lib/verification/types.ts` and `engine.ts`.
 
-export class NotImplementedError extends Error {
-  constructor(feature: string) {
-    super(`${feature} is not implemented yet`);
-    this.name = "NotImplementedError";
-  }
-}
-
 /** Thrown by a `DocumentProcessor` when processing can't complete — carries a typed, user-facing error. */
 export class ProcessingFailure extends Error {
   readonly error: ProcessingError;
