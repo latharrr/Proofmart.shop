@@ -92,6 +92,16 @@ test.describe("live document upload", () => {
       { width: 900, height: 700 },
     ]) {
       await page.setViewportSize(viewport);
+      // Chrome re-evaluates :hover (and fires mouseenter/mouseleave) against
+      // whatever now sits under a *stationary* cursor once the layout
+      // reflows from setViewportSize — with no real mouse movement at all.
+      // upload() leaves the pointer parked over the document panel, and at
+      // the narrower viewport that same screen position can land on a
+      // finding row instead, which unpins the overlay via onHover exactly
+      // as a real resize-while-hovering would. Move the pointer off all
+      // rail content first so each iteration measures alignment, not
+      // incidental hover state.
+      await page.mouse.move(0, 0);
       for (const zoom of ["0.5", "1", "2"]) {
         await page.evaluate((z) => {
           document.documentElement.style.zoom = z;
