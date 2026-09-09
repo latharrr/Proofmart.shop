@@ -32,6 +32,11 @@ export async function POST(request: Request) {
   const start = Date.now();
   const route = "/api/billing/webhook";
 
+  if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
+    logRequest({ requestId, route, method: "POST", status: 503, durationMs: Date.now() - start, failureCategory: "not_configured" });
+    return Response.json({ error: "billing is not configured", requestId }, { status: 503 });
+  }
+
   const rawBody = await request.text();
   const signature = request.headers.get("x-razorpay-signature") ?? "";
 

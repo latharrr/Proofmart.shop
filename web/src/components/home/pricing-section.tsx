@@ -17,18 +17,17 @@ export default function PricingSection() {
           <div>
             <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.1em", marginBottom: 12 }}>§ 07 · PRICING</div>
             <h2 className="pm-h2" style={{ fontFamily: SANS, fontWeight: 500, lineHeight: 1.02, letterSpacing: "-0.025em", margin: 0 }}>
-              Per scan.
+              Flat monthly.
               <br />
-              Per finding. Nothing else.
+              No per-document surprises.
             </h2>
           </div>
           <p style={{ fontFamily: SANS, fontSize: 15, lineHeight: 1.55, color: "#43494F", maxWidth: "52ch", margin: 0 }}>
-            No seats, no minimums. A scan is one document up to 50 pages. Findings are metered when they change your decision: if we say CLEAR,
-            it&rsquo;s free.
+            One plan, one price, a monthly call limit on /v1/verify. No per-finding or per-scan metering.
           </p>
         </div>
 
-        <div className="pm-cols-3" style={{ display: "grid", gap: 0, border: "1px solid #DDE1E4" }}>
+        <div className="pm-cols-2" style={{ display: "grid", gap: 0, border: "1px solid #DDE1E4" }}>
           {PRICING.map((p, i) => (
             <div
               key={p.tier}
@@ -56,7 +55,6 @@ export default function PricingSection() {
                   <span style={{ fontFamily: SANS, fontSize: 40, fontWeight: 500, letterSpacing: "-0.02em" }}>{p.price}</span>
                   <span style={{ fontFamily: MONO, fontSize: 12, color: "#767C83" }}>{p.unit}</span>
                 </div>
-                <div style={{ fontFamily: MONO, fontSize: 11, color: "#43494F", marginTop: 4, letterSpacing: "0.02em" }}>+ {p.scan}</div>
               </div>
               <p style={{ fontFamily: SANS, fontSize: 13, lineHeight: 1.55, color: "#43494F", margin: 0 }}>{p.body}</p>
               <div style={{ borderTop: "1px solid #DDE1E4", paddingTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>

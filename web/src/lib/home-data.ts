@@ -80,41 +80,33 @@ export interface PricingTier {
   tier: string;
   price: string;
   unit: string;
-  scan: string;
   body: string;
   cta: string;
   included: string[];
   highlight?: boolean;
 }
 
+// Mirrors the live PLANS in lib/billing/plans.ts exactly — flat monthly
+// subscription, not usage-metered. Keep both in sync: this page claims to
+// be the real pricing, so it must never show a plan the billing code
+// doesn't actually implement.
 export const PRICING: PricingTier[] = [
   {
-    tier: "Team",
-    price: "₹0.60",
-    unit: "per finding",
-    scan: "₹8 / scan",
-    body: "For teams verifying customer-supplied documents in a review queue.",
-    cta: "Start with 500 free findings",
-    included: ["Web upload + JSON findings", "Rail review app", "Email support"],
+    tier: "Free",
+    price: "₹0",
+    unit: "/ month",
+    body: "For trying ProofMart against real documents before committing to a plan.",
+    cta: "Start free",
+    included: ["50 /v1/verify calls / month", "Web upload + JSON findings", "Rail review app"],
   },
   {
-    tier: "Growth",
-    price: "₹0.42",
-    unit: "per finding",
-    scan: "₹6 / scan",
-    body: "For teams running ProofMart in the underwriting loop.",
-    cta: "Book a pipeline review",
-    included: ["Everything in Team", "Custom marker rules", "Priority email"],
+    tier: "Pro",
+    price: "₹999",
+    unit: "/ month",
+    body: "For teams running ProofMart in a review or underwriting loop.",
+    cta: "Upgrade to Pro",
+    included: ["2,000 /v1/verify calls / month", "Everything in Free", "Priority email support"],
     highlight: true,
-  },
-  {
-    tier: "Sovereign",
-    price: "Custom",
-    unit: "annual",
-    scan: "unmetered",
-    body: "For deployments that cannot leave your infrastructure. Scope defined together.",
-    cta: "Speak to the founding team",
-    included: ["Deployed in your environment", "Marker source access", "Named forensic contact", "Custom terms"],
   },
 ];
 
