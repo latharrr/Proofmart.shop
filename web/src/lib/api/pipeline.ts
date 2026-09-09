@@ -1,12 +1,23 @@
 import "server-only";
 
 import { PDFProcessor } from "@/lib/pdf/extract";
-import { TesseractJsOcrProcessor } from "@/lib/ocr";
+import { TesseractCliOcrProcessor, TesseractJsOcrProcessor } from "@/lib/ocr";
 import { validatePdfBytes, classify } from "@/lib/pdf/inspect";
-import { ProcessingFailure, type PdfClassification, type ProcessedDocument } from "@/lib/pdf/types";
+import { ProcessingFailure, type OCRProcessor, type PdfClassification, type ProcessedDocument } from "@/lib/pdf/types";
 import { VerificationEngine } from "@/lib/verification/engine";
 import { classifyDocumentKind, type DocumentKind } from "@/lib/verification/document-kind";
 import type { VerificationResult } from "@/lib/verification/types";
+
+/**
+ * Which OCR engine PDFProcessor uses. Defaults to the bundled Tesseract.js
+ * worker, which works anywhere including Vercel's default serverless
+ * runtime. Set OCR_PROCESSOR=tesseract-cli to use the system `tesseract`
+ * binary instead — only for deployments that actually have it installed
+ * (see TesseractCliOcrProcessor's docstring for why it isn't the default).
+ */
+function createOcrProcessor(): OCRProcessor {
+  return process.env.OCR_PROCESSOR === "tesseract-cli" ? new TesseractCliOcrProcessor() : new TesseractJsOcrProcessor();
+}
 
 /**
  * The three operations behind /v1/inspect, /v1/extract, /v1/verify — and
@@ -27,14 +38,14 @@ export async function runInspect(buffer: Buffer, sizeBytes: number): Promise<{ c
 
 /** Full extraction (with OCR) but no verification — same processor /v1/verify uses, one step short. */
 export async function runExtract(buffer: Buffer, meta: { filename: string; sizeBytes: number }): Promise<{ document: ProcessedDocument; documentKind: DocumentKind }> {
-  const processor = new PDFProcessor(new TesseractJsOcrProcessor());
+  const processor = new PDFProcessor(createOcrProcessor());
   const { document } = await processor.processWithEvidence(buffer, meta);
   return { document, documentKind: classifyDocumentKind(document) };
 }
 
 /** The full pipeline — identical to what /api/inspect runs internally. */
 export async function runVerify(buffer: Buffer, meta: { filename: string; sizeBytes: number }): Promise<{ document: ProcessedDocument; verification: VerificationResult }> {
-  const processor = new PDFProcessor(new TesseractJsOcrProcessor());
+  const processor = new PDFProcessor(createOcrProcessor());
   const { document, raw } = await processor.processWithEvidence(buffer, meta);
   const verification = new VerificationEngine().run({ document, raw });
   return { document, verification };

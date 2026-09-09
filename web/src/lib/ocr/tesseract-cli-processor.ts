@@ -58,11 +58,11 @@ function runTesseractTsv(imagePath: string): Promise<string> {
  * Not available on Vercel's default serverless runtime, which doesn't
  * bundle the binary — this processor is for environments that have it
  * installed (Docker/VPS with `apt-get install tesseract-ocr`, or a custom
- * Vercel build step that bundles a static binary). It is intentionally
- * **not** wired into `PDFProcessor` by default (see registry note in
- * `lib/verification/registry.ts`-style documentation, here in the
- * class doc) — callers opt in by constructing `PDFProcessor` with this
- * processor explicitly. When the binary is missing, `recognize` rejects
+ * Vercel build step that bundles a static binary). It is **not** used by
+ * default — `lib/api/pipeline.ts`'s `createOcrProcessor()` only selects
+ * this processor when `OCR_PROCESSOR=tesseract-cli` is set, which a
+ * deployment does deliberately once the binary is actually present.
+ * When the binary is missing, `recognize` rejects
  * and the caller's existing try/catch around OCR (in
  * `PDFProcessor.processWithEvidence`) swallows it — the page stays
  * flagged via OCR_LOW_CONFIDENCE with no OCR text, never a fabricated

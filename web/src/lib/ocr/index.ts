@@ -4,4 +4,5 @@
  * files directly.
  */
 export { TESSERACT_ASSET_PATHS, TesseractJsOcrProcessor } from "./tesseract-js";
+export { TesseractCliOcrProcessor } from "./tesseract-cli-processor";
 export type { TesseractAssetPaths } from "./types";
