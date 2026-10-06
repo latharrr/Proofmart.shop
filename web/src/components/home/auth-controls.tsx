@@ -2,7 +2,6 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
-import { MONO, SANS } from "@/lib/evidence-data";
 import { recordAuditEvent } from "@/lib/audit";
 
 // Server component: reads the session on the server (getClaims — verifies
@@ -14,16 +13,19 @@ import { recordAuditEvent } from "@/lib/audit";
 // (env vars not yet set, e.g. on a fresh Vercel deploy) must degrade to
 // the signed-out state, not crash every page on the site — createClient()
 // itself would throw synchronously if it ran.
+const ACCOUNT_LINKS = [
+  { href: "/documents", label: "Documents" },
+  { href: "/account/api-keys", label: "API keys" },
+  { href: "/account/webhooks", label: "Webhooks" },
+  { href: "/account/billing", label: "Billing" },
+];
+
 export default async function AuthControls() {
   const claims = isSupabaseConfigured() ? (await (await createClient()).auth.getClaims()).data?.claims : null;
 
   if (!claims) {
     return (
-      <Link
-        href="/login"
-        className="pm-hoverable"
-        style={{ fontFamily: SANS, fontSize: 14, color: "#43494F" }}
-      >
+      <Link href="/login" className="pm-nav-link" style={{ whiteSpace: "nowrap" }}>
         Sign in
       </Link>
     );
@@ -33,48 +35,20 @@ export default async function AuthControls() {
   const userId = typeof claims.sub === "string" ? claims.sub : null;
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <span
-        style={{
-          fontFamily: SANS,
-          fontSize: 13,
-          color: "#43494F",
-          maxWidth: 160,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {email}
-      </span>
-      <Link
-        href="/documents"
-        className="pm-hoverable"
-        style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.04em" }}
-      >
-        My documents
-      </Link>
-      <Link
-        href="/account/api-keys"
-        className="pm-hoverable"
-        style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.04em" }}
-      >
-        API keys
-      </Link>
-      <Link
-        href="/account/webhooks"
-        className="pm-hoverable"
-        style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.04em" }}
-      >
-        Webhooks
-      </Link>
-      <Link
-        href="/account/billing"
-        className="pm-hoverable"
-        style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.04em" }}
-      >
-        Billing
-      </Link>
+    <div style={{ display: "flex", alignItems: "center", gap: 16, minWidth: 0 }}>
+      <div className="pm-account-links">
+        <span
+          className="pm-mono"
+          style={{ color: "var(--pm-ash)", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+        >
+          {email}
+        </span>
+        {ACCOUNT_LINKS.map((l) => (
+          <Link key={l.href} href={l.href} className="pm-nav-link" style={{ whiteSpace: "nowrap" }}>
+            {l.label}
+          </Link>
+        ))}
+      </div>
       <form
         action={async () => {
           "use server";
@@ -85,20 +59,7 @@ export default async function AuthControls() {
           redirect("/");
         }}
       >
-        <button
-          type="submit"
-          className="pm-hoverable"
-          style={{
-            fontFamily: MONO,
-            fontSize: 11,
-            color: "#767C83",
-            background: "none",
-            border: "1px solid #DDE1E4",
-            borderRadius: 3,
-            padding: "4px 8px",
-            cursor: "pointer",
-          }}
-        >
+        <button type="submit" className="pm-btn pm-btn-ghost pm-btn-sm">
           Sign out
         </button>
       </form>

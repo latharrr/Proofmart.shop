@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Wordmark from "@/components/brand/wordmark";
 import { redirect } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { MONO, SANS } from "@/lib/evidence-data";
@@ -18,28 +18,25 @@ export default async function BillingPage() {
   const plan = PLANS[usage.plan];
 
   return (
-    <div style={{ minHeight: "100vh", background: "#FFFFFF" }}>
+    <div style={{ minHeight: "100vh", background: "var(--pm-paper)" }}>
       <div style={{ maxWidth: 640, margin: "0 auto", padding: "56px 24px" }}>
-        <Link href="/" className="pm-hoverable" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 40, width: "fit-content" }}>
-          <div aria-hidden="true" style={{ width: 22, height: 22, background: "#0E1216", position: "relative" }}>
-            <div style={{ position: "absolute", inset: 5, border: "1.5px solid #F5F5F0" }} />
-          </div>
-          <span style={{ fontFamily: SANS, fontWeight: 600, letterSpacing: "-0.01em", fontSize: 17, color: "#0E1216" }}>ProofMart</span>
-        </Link>
+        <div style={{ marginBottom: 40 }}>
+          <Wordmark href="/" />
+        </div>
 
         <h1 style={{ fontFamily: SANS, fontWeight: 500, fontSize: 24, letterSpacing: "-0.01em", margin: "0 0 6px" }}>Billing</h1>
-        <p style={{ fontFamily: SANS, fontSize: 14, color: "#767C83", margin: "0 0 32px", lineHeight: 1.5 }}>
+        <p style={{ fontFamily: SANS, fontSize: 17, color: "var(--pm-ash)", margin: "0 0 32px", lineHeight: 1.5 }}>
           Your plan governs the monthly quota on <code style={{ fontFamily: MONO }}>/v1/verify</code> calls. The web app&rsquo;s own upload flow is unmetered.
         </p>
 
-        <div style={{ border: "1px solid #DDE1E4", borderRadius: 3, padding: "20px 16px", marginBottom: 24 }}>
+        <div style={{ border: "1px solid var(--pm-hairline)", borderRadius: "var(--pm-r-image)", padding: "20px 16px", marginBottom: 24 }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 10 }}>
-            <span style={{ fontFamily: SANS, fontSize: 16, fontWeight: 500, color: "#0E1216" }}>{plan.name} plan</span>
-            <span style={{ fontFamily: MONO, fontSize: 12, color: "#767C83" }}>
+            <span style={{ fontFamily: SANS, fontSize: 16, fontWeight: 500, color: "var(--pm-ink)" }}>{plan.name} plan</span>
+            <span style={{ fontFamily: MONO, fontSize: 12, color: "var(--pm-ash)" }}>
               {plan.priceInPaise === 0 ? "₹0/mo" : `₹${(plan.priceInPaise / 100).toLocaleString("en-IN")}/mo`}
             </span>
           </div>
-          <div style={{ fontFamily: MONO, fontSize: 12, color: "#767C83" }}>
+          <div style={{ fontFamily: MONO, fontSize: 12, color: "var(--pm-ash)" }}>
             {usage.used} / {usage.limit} /v1/verify calls used this month
           </div>
         </div>
@@ -48,7 +45,7 @@ export default async function BillingPage() {
           (isRazorpayConfigured() ? (
             <CreateCheckoutButton />
           ) : (
-            <p style={{ fontFamily: SANS, fontSize: 13, color: "#767C83" }}>Upgrading isn&rsquo;t available yet — billing is not configured on this deployment.</p>
+            <p style={{ fontFamily: SANS, fontSize: 15, color: "var(--pm-ash)" }}>Upgrading isn&rsquo;t available yet — billing is not configured on this deployment.</p>
           ))}
       </div>
     </div>

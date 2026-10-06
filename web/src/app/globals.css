@@ -15,48 +15,92 @@ html {
   scroll-behavior: smooth;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+/**
+ * The hero's product artifacts are positioned so their edges run *past* the
+ * viewport, and the viewport is what crops them. `clip` rather than `hidden`
+ * on purpose: `hidden` would turn the root into a scroll container, which
+ * breaks the sticky topbar and in-page anchor scrolling. `clip` crops without
+ * creating one. Set on html *and* body — html's value propagates to the
+ * viewport, body's then applies to body itself.
+ */
+html,
+body {
+  overflow-x: clip;
 }
 
-:focus-visible {
-  outline: 2px solid #0e1216;
-  outline-offset: 2px;
-}
+/* ==========================================================================
+   Tokens — design-system.md §2 colour, §4 shape, §5 elevation, §6 motion.
+   ========================================================================== */
+:root {
+  /* Achromatic field — everything that is not a verdict */
+  --pm-ink: #17191c;
+  --pm-paper: #ffffff;
+  --pm-mist: #f2f2f3;
+  --pm-fog: #fafafb;
+  --pm-slate: #777b86;
+  --pm-ash: #979799;
+  --pm-smoke: #a3a6af;
+  --pm-hairline: #ececec;
 
-.pm-skip-link {
-  position: absolute;
-  left: 12px;
-  top: -48px;
-  z-index: 100;
-  padding: 10px 16px;
-  background: #0e1216;
-  color: #f5f5f0;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12px;
-  transition: top 160ms cubic-bezier(0.2, 0, 0, 1);
-}
+  /* Dark band surfaces — ink, and one step up from it for cards on ink. */
+  --pm-ink-raised: #212429;
+  --pm-ink-hairline: #2c3036;
 
-.pm-skip-link:focus {
-  top: 12px;
+  /* Warm accent — at most one surface on the page */
+  --pm-peach: #fbe1d1;
+  --pm-sienna: #5d2a1a;
+
+  /* Verdict signal — functional, never decorative */
+  --pm-fail: #b4231f;
+  --pm-review: #8a6a1f;
+  --pm-clear: #1f6b4a;
+
+  /* Shape. Nothing on this page renders below 12px radius. */
+  --pm-r-pill: 9999px;
+  --pm-r-card: 24px;
+  --pm-r-artifact: 20px;
+  --pm-r-input: 16px;
+  --pm-r-image: 12px;
+
+  /*
+   * Legacy aliases. /login, /signup, /account/*, /documents and the Evidence
+   * Rail still reference these names; they are kept so retiring the old 2/6/10px
+   * scale doesn't square off every control outside the marketing page.
+   */
+  --pm-r-control: 16px;
+  --pm-r-panel: 20px;
+
+  /* Elevation. Content cards get none — they separate by fill, not by light. */
+  --shadow-subtle: oklab(0 0 0 / 0.05) 0 0 0 1px, rgba(0, 0, 0, 0.08) 0 4px 24px;
+  --shadow-modal: oklab(0 0 0 / 0.05) 0 0 0 1px, rgba(0, 0, 0, 0.1) 0 8px 40px;
+  --shadow-artifact: rgba(4, 23, 43, 0.05) 0 0 0 1px, rgba(0, 0, 0, 0.1) 0 20px 25px -5px, rgba(0, 0, 0, 0.1) 0 8px 10px -6px;
+  --pm-shadow-sm: var(--shadow-subtle);
+  --pm-shadow-md: var(--shadow-subtle);
+  --pm-shadow-lg: var(--shadow-artifact);
+
+  /* Motion. One enter gesture for the whole site; hover never transforms. */
+  --ease-enter: ease-out;
+  --ease-hover: cubic-bezier(0.4, 0, 0.2, 1);
+  --pm-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --pm-ease-out: ease-out;
+
+  --pm-sans: var(--font-sans), system-ui, sans-serif;
+  --pm-serif: var(--font-serif), "Iowan Old Style", Georgia, serif;
+  --pm-mono: var(--font-mono), ui-monospace, monospace;
 }
 
 body {
-  background: #ffffff;
-  color: #0e1216;
-  font-family: var(--font-sans), system-ui, sans-serif;
+  background: var(--pm-paper);
+  color: var(--pm-ink);
+  font-family: var(--pm-sans);
+  font-size: 17px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
 a {
-  color: #0e1216;
+  color: inherit;
   text-decoration: none;
-}
-
-a:hover {
-  color: #43494f;
 }
 
 button {
@@ -70,125 +114,865 @@ button {
 }
 
 ::selection {
-  background: #0e1216;
-  color: #f5f5f0;
+  background: var(--pm-ink);
+  color: var(--pm-paper);
 }
 
-/**
- * Universal hover/press feedback via opacity rather than color/background
- * swaps: every interactive element on this page already sets its own
- * inline color/background (deliberately, per component), and an inline
- * style always wins over a class regardless of pseudo-state, so a class
- * that tried to override color/background on `:hover` would silently do
- * nothing. `opacity` isn't set inline anywhere, so this is free to apply
- * uniformly without touching a single existing inline value.
- */
-.pm-hoverable {
-  transition: opacity 160ms cubic-bezier(0.2, 0, 0, 1);
+:focus-visible {
+  outline: 2px solid var(--pm-ink);
+  outline-offset: 3px;
+  border-radius: var(--pm-r-image);
 }
 
-.pm-hoverable:hover {
-  opacity: 0.72;
+.pm-skip-link {
+  position: absolute;
+  left: 16px;
+  top: -56px;
+  z-index: 100;
+  padding: 12px 20px;
+  background: var(--pm-ink);
+  color: var(--pm-paper);
+  font-family: var(--pm-sans);
+  font-size: 17px;
+  font-weight: 450;
+  border-radius: var(--pm-r-pill);
+  transition: top 200ms var(--ease-hover);
 }
 
-.pm-hoverable:active {
-  opacity: 0.5;
+.pm-skip-link:focus {
+  top: 16px;
 }
 
-/**
- * Responsive layout overrides.
- *
- * Every section on the marketing page is styled with inline `style`
- * objects (see components/home/*), which is deliberate elsewhere in this
- * codebase but can't express a media query. These classes carry only the
- * handful of grid-column and font-size properties that need to change
- * per breakpoint; each affected component omits that one property from
- * its own inline style (an inline style always wins over a class,
- * breakpoint or not) and applies the matching class name instead.
- * Desktop values here match the inline styles they replace exactly, so
- * nothing changes above 880px.
- */
-.pm-nav-links {
-  display: flex;
+/* ==========================================================================
+   Type — design-system.md §1. Serif is display only, always weight 400, and
+   never looser than -0.025em of tracking.
+   ========================================================================== */
+.pm-display,
+.pm-h2 {
+  font-family: var(--pm-serif);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  margin: 0;
+  text-wrap: pretty;
 }
 
-.pm-hero-grid,
-.pm-split-grid-57 {
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-}
-
-.pm-split-grid-48 {
-  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
-}
-
-.pm-cols-4 {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-.pm-cols-3 {
-  grid-template-columns: repeat(3, 1fr);
-}
-
-.pm-cols-2 {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-}
-
-.pm-run-grid {
-  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-}
-
-.pm-footer-grid {
-  grid-template-columns: minmax(0, 5fr) repeat(3, 1fr);
-}
-
-.pm-hero-title {
-  font-size: 72px;
+.pm-display {
+  font-size: 90px;
+  line-height: 1.05;
 }
 
 .pm-h2 {
-  font-size: 44px;
+  font-size: 64px;
+  line-height: 1.1;
 }
 
-.pm-hero-rail {
-  height: 640px;
+.pm-display em,
+.pm-h2 em {
+  font-style: italic;
+  font-weight: 400;
+  color: inherit;
+  font-size: inherit;
 }
 
-.pm-flow-arrow {
-  display: block;
+.pm-h3 {
+  font-family: var(--pm-sans);
+  font-size: 26px;
+  font-weight: 450;
+  letter-spacing: -0.009em;
+  line-height: 1.18;
+  margin: 0;
+}
+
+.pm-lead {
+  font-family: var(--pm-sans);
+  font-size: 20px;
+  font-weight: 450;
+  line-height: 1.35;
+  color: var(--pm-slate);
+  margin: 0;
+}
+
+.pm-body {
+  font-family: var(--pm-sans);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Reserved for machine strings: marker ids, endpoints, request ids, JSON,
+   coordinates, and the amounts inside a finding's arithmetic. Never prose. */
+.pm-mono {
+  font-family: var(--pm-mono);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+}
+
+/*
+ * Eyebrows and small labels are sans, not mono. Mono is reserved for machine
+ * strings; a section number is a label that merely sounds technical, and body
+ * text never drops below 15px — so this is 15px sans, tracked out.
+ */
+.pm-eyebrow {
+  font-family: var(--pm-sans);
+  font-size: 15px;
+  font-weight: 450;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  color: var(--pm-ash);
+  text-transform: uppercase;
+  margin: 0 0 20px;
+}
+
+.pm-caption {
+  font-family: var(--pm-sans);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ==========================================================================
+   Controls — §7. Buttons are pills; hover swaps colour and nothing else.
+   ========================================================================== */
+.pm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--pm-sans);
+  font-size: 17px;
+  font-weight: 450;
+  letter-spacing: -0.005em;
+  line-height: 1.2;
+  padding: 12px 20px;
+  border: 1px solid transparent;
+  border-radius: var(--pm-r-pill);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 200ms var(--ease-hover),
+    background-color 200ms var(--ease-hover),
+    border-color 200ms var(--ease-hover);
+}
+
+.pm-btn-sm {
+  font-size: 17px;
+  padding: 9px 18px;
+}
+
+.pm-btn-filled {
+  background: var(--pm-ink);
+  border-color: var(--pm-ink);
+  color: var(--pm-paper);
+}
+
+.pm-btn-filled:hover {
+  background: #383c43;
+  border-color: #383c43;
+  color: var(--pm-paper);
+}
+
+.pm-btn-ghost {
+  background: transparent;
+  border-color: var(--pm-ink);
+  color: var(--pm-ink);
+}
+
+.pm-btn-ghost:hover {
+  background: var(--pm-ink);
+  color: var(--pm-paper);
+}
+
+/* Inline link — slate, no underline at rest; the arrow carries the affordance. */
+.pm-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--pm-slate);
+  text-decoration: none;
+  transition: color 150ms var(--ease-hover);
+}
+
+.pm-link:hover {
+  color: var(--pm-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/*
+ * The one sanctioned transform on the page. The arrow doesn't slide away and
+ * come back — it wraps: out the right edge of its own box and in again from
+ * the left, which is why the track clips.
+ */
+.pm-arrow {
+  display: inline-block;
+  overflow: hidden;
+  width: 1em;
+  flex: none;
+}
+
+.pm-arrow > span {
+  display: inline-block;
+}
+
+.pm-link:hover .pm-arrow > span {
+  animation: pm-arrow-slide 300ms ease-out;
+}
+
+@keyframes pm-arrow-slide {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+  51% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* Filter pills (§03 marker catalog). */
+.pm-tab {
+  font-family: var(--pm-sans);
+  font-size: 17px;
+  font-weight: 450;
+  padding: 8px 18px;
+  border: 1px solid var(--pm-hairline);
+  border-radius: var(--pm-r-pill);
+  background: var(--pm-paper);
+  color: var(--pm-slate);
+  transition:
+    color 200ms var(--ease-hover),
+    background-color 200ms var(--ease-hover),
+    border-color 200ms var(--ease-hover);
+}
+
+.pm-tab:hover {
+  color: var(--pm-ink);
+  border-color: var(--pm-smoke);
+}
+
+.pm-tab[data-active="true"] {
+  background: var(--pm-ink);
+  border-color: var(--pm-ink);
+  color: var(--pm-paper);
+}
+
+/* Primary nav — active state is a colour, not a moving underline. */
+.pm-nav-link {
+  font-family: var(--pm-sans);
+  font-size: 17px;
+  color: var(--pm-slate);
+  transition: color 150ms var(--ease-hover);
+}
+
+.pm-nav-link:hover,
+.pm-nav-link[data-active="true"] {
+  color: var(--pm-ink);
+}
+
+/* Marker catalog rows — hover tints the fill, nothing moves. */
+.pm-marker-row {
+  transition: background-color 200ms var(--ease-hover);
+}
+
+.pm-marker-row:hover {
+  background-color: var(--pm-paper);
+}
+
+/* Integration cells (§06). */
+.pm-integrate-cell {
+  transition: background-color 200ms var(--ease-hover);
+}
+
+.pm-integrate-cell:hover {
+  background-color: var(--pm-paper);
+}
+
+/**
+ * Shared hover affordance for the rest of the app (/login, /account/*,
+ * /documents) and for controls inside the Evidence Rail, which set their own
+ * colours inline and so can't be recoloured from here. Colour and opacity
+ * only — no transform, and well under the 250ms ceiling.
+ */
+.pm-hoverable {
+  transition:
+    color 150ms var(--ease-hover),
+    background-color 150ms var(--ease-hover),
+    border-color 150ms var(--ease-hover),
+    opacity 150ms var(--ease-hover);
+}
+
+.pm-hoverable:hover {
+  opacity: 0.68;
+}
+
+.pm-hoverable:active {
+  opacity: 0.55;
+}
+
+/* ==========================================================================
+   Enter motion — §6. One gesture: 10px of travel, 500ms, ease-out, opacity
+   and translateY only. Stagger is 300ms per sibling, passed as --pm-delay.
+   ========================================================================== */
+.pm-reveal {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 500ms ease-out,
+    transform 500ms ease-out;
+  transition-delay: var(--pm-delay, 0ms);
+}
+
+.pm-reveal[data-shown="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/*
+ * Reduced motion: the reveal's resting state is invisible, so the animation is
+ * removed outright rather than shortened — every element is painted at full
+ * opacity on the first frame. Same guarantee the <noscript> rule in layout.tsx
+ * gives a visitor with JavaScript disabled.
+ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .pm-reveal,
+  .pm-reveal[data-shown="true"] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .pm-link:hover .pm-arrow > span {
+    animation: none;
+  }
+
+  .pm-skip-link {
+    transition: none;
+  }
+}
+
+/* ==========================================================================
+   Floating product artifacts — §3 of the bar. White, 20px, one shadow, and
+   positioned so the *viewport* crops them. No frame, no container, no border.
+   ========================================================================== */
+.pm-artifact {
+  background: var(--pm-paper);
+  border-radius: var(--pm-r-artifact);
+  box-shadow: var(--shadow-artifact);
+  overflow: hidden;
+}
+
+/*
+ * The Evidence Rail's Copy JSON button and page stepper now carry the pill
+ * radius inline themselves, so this only has to cover the close button, which
+ * sets no radius at all. Scoped to the rail's *labelled* controls: deliberately
+ * NOT `button` in general, because each finding row is itself a full-width
+ * <button> and a pill radius on those turns every row into a lozenge.
+ * Presentation only; no behaviour changes here.
+ */
+[data-testid="evidence-rail"] button[aria-label] {
+  border-radius: var(--pm-r-pill);
+}
+
+/* ==========================================================================
+   Hero layout.
+   ========================================================================== */
+.pm-page {
+  width: 100%;
+  min-height: 100dvh;
+  background: var(--pm-paper);
+  color: var(--pm-ink);
+}
+
+.pm-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.pm-section {
+  padding: 80px 0;
+}
+
+.pm-hero {
+  position: relative;
+  padding: 72px 0 80px;
+}
+
+.pm-hero-copy {
+  max-width: 560px;
+}
+
+/* Below the floating layout the right half is no longer occupied by the rail,
+   so the headline is allowed the extra measure rather than staying a narrow
+   column in a wide viewport. */
+@media (max-width: 1239px) {
+  .pm-hero-copy {
+    max-width: 760px;
+  }
+}
+
+.pm-hero-title {
+  margin: 0 0 24px;
+}
+
+/* Desktop keeps the three deliberate line breaks; below that the headline
+   wraps on its own. `display:none` on a <br> suppresses the break. */
+.pm-hero-title br {
+  display: none;
+}
+
+.pm-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 32px;
+}
+
+.pm-hero-strip {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-top: 24px;
+  border-top: 1px solid var(--pm-hairline);
+}
+
+.pm-hero-strip-wrap {
+  margin-top: 56px;
+}
+
+/* Stacked (default / small-viewport) artifact placement. Both still run past a
+   viewport edge — the rail past the right, the finding card past the left. */
+.pm-artifact-rail {
+  position: relative;
+  margin: 40px 0 0 16px;
+  width: calc(100vw + 56px);
+  height: 560px;
+}
+
+/*
+ * Which half of the rail takes the crop — bar.md mechanism 3.
+ *
+ * The rail runs past the right viewport edge on purpose. What it must never
+ * sever is the evidence: a reader who sees `84,210.00 + 12,500.00 = 96,7`
+ * has been shown the arithmetic and denied the proof, at the exact moment
+ * they were deciding whether to believe it.
+ *
+ * The rail's DOM order is document-pane then findings-pane, which puts the
+ * findings against the cropped edge. Reversing the grid's direction (children
+ * restored to ltr) seats the findings column inside the viewport and hands the
+ * crop to the sample document — which is the ambient half, and is exactly what
+ * the hero copy promises: you read the rail, not the doc.
+ *
+ * Home hero only. Elsewhere the rail is fully on-screen and reads in DOM order.
+ */
+.pm-artifact-rail .pm-rail-panes {
+  direction: rtl;
+}
+
+.pm-artifact-rail .pm-rail-panes > * {
+  direction: ltr;
+}
+
+/*
+ * The crop must land on padding, never on content. The document pane renders
+ * on the right once the grid is reversed, so it carries the overhang: inset
+ * its contents by more than the overhang and the viewport edge cuts through
+ * the pane's own whitespace while the statement — its balance column, its
+ * footer caption — stays wholly readable inside the fold.
+ */
+.pm-artifact-rail .pm-rail-panes > *:first-child {
+  /* !important: the pane sets `padding` inline. Scoped to the cropped instance. */
+  padding-right: calc(var(--pm-rail-bleed, 88px) + 20px) !important;
+}
+
+/*
+ * Phone width. The rail's two panes need ~560px to sit side by side (the grid
+ * carries that as an inline min-width), so below that they stop being a layout
+ * and start being a horizontal scroll that severs the statement mid-number.
+ *
+ * Stacked instead, findings first: the evidence leads, the document follows,
+ * and neither is cut. The hero's finding card still supplies the cropped
+ * artifact mechanism 3 asks for, so the rail does not also have to bleed here.
+ */
+@media (max-width: 880px) {
+  /* Stacked, the findings span the rail's full width — so the rail itself must
+     stop overhanging, or the evidence goes straight off the edge again. The
+     hero's finding card carries the crop at these widths. */
+  .pm-artifact-rail {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+
+  .pm-artifact-rail .pm-rail-panes {
+    direction: ltr;
+    grid-template-columns: minmax(0, 1fr) !important;
+    min-width: 0 !important;
+    overflow-x: visible !important;
+  }
+
+  .pm-artifact-rail .pm-rail-panes > *:first-child {
+    padding-right: 20px !important;
+    order: 2;
+    border-right: 0;
+  }
+
+  .pm-artifact-rail .pm-rail-panes > *:nth-child(2) {
+    order: 1;
+    border-bottom: 1px solid #dde1e4;
+  }
+
+  .pm-artifact-rail .pm-rail-head {
+    padding-right: 16px !important;
+    flex-wrap: wrap;
+  }
+
+  /* Machine strings wrap rather than scroll out of sight — a request or a
+     response a reader cannot finish is the same as one they were never shown. */
+  .pm-code,
+  .pm-artifact-rail pre,
+  main pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* The document pane is narrower once inset, so its footer row wraps instead of
+   colliding the page stepper into the sample caption. */
+.pm-artifact-rail .pm-rail-doc-foot {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+/* The header spans the full rail, so its right-hand controls would sit in the
+   cropped region. Pull them back inside by the width of the overhang. */
+.pm-artifact-rail .pm-rail-head {
+  /* !important because the header sets `padding` inline, which otherwise wins.
+     Scoped to the cropped hero instance only. */
+  padding-right: calc(var(--pm-rail-bleed, 88px) + 16px) !important;
+  /* Wrap rather than crush: the filename identifies the document under review,
+     and shrinking it to a single ellipsis tells the reader nothing. */
+  flex-wrap: wrap;
+}
+
+.pm-artifact-rail .pm-rail-head > div:first-child {
+  min-width: 200px;
+}
+
+.pm-artifact-finding {
+  position: relative;
+  margin: 24px 16px 0 -48px;
+  /* Capped: this is one finding, not a section. Without the cap it stretched
+     to the full viewport in the tablet band — 1271px wide at 1239px. */
+  width: min(calc(100vw + 32px), 480px);
+  padding: 20px 20px 20px 68px;
+}
+
+@media (min-width: 1240px) {
+  .pm-hero-title br {
+    display: inline;
+  }
+
+  /* Reserves the vertical room the floating rail occupies. */
+  .pm-hero-copy {
+    min-height: 560px;
+  }
+
+  .pm-artifact-rail {
+    position: absolute;
+    margin: 0;
+    top: 54px;
+    /* How far the rail runs past the right edge. Everything that has to stay
+       readable is inset by this much, so it cannot be a constant: at 1280 the
+       rail is only 620px wide and an 88px bleed crushes the header. Scales
+       with the room actually available, and stops at 88. */
+    --pm-rail-bleed: clamp(48px, calc(100vw - 1232px), 88px);
+    right: calc(-1 * var(--pm-rail-bleed));
+    width: min(760px, calc(100vw - 660px));
+    height: 560px;
+  }
+
+  .pm-artifact-finding {
+    position: absolute;
+    margin: 0;
+    top: 596px;
+    left: -72px;
+    width: 440px;
+    /* The left 72px of this card is off-screen, so its content is inset past
+       the crop: what the viewer sees starts 20px from the viewport edge. */
+    padding: 20px 24px 20px 92px;
+  }
+
+  .pm-hero-strip-wrap {
+    margin-top: 224px;
+  }
+}
+
+/* ==========================================================================
+   Prose pages (/security and friends). A narrower measure than the marketing
+   shell, because these are read rather than scanned.
+   ========================================================================== */
+.pm-prose {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.pm-prose h2 {
+  font-family: var(--pm-sans);
+  font-size: 26px;
+  font-weight: 450;
+  letter-spacing: -0.009em;
+  line-height: 1.18;
+  margin: 48px 0 12px;
+}
+
+.pm-prose p,
+.pm-prose li {
+  font-family: var(--pm-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--pm-slate);
+  margin: 0 0 12px;
+}
+
+.pm-prose strong {
+  color: var(--pm-ink);
+  font-weight: 600;
+}
+
+.pm-prose ul {
+  margin: 0 0 12px;
+  padding-left: 22px;
+}
+
+.pm-prose li::marker {
+  color: var(--pm-smoke);
+}
+
+/* Machine strings inside prose — endpoints, header names, module names. */
+.pm-prose code,
+.pm-code {
+  font-family: var(--pm-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  background: var(--pm-mist);
+  color: var(--pm-ink);
+  border-radius: var(--pm-r-image);
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.pm-prose a:not(.pm-btn) {
+  color: var(--pm-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--pm-smoke);
+  transition: text-decoration-color 150ms var(--ease-hover);
+}
+
+.pm-prose a:not(.pm-btn):hover {
+  text-decoration-color: var(--pm-ink);
+}
+
+@media (max-width: 560px) {
+  .pm-prose {
+    padding: 0 16px;
+  }
+
+  .pm-prose h2 {
+    font-size: 22px;
+    margin-top: 36px;
+  }
+}
+
+/* ==========================================================================
+   Section scaffolding.
+   ========================================================================== */
+.pm-band-fog {
+  background: var(--pm-fog);
+  border-top: 1px solid var(--pm-hairline);
+}
+
+.pm-band-paper {
+  background: var(--pm-paper);
+  border-top: 1px solid var(--pm-hairline);
+}
+
+.pm-band-ink {
+  background: var(--pm-ink);
+  color: var(--pm-paper);
+  border-top: 1px solid var(--pm-ink);
+}
+
+.pm-section-head {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  gap: 56px;
+  align-items: end;
+  margin-bottom: 48px;
+}
+
+.pm-card {
+  background: var(--pm-mist);
+  border-radius: var(--pm-r-card);
+  padding: 20px;
+}
+
+.pm-cols-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.pm-cols-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.pm-run-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+.pm-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.pm-account-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+@media (max-width: 1180px) {
+  .pm-account-links {
+    display: none;
+  }
+}
+
+.pm-footer-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) repeat(3, minmax(0, 1fr));
+  gap: 40px;
+}
+
+.pm-marker-grid {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 132px 120px;
+  column-gap: 24px;
+  align-items: baseline;
+}
+
+@media (max-width: 1000px) {
+  .pm-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 880px) {
+  .pm-display {
+    font-size: 56px;
+  }
+
+  /* 44px is the serif's hard floor (design-system.md §1) — the face is display
+     only, and below this it starts reading as UI text. The scale compresses
+     toward the floor at narrow widths but never through it. */
+  .pm-h2 {
+    font-size: 48px;
+  }
+
+  .pm-h3 {
+    font-size: 22px;
+  }
+
+  .pm-lead {
+    font-size: 17px;
+  }
+
+  .pm-section {
+    padding: 64px 0;
+  }
+
+  .pm-hero {
+    padding: 40px 0 64px;
+  }
+
+  .pm-section-head,
+  .pm-cols-4,
+  .pm-cols-2,
+  .pm-run-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .pm-section-head {
+    align-items: start;
+    margin-bottom: 32px;
+  }
+
   .pm-nav-links {
     display: none;
   }
-  .pm-hero-grid,
-  .pm-split-grid-48,
-  .pm-split-grid-57,
-  .pm-cols-4,
-  .pm-cols-3,
-  .pm-cols-2,
-  .pm-run-grid {
-    grid-template-columns: 1fr;
-  }
+
   .pm-footer-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .pm-h2 {
-    font-size: 32px;
-  }
-  .pm-hero-rail {
-    height: 480px;
-  }
-  .pm-flow-arrow {
-    display: none;
+
+  .pm-marker-grid {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 8px;
   }
 }
 
 @media (max-width: 560px) {
-  .pm-hero-title {
-    font-size: 40px;
+  .pm-display {
+    font-size: 46px;
   }
+
+  .pm-h2 {
+    font-size: 44px;
+  }
+
+  .pm-shell {
+    padding: 0 16px;
+  }
+
+  .pm-artifact-rail {
+    margin-left: 8px;
+    width: calc(100vw + 64px);
+    height: 520px;
+  }
+
+  .pm-artifact-finding {
+    margin: 24px 8px 0 -40px;
+    width: min(calc(100vw + 32px), 480px);
+    padding: 20px 16px 20px 56px;
+  }
+
   .pm-footer-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pm-topbar-version {
+    display: none;
   }
 }

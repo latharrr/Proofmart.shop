@@ -25,16 +25,16 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
   if (!doc) notFound();
 
   return (
-    <div style={{ minHeight: "100vh", background: "#FFFFFF" }}>
+    <div style={{ minHeight: "100vh", background: "var(--pm-paper)" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "56px 24px" }}>
-        <Link href="/documents" className="pm-hoverable" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 24, fontFamily: MONO, fontSize: 12, color: "#767C83" }}>
+        <Link href="/documents" className="pm-hoverable" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 24, fontFamily: MONO, fontSize: 12, color: "var(--pm-ash)" }}>
           ← My documents
         </Link>
 
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 16, marginBottom: 20, flexWrap: "wrap" }}>
           <div>
             <h1 style={{ fontFamily: SANS, fontWeight: 500, fontSize: 22, letterSpacing: "-0.01em", margin: "0 0 4px", wordBreak: "break-word" }}>{doc.filename}</h1>
-            <p style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", margin: 0 }}>
+            <p style={{ fontFamily: MONO, fontSize: 12, color: "var(--pm-ash)", margin: 0 }}>
               verified {new Date(doc.created_at).toLocaleString()}
               {doc.updated_at !== doc.created_at ? ` · re-run ${new Date(doc.updated_at).toLocaleString()}` : ""} · engine v{doc.verification_version}
             </p>
@@ -44,14 +44,14 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
               <a
                 href={`/api/documents/${doc.id}/dossier`}
                 className="pm-hoverable"
-                style={{ fontFamily: MONO, fontSize: 11, color: "#0E1216", background: "none", border: "1px solid #0E1216", borderRadius: 3, padding: "8px 12px", textDecoration: "none" }}
+                style={{ fontFamily: MONO, fontSize: 12, color: "var(--pm-ink)", background: "none", border: "1px solid #0E1216", borderRadius: "var(--pm-r-image)", padding: "8px 12px", textDecoration: "none" }}
               >
                 Download dossier ↓
               </a>
             )}
             {doc.storage_pathname && (
               <form action={rerunDocument.bind(null, doc.id)}>
-                <button type="submit" className="pm-hoverable" style={{ fontFamily: MONO, fontSize: 11, color: "#43494F", background: "none", border: "1px solid #DDE1E4", borderRadius: 3, padding: "8px 12px", cursor: "pointer" }}>
+                <button type="submit" className="pm-hoverable" style={{ fontFamily: MONO, fontSize: 12, color: "var(--pm-slate)", background: "none", border: "1px solid var(--pm-hairline)", borderRadius: "var(--pm-r-image)", padding: "8px 12px", cursor: "pointer" }}>
                   Re-run
                 </button>
               </form>
@@ -63,7 +63,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
                 redirect("/documents");
               }}
             >
-              <button type="submit" className="pm-hoverable" style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", background: "none", border: "1px solid #DDE1E4", borderRadius: 3, padding: "8px 12px", cursor: "pointer" }}>
+              <button type="submit" className="pm-hoverable" style={{ fontFamily: MONO, fontSize: 12, color: "var(--pm-ash)", background: "none", border: "1px solid var(--pm-hairline)", borderRadius: "var(--pm-r-image)", padding: "8px 12px", cursor: "pointer" }}>
                 Delete
               </button>
             </form>
@@ -71,7 +71,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
         </div>
 
         {doc.status === "error" && (
-          <div style={{ fontFamily: SANS, fontSize: 14, color: "#B4231F", padding: "16px 0" }}>Processing failed: {doc.error_message}</div>
+          <div style={{ fontFamily: SANS, fontSize: 17, color: "var(--pm-fail)", padding: "16px 0" }}>Processing failed: {doc.error_message}</div>
         )}
 
         {doc.status === "ready" && doc.result && <SavedDocumentViewer documentId={doc.id} envelope={doc.result} hasStoredFile={Boolean(doc.storage_pathname)} />}

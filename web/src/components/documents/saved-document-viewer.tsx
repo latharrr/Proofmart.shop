@@ -207,7 +207,7 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
               <span style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", letterSpacing: "0.12em" }}>FINDINGS</span>
               <div style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: MONO, fontSize: 10, letterSpacing: "0.06em" }}>
                 <span style={{ color: "#B4231F", fontWeight: 600 }}>{counts.fail} FAIL</span>
-                <span style={{ color: "#A66A00", fontWeight: 600 }}>{counts.review} REVIEW</span>
+                <span style={{ color: VERDICT.REVIEW.color, fontWeight: 600 }}>{counts.review} REVIEW</span>
                 <span style={{ color: "#767C83" }}>{counts.clear} CLEAR</span>
               </div>
             </div>

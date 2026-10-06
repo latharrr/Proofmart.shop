@@ -18,14 +18,14 @@ export default function CreateWebhookForm() {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <div style={s.successBanner}>Copy this signing secret now — it won&rsquo;t be shown again. Use it to verify the x-proofmart-signature header on deliveries.</div>
-        <div style={{ fontFamily: MONO, fontSize: 13, padding: "10px 12px", border: "1px solid #DDE1E4", borderRadius: 3, background: "#EDEFF1", wordBreak: "break-all" }}>
+        <div style={{ fontFamily: MONO, fontSize: 13, padding: "10px 12px", border: "1px solid var(--pm-hairline)", borderRadius: "var(--pm-r-image)", background: "var(--pm-mist)", wordBreak: "break-all" }}>
           {revealedSecret}
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           <button
             type="button"
-            className="pm-hoverable"
-            style={{ ...s.secondaryButton, width: "auto", padding: "8px 14px" }}
+            className="pm-btn pm-btn-ghost"
+            style={{ ...s.secondaryButton, width: "auto" }}
             onClick={async () => {
               await navigator.clipboard.writeText(revealedSecret);
               setCopied(true);
@@ -34,7 +34,7 @@ export default function CreateWebhookForm() {
           >
             {copied ? "Copied" : "Copy"}
           </button>
-          <button type="button" className="pm-hoverable" style={{ ...s.primaryButton, width: "auto", padding: "8px 14px" }} onClick={() => setRevealedSecret(null)}>
+          <button type="button" className="pm-btn pm-btn-filled" style={{ ...s.primaryButton, width: "auto" }} onClick={() => setRevealedSecret(null)}>
             Done
           </button>
         </div>
@@ -64,7 +64,7 @@ export default function CreateWebhookForm() {
         placeholder="https://your-server.example.com/webhooks/proofmart"
         style={{ ...s.input, flex: 1 }}
       />
-      <button type="submit" disabled={pending} className="pm-hoverable" style={{ ...s.primaryButton, width: "auto", padding: "10px 16px" }}>
+      <button type="submit" disabled={pending} className="pm-btn pm-btn-filled" style={{ ...s.primaryButton, width: "auto" }}>
         {pending ? "Adding…" : "Add webhook"}
       </button>
       {error && <div style={s.errorBanner}>{error}</div>}

@@ -1,49 +1,58 @@
-import { MONO, SANS } from "@/lib/evidence-data";
+import Reveal from "@/components/home/reveal";
 import { INTEGRATIONS } from "@/lib/home-data";
 
 export default function IntegrateSection() {
   return (
-    <section id="integrate" style={{ borderTop: "1px solid #2A2F35", background: "#0E1216", color: "#F5F5F0" }}>
-      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "88px 32px" }}>
-        <div
-          className="pm-split-grid-48"
-          style={{
-            display: "grid",
-            gap: 56,
-            alignItems: "end",
-            marginBottom: 48,
-          }}
-        >
+    <section id="integrate" className="pm-band-fog">
+      <div className="pm-shell pm-section">
+        <Reveal className="pm-section-head">
           <div>
-            <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.1em", marginBottom: 12 }}>§ 06 · INTEGRATE</div>
-            <h2 className="pm-h2" style={{ fontFamily: SANS, fontWeight: 500, lineHeight: 1.02, letterSpacing: "-0.025em", margin: 0, color: "#F5F5F0" }}>
-              Four ways in.
-              <br />
-              Same engine, every time.
-            </h2>
+            <p className="pm-eyebrow">§ 06 · Integrate</p>
+            <h2 className="pm-h2">Four ways in. Same engine, every time.</h2>
           </div>
-          <p style={{ fontFamily: SANS, fontSize: 17, lineHeight: 1.55, color: "#C2C7CC", maxWidth: "60ch", margin: "8px 0 0" }}>
-            The upload flow above, the public API, webhook delivery, and the CLI all run through the same verification engine — one
-            processing path, not a marketing demo backed by something thinner.
+          <p className="pm-lead">
+            The upload flow above, the public API, webhook delivery and the CLI all run through the same verification engine — one processing path,
+            not a marketing demo backed by something thinner.
           </p>
-        </div>
-        <div className="pm-cols-4" style={{ display: "grid", gap: 0, borderTop: "1px solid #2A2F35" }}>
+        </Reveal>
+
+        <div className="pm-cols-4" style={{ gap: 0, borderTop: "1px solid var(--pm-hairline)" }}>
           {INTEGRATIONS.map((it, i) => (
-            <div
+            <Reveal
               key={it.name}
+              delay={i * 300}
+              className="pm-integrate-cell"
               style={{
-                padding: "32px 24px 28px",
-                borderRight: i < INTEGRATIONS.length - 1 ? "1px solid #2A2F35" : "none",
-                borderBottom: "1px solid #2A2F35",
+                padding: 20,
+                borderBottom: "1px solid var(--pm-hairline)",
               }}
             >
-              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 16 }}>
-                <span style={{ fontFamily: SANS, fontSize: 20, fontWeight: 500, letterSpacing: "-0.015em" }}>{it.name}</span>
-                <span style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", letterSpacing: "0.08em" }}>{it.kind.toUpperCase()}</span>
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginBottom: 12 }}>
+                <h3 className="pm-h3">{it.name}</h3>
+                <span className="pm-caption" style={{ color: "var(--pm-ash)", whiteSpace: "nowrap" }}>
+                  {it.kind}
+                </span>
               </div>
-              <div style={{ fontFamily: SANS, fontSize: 13, lineHeight: 1.55, color: "#C2C7CC" }}>{it.body}</div>
-            </div>
+              <p className="pm-body" style={{ color: "var(--pm-slate)" }}>
+                {it.body}
+              </p>
+            </Reveal>
           ))}
+        </div>
+
+        <div style={{ marginTop: 24, display: "flex", flexWrap: "wrap", gap: 28 }}>
+          <a href="/account/api-keys" className="pm-link">
+            Create an API key
+            <span className="pm-arrow" aria-hidden="true">
+              <span>→</span>
+            </span>
+          </a>
+          <a href="/account/webhooks" className="pm-link">
+            Register a webhook
+            <span className="pm-arrow" aria-hidden="true">
+              <span>→</span>
+            </span>
+          </a>
         </div>
       </div>
     </section>

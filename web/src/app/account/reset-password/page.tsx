@@ -15,7 +15,7 @@ export default async function ResetPasswordPage({
       title="Reset your password"
       subtitle="Enter your email and we'll send you a reset link."
       footer={
-        <Link href="/login" className="pm-hoverable" style={{ color: "#0E1216", textDecoration: "underline" }}>
+        <Link href="/login" className="pm-hoverable" style={{ color: "var(--pm-ink)", textDecoration: "underline" }}>
           Back to sign in
         </Link>
       }
@@ -26,12 +26,12 @@ export default async function ResetPasswordPage({
         <form action={requestPasswordReset} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div>
             <label htmlFor="email" style={s.label}>
-              EMAIL
+              Email
             </label>
             <input id="email" name="email" type="email" autoComplete="email" required style={s.input} />
           </div>
-          <button type="submit" className="pm-hoverable" style={s.primaryButton}>
-            SEND RESET LINK →
+          <button type="submit" className="pm-btn pm-btn-filled" style={s.primaryButton}>
+            Send reset link
           </button>
         </form>
       )}

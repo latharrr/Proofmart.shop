@@ -10,10 +10,10 @@ export default async function AuthErrorPage({
   const { error } = await searchParams;
 
   return (
-    <AuthShell title="Sign-in link didn't work">
+    <AuthShell title="That link didn&rsquo;t work" subtitle="Sign-in links are single-use and expire quickly.">
       <div style={s.errorBanner}>{error || "The link may have expired, or already been used."}</div>
-      <Link href="/login" className="pm-hoverable" style={{ ...s.primaryButton, display: "block", textDecoration: "none" }}>
-        BACK TO SIGN IN
+      <Link href="/login" className="pm-btn pm-btn-filled" style={{ ...s.primaryButton, textDecoration: "none" }}>
+        Back to sign in
       </Link>
     </AuthShell>
   );

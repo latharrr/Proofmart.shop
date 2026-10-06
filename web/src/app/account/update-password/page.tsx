@@ -24,12 +24,12 @@ export default async function UpdatePasswordPage({
       <form action={updatePassword} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <div>
           <label htmlFor="password" style={s.label}>
-            NEW PASSWORD
+            New password
           </label>
           <input id="password" name="password" type="password" autoComplete="new-password" required minLength={6} style={s.input} />
         </div>
-        <button type="submit" className="pm-hoverable" style={s.primaryButton}>
-          UPDATE PASSWORD →
+        <button type="submit" className="pm-btn pm-btn-filled" style={s.primaryButton}>
+          Update password
         </button>
       </form>
     </AuthShell>

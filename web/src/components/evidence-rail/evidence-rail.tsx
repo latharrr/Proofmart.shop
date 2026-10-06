@@ -220,6 +220,7 @@ export default function EvidenceRail() {
           background: "#FFFFFF",
           gap: 16,
         }}
+        className="pm-rail-head"
       >
         <div style={{ display: "flex", alignItems: "baseline", gap: 12, minWidth: 0 }}>
           <span style={{ fontFamily: MONO, fontSize: 12, color: "#0E1216", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -251,7 +252,7 @@ export default function EvidenceRail() {
             aria-label="Copy JSON"
             onClick={handleCopyJson}
             className="pm-hoverable"
-            style={{ fontFamily: MONO, fontSize: 11, color: "#43494F", padding: "4px 8px", border: "1px solid #DDE1E4", borderRadius: 3 }}
+            style={{ fontFamily: MONO, fontSize: 11, color: "#43494F", padding: "4px 10px", border: "1px solid #DDE1E4", borderRadius: "var(--pm-r-pill)" }}
           >
             {copied ? "Copied" : "Copy JSON"}
           </button>
@@ -271,7 +272,10 @@ export default function EvidenceRail() {
           the document/findings legibly, so on narrow viewports this scrolls
           horizontally at its proven desktop proportions rather than
           reflowing into two height-constrained rows with no minimum size. */}
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 1fr)", flex: 1, minHeight: 0, minWidth: 560, overflowX: "auto" }}>
+      <div
+        className="pm-rail-panes"
+        style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 1fr)", flex: 1, minHeight: 0, minWidth: 560, overflowX: "auto" }}
+      >
         {/* Document panel */}
         <div
           style={{
@@ -326,10 +330,13 @@ export default function EvidenceRail() {
           </div>
 
           {/* Page toolbar row */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: MONO, fontSize: 11, color: "#767C83" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div
+            className="pm-rail-doc-foot"
+            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: MONO, fontSize: 11, color: "#767C83" }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 12, whiteSpace: "nowrap" }}>
               <span>page</span>
-              <span style={{ display: "inline-flex", alignItems: "center", border: "1px solid #DDE1E4", borderRadius: 3, overflow: "hidden" }}>
+              <span style={{ display: "inline-flex", alignItems: "center", border: "1px solid #DDE1E4", borderRadius: "var(--pm-r-pill)", overflow: "hidden" }}>
                 <button
                   onClick={() => isLive && live.goToPage(-1)}
                   disabled={isLive ? currentPage <= 1 : true}
@@ -371,12 +378,12 @@ export default function EvidenceRail() {
               background: "#FFFFFF",
             }}
           >
-            <span style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", letterSpacing: "0.12em", textAlign: "center" }}>04</span>
+            <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.12em", textAlign: "center" }}>04</span>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-              <span style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", letterSpacing: "0.12em" }}>FINDINGS</span>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: MONO, fontSize: 10, letterSpacing: "0.06em" }}>
+              <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.12em" }}>FINDINGS</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: MONO, fontSize: 11, letterSpacing: "0.06em" }}>
                 <span style={{ color: "#B4231F", fontWeight: 600 }}>{counts.fail} FAIL</span>
-                <span style={{ color: "#A66A00", fontWeight: 600 }}>{counts.review} REVIEW</span>
+                <span style={{ color: VERDICT.REVIEW.color, fontWeight: 600 }}>{counts.review} REVIEW</span>
                 <span style={{ color: "#767C83" }}>{counts.clear} CLEAR</span>
               </div>
             </div>
@@ -409,7 +416,7 @@ export default function EvidenceRail() {
               background: "#FFFFFF",
             }}
           >
-            <span style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", letterSpacing: "0.12em", textAlign: "center" }}>↵</span>
+            <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.12em", textAlign: "center" }}>↵</span>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: MONO, fontSize: 11, color: "#767C83" }}>
               <span>Tab · Enter to pin · Esc to clear</span>
               <span>{isLive ? "local · not persisted" : "proofmart.shop/d/req_8fk2"}</span>

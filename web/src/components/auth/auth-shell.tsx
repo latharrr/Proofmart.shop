@@ -1,6 +1,5 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
-import { MONO, SANS } from "@/lib/evidence-data";
+import Wordmark from "@/components/brand/wordmark";
 
 export default function AuthShell({
   title,
@@ -16,50 +15,41 @@ export default function AuthShell({
   return (
     <div
       style={{
-        minHeight: "100vh",
+        minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         padding: "48px 24px",
-        background: "#FFFFFF",
+        background: "var(--pm-paper)",
       }}
     >
-      <Link
-        href="/"
-        className="pm-hoverable"
-        style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 40 }}
-      >
-        <div aria-hidden="true" style={{ width: 22, height: 22, background: "#0E1216", position: "relative" }}>
-          <div style={{ position: "absolute", inset: 5, border: "1.5px solid #F5F5F0" }} />
+      <div style={{ width: "100%", maxWidth: 400 }}>
+        <div style={{ marginBottom: 40 }}>
+          <Wordmark href="/" />
         </div>
-        <span style={{ fontFamily: SANS, fontWeight: 600, letterSpacing: "-0.01em", fontSize: 17, color: "#0E1216" }}>
-          ProofMart
-        </span>
-      </Link>
 
-      <div style={{ width: "100%", maxWidth: 360 }}>
-        <h1 style={{ fontFamily: SANS, fontWeight: 500, fontSize: 22, letterSpacing: "-0.01em", margin: "0 0 6px" }}>
+        {/* Serif, because this is the page's display line and the system puts
+            serif at 44px and nothing smaller. */}
+        <h1 className="pm-h2" style={{ fontSize: 44, marginBottom: subtitle ? 12 : 32 }}>
           {title}
         </h1>
         {subtitle && (
-          <p style={{ fontFamily: SANS, fontSize: 14, color: "#767C83", margin: "0 0 28px", lineHeight: 1.5 }}>
+          <p className="pm-body" style={{ color: "var(--pm-slate)", margin: "0 0 32px" }}>
             {subtitle}
           </p>
         )}
-        {!subtitle && <div style={{ marginBottom: 28 }} />}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>{children}</div>
 
         {footer && (
           <div
+            className="pm-body"
             style={{
-              marginTop: 24,
-              paddingTop: 20,
-              borderTop: "1px solid #DDE1E4",
-              fontFamily: MONO,
-              fontSize: 12,
-              color: "#767C83",
+              marginTop: 28,
+              paddingTop: 24,
+              borderTop: "1px solid var(--pm-hairline)",
+              color: "var(--pm-slate)",
               textAlign: "center",
             }}
           >

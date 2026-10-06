@@ -19,7 +19,7 @@ export default async function SignupPage({
       footer={
         <>
           Already have an account?{" "}
-          <Link href="/login" className="pm-hoverable" style={{ color: "#0E1216", textDecoration: "underline" }}>
+          <Link href="/login" className="pm-hoverable" style={{ color: "var(--pm-ink)", textDecoration: "underline", textUnderlineOffset: 3 }}>
             Sign in
           </Link>
         </>
@@ -31,33 +31,33 @@ export default async function SignupPage({
       {params.error && <div style={s.errorBanner}>{params.error}</div>}
 
       <form action={signInWithGoogle}>
-        <button type="submit" className="pm-hoverable" style={s.secondaryButton}>
+        <button type="submit" className="pm-btn pm-btn-ghost" style={s.secondaryButton}>
           <GoogleMark />
           Continue with Google
         </button>
       </form>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <span style={{ flex: 1, height: 1, background: "#DDE1E4" }} />
-        <span style={{ fontFamily: s.label.fontFamily, fontSize: 11, color: "#767C83" }}>OR</span>
-        <span style={{ flex: 1, height: 1, background: "#DDE1E4" }} />
+        <span style={{ flex: 1, height: 1, background: "var(--pm-hairline)" }} />
+        <span className="pm-eyebrow" style={{ margin: 0 }}>or</span>
+        <span style={{ flex: 1, height: 1, background: "var(--pm-hairline)" }} />
       </div>
 
       <form action={signup} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <div>
           <label htmlFor="email" style={s.label}>
-            EMAIL
+            Email
           </label>
           <input id="email" name="email" type="email" autoComplete="email" required style={s.input} />
         </div>
         <div>
           <label htmlFor="password" style={s.label}>
-            PASSWORD
+            Password
           </label>
           <input id="password" name="password" type="password" autoComplete="new-password" required minLength={6} style={s.input} />
         </div>
-        <button type="submit" className="pm-hoverable" style={{ ...s.primaryButton, marginTop: 4 }}>
-          CREATE ACCOUNT →
+        <button type="submit" className="pm-btn pm-btn-filled" style={{ ...s.primaryButton, marginTop: 4 }}>
+          Create account
         </button>
       </form>
     </AuthShell>

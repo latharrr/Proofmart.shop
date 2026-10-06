@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import type { CSSProperties, ReactNode } from "react";
 
 /**
@@ -21,13 +22,20 @@ export default function OpenScanButton({
   className?: string;
   style?: CSSProperties;
 }) {
+  const router = useRouter();
+
   return (
     <button
       type="button"
       className={className}
       style={style}
       onClick={() => {
-        document.getElementById("access")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        const rail = document.getElementById("access");
+        // The rail only exists on the home page, and this button now ships in
+        // the topbar on every page — so off-home the CTA has to navigate there
+        // rather than silently doing nothing.
+        if (rail) rail.scrollIntoView({ behavior: "smooth", block: "center" });
+        else router.push("/#access");
       }}
     >
       {children}

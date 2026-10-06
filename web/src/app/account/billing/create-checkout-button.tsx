@@ -69,7 +69,7 @@ export default function CreateCheckoutButton() {
         description: `${order.planName} plan`,
         order_id: order.orderId,
         prefill: order.prefill,
-        theme: { color: "#0E1216" },
+        theme: { color: "var(--pm-ink)" },
         handler: () => setStarted(true),
       });
       rzp.open();
@@ -86,7 +86,7 @@ export default function CreateCheckoutButton() {
 
   return (
     <div>
-      <button type="button" disabled={pending} onClick={startCheckout} className="pm-hoverable" style={{ ...s.primaryButton, width: "auto", padding: "10px 16px" }}>
+      <button type="button" disabled={pending} onClick={startCheckout} className="pm-btn pm-btn-filled" style={{ ...s.primaryButton, width: "auto" }}>
         {pending ? "Starting…" : "Upgrade to Pro"}
       </button>
       {error && <div style={{ ...s.errorBanner, marginTop: 10 }}>{error}</div>}

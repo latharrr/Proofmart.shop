@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Wordmark from "@/components/brand/wordmark";
 import { redirect } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { MONO, SANS, VERDICT } from "@/lib/evidence-data";
@@ -35,26 +36,23 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
   const hasMore = (count ?? 0) > from + PAGE_SIZE;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#FFFFFF" }}>
+    <div style={{ minHeight: "100vh", background: "var(--pm-paper)" }}>
       <div style={{ maxWidth: 880, margin: "0 auto", padding: "56px 24px" }}>
-        <Link href="/" className="pm-hoverable" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 40, width: "fit-content" }}>
-          <div aria-hidden="true" style={{ width: 22, height: 22, background: "#0E1216", position: "relative" }}>
-            <div style={{ position: "absolute", inset: 5, border: "1.5px solid #F5F5F0" }} />
-          </div>
-          <span style={{ fontFamily: SANS, fontWeight: 600, letterSpacing: "-0.01em", fontSize: 17, color: "#0E1216" }}>ProofMart</span>
-        </Link>
+        <div style={{ marginBottom: 40 }}>
+          <Wordmark href="/" />
+        </div>
 
         <h1 style={{ fontFamily: SANS, fontWeight: 500, fontSize: 24, letterSpacing: "-0.01em", margin: "0 0 6px" }}>My documents</h1>
-        <p style={{ fontFamily: SANS, fontSize: 14, color: "#767C83", margin: "0 0 32px", lineHeight: 1.5 }}>
+        <p style={{ fontFamily: SANS, fontSize: 17, color: "var(--pm-ash)", margin: "0 0 32px", lineHeight: 1.5 }}>
           Every document you verify while signed in is saved here automatically. Nothing here is shared or public.
         </p>
 
         {!docs || docs.length === 0 ? (
-          <p style={{ fontFamily: SANS, fontSize: 14, color: "#767C83" }}>
-            No documents yet. <Link href="/#run" className="pm-hoverable" style={{ color: "#0E1216" }}>Verify one</Link> and it&apos;ll show up here.
+          <p style={{ fontFamily: SANS, fontSize: 17, color: "var(--pm-ash)" }}>
+            No documents yet. <Link href="/#run" className="pm-hoverable" style={{ color: "var(--pm-ink)" }}>Verify one</Link> and it&apos;ll show up here.
           </p>
         ) : (
-          <div style={{ border: "1px solid #DDE1E4", borderRadius: 3 }}>
+          <div style={{ border: "1px solid var(--pm-hairline)", borderRadius: "var(--pm-r-image)" }}>
             {docs.map((doc, i) => {
               const v = doc.verdict ? VERDICT[doc.verdict] : null;
               return (
@@ -66,7 +64,7 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
                     alignItems: "center",
                     gap: 12,
                     padding: "14px 16px",
-                    borderTop: i === 0 ? "none" : "1px solid #DDE1E4",
+                    borderTop: i === 0 ? "none" : "1px solid var(--pm-hairline)",
                   }}
                 >
                   <div style={{ minWidth: 0 }}>
@@ -74,23 +72,23 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
                       <Link
                         href={`/documents/${doc.id}`}
                         className="pm-hoverable"
-                        style={{ fontFamily: SANS, fontSize: 14, color: "#0E1216", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 340 }}
+                        style={{ fontFamily: SANS, fontSize: 17, color: "var(--pm-ink)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 340 }}
                       >
                         {doc.filename}
                       </Link>
                       {v && (
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: MONO, fontSize: 10, fontWeight: 600, letterSpacing: "0.06em", color: v.color }}>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: MONO, fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", color: v.color }}>
                           <span aria-hidden="true">{v.glyph}</span>
                           {doc.verdict}
                         </span>
                       )}
                       {doc.status !== "ready" && (
-                        <span style={{ fontFamily: MONO, fontSize: 10, color: doc.status === "error" ? "#B4231F" : "#767C83", letterSpacing: "0.06em" }}>
+                        <span style={{ fontFamily: MONO, fontSize: 12, color: doc.status === "error" ? "var(--pm-fail)" : "var(--pm-ash)", letterSpacing: "0.06em" }}>
                           {STATUS_LABEL[doc.status]}
                         </span>
                       )}
                     </div>
-                    <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.02em" }}>
+                    <div style={{ fontFamily: MONO, fontSize: 12, color: "var(--pm-ash)", letterSpacing: "0.02em" }}>
                       {doc.status === "ready"
                         ? `${doc.findings_count} finding${doc.findings_count === 1 ? "" : "s"} · ${doc.document_kind ?? "generic"} · ${formatBytes(doc.size_bytes)} · ${new Date(doc.created_at).toLocaleDateString()}`
                         : doc.status === "error"
@@ -102,7 +100,7 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
                     <Link
                       href={`/documents/${doc.id}`}
                       className="pm-hoverable"
-                      style={{ fontFamily: MONO, fontSize: 11, color: "#43494F", border: "1px solid #DDE1E4", borderRadius: 3, padding: "6px 10px" }}
+                      style={{ fontFamily: MONO, fontSize: 12, color: "var(--pm-slate)", border: "1px solid var(--pm-hairline)", borderRadius: "var(--pm-r-image)", padding: "6px 10px" }}
                     >
                       Open
                     </Link>
@@ -110,7 +108,7 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
                       <button
                         type="submit"
                         className="pm-hoverable"
-                        style={{ fontFamily: MONO, fontSize: 11, color: "#43494F", background: "none", border: "1px solid #DDE1E4", borderRadius: 3, padding: "6px 10px", cursor: "pointer" }}
+                        style={{ fontFamily: MONO, fontSize: 12, color: "var(--pm-slate)", background: "none", border: "1px solid var(--pm-hairline)", borderRadius: "var(--pm-r-image)", padding: "6px 10px", cursor: "pointer" }}
                       >
                         Re-run
                       </button>
@@ -119,7 +117,7 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
                       <ConfirmSubmitButton
                         confirmMessage={`Delete "${doc.filename}"? The stored file and its findings will be permanently removed — this can't be undone.`}
                         className="pm-hoverable"
-                        style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", background: "none", border: "1px solid #DDE1E4", borderRadius: 3, padding: "6px 10px", cursor: "pointer" }}
+                        style={{ fontFamily: MONO, fontSize: 12, color: "var(--pm-ash)", background: "none", border: "1px solid var(--pm-hairline)", borderRadius: "var(--pm-r-image)", padding: "6px 10px", cursor: "pointer" }}
                       >
                         Delete
                       </ConfirmSubmitButton>
@@ -134,14 +132,14 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
         {(page > 1 || hasMore) && (
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20, fontFamily: MONO, fontSize: 12 }}>
             {page > 1 ? (
-              <Link href={`/documents?page=${page - 1}`} className="pm-hoverable" style={{ color: "#0E1216" }}>
+              <Link href={`/documents?page=${page - 1}`} className="pm-hoverable" style={{ color: "var(--pm-ink)" }}>
                 ← Newer
               </Link>
             ) : (
               <span />
             )}
             {hasMore && (
-              <Link href={`/documents?page=${page + 1}`} className="pm-hoverable" style={{ color: "#0E1216" }}>
+              <Link href={`/documents?page=${page + 1}`} className="pm-hoverable" style={{ color: "var(--pm-ink)" }}>
                 Older →
               </Link>
             )}

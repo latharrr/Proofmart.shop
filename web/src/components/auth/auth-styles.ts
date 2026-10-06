@@ -1,85 +1,74 @@
 import type { CSSProperties } from "react";
-import { MONO, SANS } from "@/lib/evidence-data";
 
-// Shared styling for the auth pages (login/signup/reset/update-password) —
-// same visual system as the rest of the marketing site (topbar.tsx,
-// hero.tsx): inline styles, MONO/SANS tokens, the ink/border/muted palette.
-// Pulled into one place because these four pages share an identical form
-// shape, not because it needs to be reusable elsewhere.
+// Shared styling for the auth pages (login/signup/reset/update-password) and
+// for the small forms on /account/*. One module because those pages share an
+// identical form shape — and because it is the single place that decides what
+// an input and a button look like everywhere outside the marketing page.
+//
+// Everything here reads the design-system tokens in globals.css rather than
+// repeating hex values, so the app and the marketing page cannot drift.
 
 export const label: CSSProperties = {
   display: "block",
-  fontFamily: MONO,
-  fontSize: 11,
-  color: "#767C83",
+  fontFamily: "var(--pm-sans)",
+  fontSize: 15,
+  fontWeight: 450,
+  color: "var(--pm-ash)",
   letterSpacing: "0.08em",
-  marginBottom: 6,
+  textTransform: "uppercase",
+  marginBottom: 8,
 };
 
 export const input: CSSProperties = {
   width: "100%",
-  fontFamily: SANS,
-  fontSize: 14,
-  color: "#0E1216",
-  padding: "10px 12px",
-  border: "1px solid #DDE1E4",
-  borderRadius: 3,
-  background: "#FFFFFF",
+  fontFamily: "var(--pm-sans)",
+  fontSize: 17,
+  color: "var(--pm-ink)",
+  padding: "12px 16px",
+  border: "1px solid var(--pm-hairline)",
+  borderRadius: "var(--pm-r-input)",
+  background: "var(--pm-mist)",
+  outlineOffset: 2,
 };
 
+/** Fill and border swap on hover via `.pm-btn`; these carry only layout. */
 export const primaryButton: CSSProperties = {
   width: "100%",
-  fontFamily: MONO,
-  fontSize: 12,
-  letterSpacing: "0.06em",
-  padding: "12px 18px",
-  background: "#0E1216",
-  color: "#F5F5F0",
-  borderRadius: 3,
-  textAlign: "center",
 };
 
 export const secondaryButton: CSSProperties = {
   width: "100%",
-  fontFamily: MONO,
-  fontSize: 12,
-  letterSpacing: "0.04em",
-  padding: "12px 18px",
-  border: "1px solid #DDE1E4",
-  color: "#0E1216",
-  borderRadius: 3,
-  textAlign: "center",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 8,
+  gap: 10,
 };
 
 export const helperText: CSSProperties = {
-  fontFamily: SANS,
-  fontSize: 13,
-  color: "#767C83",
+  fontFamily: "var(--pm-sans)",
+  fontSize: 17,
+  color: "var(--pm-slate)",
   lineHeight: 1.5,
 };
 
+// Error and success are the two verdict colours doing the job they encode —
+// a failed state and a clear one. That is semantic signal, not the decorative
+// use the system forbids: an achromatic error banner would be a worse form.
 export const errorBanner: CSSProperties = {
-  fontFamily: SANS,
-  fontSize: 13,
-  color: "#B4231F",
-  background: "#FBEAE9",
-  border: "1px solid #F1C7C5",
-  borderRadius: 3,
-  padding: "10px 12px",
-  lineHeight: 1.4,
+  fontFamily: "var(--pm-sans)",
+  fontSize: 17,
+  color: "var(--pm-fail)",
+  background: "rgba(180, 35, 31, 0.07)",
+  border: "1px solid rgba(180, 35, 31, 0.25)",
+  borderRadius: "var(--pm-r-input)",
+  padding: "12px 16px",
+  lineHeight: 1.45,
 };
 
 export const successBanner: CSSProperties = {
-  fontFamily: SANS,
-  fontSize: 13,
-  color: "#1F6B4A",
-  background: "#EAF3EE",
-  border: "1px solid #C7DFD1",
-  borderRadius: 3,
-  padding: "10px 12px",
-  lineHeight: 1.4,
+  fontFamily: "var(--pm-sans)",
+  fontSize: 17,
+  color: "var(--pm-clear)",
+  background: "rgba(31, 107, 74, 0.07)",
+  border: "1px solid rgba(31, 107, 74, 0.25)",
+  borderRadius: "var(--pm-r-input)",
+  padding: "12px 16px",
+  lineHeight: 1.45,
 };

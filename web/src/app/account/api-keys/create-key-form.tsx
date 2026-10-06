@@ -26,9 +26,9 @@ export default function CreateKeyForm() {
             fontFamily: MONO,
             fontSize: 13,
             padding: "10px 12px",
-            border: "1px solid #DDE1E4",
-            borderRadius: 3,
-            background: "#EDEFF1",
+            border: "1px solid var(--pm-hairline)",
+            borderRadius: "var(--pm-r-image)",
+            background: "var(--pm-mist)",
             wordBreak: "break-all",
           }}
         >
@@ -37,8 +37,8 @@ export default function CreateKeyForm() {
         <div style={{ display: "flex", gap: 10 }}>
           <button
             type="button"
-            className="pm-hoverable"
-            style={{ ...s.secondaryButton, width: "auto", padding: "8px 14px" }}
+            className="pm-btn pm-btn-ghost"
+            style={{ ...s.secondaryButton, width: "auto" }}
             onClick={async () => {
               await navigator.clipboard.writeText(revealedKey);
               setCopied(true);
@@ -49,8 +49,8 @@ export default function CreateKeyForm() {
           </button>
           <button
             type="button"
-            className="pm-hoverable"
-            style={{ ...s.primaryButton, width: "auto", padding: "8px 14px" }}
+            className="pm-btn pm-btn-filled"
+            style={{ ...s.primaryButton, width: "auto" }}
             onClick={() => setRevealedKey(null)}
           >
             Done
@@ -82,7 +82,7 @@ export default function CreateKeyForm() {
         placeholder="Key name (e.g. production)"
         style={{ ...s.input, flex: 1 }}
       />
-      <button type="submit" disabled={pending} className="pm-hoverable" style={{ ...s.primaryButton, width: "auto", padding: "10px 16px" }}>
+      <button type="submit" disabled={pending} className="pm-btn pm-btn-filled" style={{ ...s.primaryButton, width: "auto" }}>
         {pending ? "Creating…" : "Create key"}
       </button>
       {error && <div style={s.errorBanner}>{error}</div>}

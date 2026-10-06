@@ -2,7 +2,7 @@ export type Verdict = "CLEAR" | "REVIEW" | "FAIL" | "INCONCLUSIVE";
 
 export const VERDICT: Record<Verdict, { color: string; fill: string; glyph: string }> = {
   CLEAR: { color: "#1F6B4A", fill: "rgba(31,107,74,0.10)", glyph: "=" },
-  REVIEW: { color: "#A66A00", fill: "rgba(166,106,0,0.10)", glyph: "~" },
+  REVIEW: { color: "#8A6A1F", fill: "rgba(138,106,31,0.10)", glyph: "~" },
   FAIL: { color: "#B4231F", fill: "rgba(180,35,31,0.10)", glyph: "×" },
   INCONCLUSIVE: { color: "#5A6570", fill: "rgba(90,101,112,0.10)", glyph: "?" },
 };
@@ -49,7 +49,7 @@ export const FINDINGS: Finding[] = [
     verdict: "FAIL",
     marker: "BALANCE_BREAK",
     addr1: "p4·r17",
-    addr2: "502,674",
+    addr2: "548,528",
     explanation: "Running balance differs from prior + credit − debit by ₹5,000.00.",
     arithmetic: "84,210.00 + 12,500.00 = 96,710.00\ndocument shows           91,710.00",
     rect: { x: 548, y: 528, w: 68, h: 22 },
@@ -61,7 +61,7 @@ export const FINDINGS: Finding[] = [
     addr1: "p3→p4",
     addr2: "548,88",
     explanation: "Balance carried from page 3 to page 4 differs by ₹1,240.00.",
-    arithmetic: "page 3 closing balance 96,450.00 + 0.00 − 0.00 = 96,450.00\npage 4 opening row shows              97,690.00",
+    arithmetic: "page 3 closing balance 23,760.00 + 84,120.00 − 0.00 = 1,07,880.00\npage 4 opening row shows                 1,09,120.00",
     rect: { x: 548, y: 88, w: 68, h: 22 },
   },
   {

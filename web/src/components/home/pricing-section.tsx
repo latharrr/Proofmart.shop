@@ -1,91 +1,96 @@
-import { MONO, SANS } from "@/lib/evidence-data";
+import Reveal from "@/components/home/reveal";
 import { PRICING } from "@/lib/home-data";
 
 export default function PricingSection() {
   return (
-    <section id="pricing" style={{ borderTop: "1px solid #DDE1E4" }}>
-      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "88px 32px" }}>
-        <div
-          className="pm-split-grid-48"
-          style={{
-            display: "grid",
-            gap: 56,
-            marginBottom: 48,
-            alignItems: "end",
-          }}
-        >
+    <section id="pricing" className="pm-band-paper">
+      <div className="pm-shell pm-section">
+        <Reveal className="pm-section-head">
           <div>
-            <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.1em", marginBottom: 12 }}>§ 07 · PRICING</div>
-            <h2 className="pm-h2" style={{ fontFamily: SANS, fontWeight: 500, lineHeight: 1.02, letterSpacing: "-0.025em", margin: 0 }}>
-              Flat monthly.
-              <br />
-              No per-document surprises.
-            </h2>
+            <p className="pm-eyebrow">§ 07 · Pricing</p>
+            <h2 className="pm-h2">Flat monthly. No per-document surprises.</h2>
           </div>
-          <p style={{ fontFamily: SANS, fontSize: 15, lineHeight: 1.55, color: "#43494F", maxWidth: "52ch", margin: 0 }}>
-            One plan, one price, a monthly call limit on /v1/verify. No per-finding or per-scan metering.
-          </p>
-        </div>
+          <p className="pm-lead">One plan, one price, a monthly call limit on /v1/verify. No per-finding or per-scan metering.</p>
+        </Reveal>
 
-        <div className="pm-cols-2" style={{ display: "grid", gap: 0, border: "1px solid #DDE1E4" }}>
-          {PRICING.map((p, i) => (
-            <div
-              key={p.tier}
-              style={{
-                padding: "32px 28px 32px",
-                borderRight: i < PRICING.length - 1 ? "1px solid #DDE1E4" : "none",
-                background: p.highlight ? "#FAFAF7" : "#FFFFFF",
-                position: "relative",
-                display: "flex",
-                flexDirection: "column",
-                gap: 20,
-              }}
-            >
-              {p.highlight && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "#0E1216" }} />}
-              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-                <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.08em" }}>{p.tier.toUpperCase()}</span>
-                {p.highlight && (
-                  <span style={{ fontFamily: MONO, fontSize: 10, color: "#0E1216", letterSpacing: "0.1em", border: "1px solid #0E1216", padding: "2px 6px" }}>
-                    RECOMMENDED
-                  </span>
-                )}
-              </div>
-              <div>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                  <span style={{ fontFamily: SANS, fontSize: 40, fontWeight: 500, letterSpacing: "-0.02em" }}>{p.price}</span>
-                  <span style={{ fontFamily: MONO, fontSize: 12, color: "#767C83" }}>{p.unit}</span>
-                </div>
-              </div>
-              <p style={{ fontFamily: SANS, fontSize: 13, lineHeight: 1.55, color: "#43494F", margin: 0 }}>{p.body}</p>
-              <div style={{ borderTop: "1px solid #DDE1E4", paddingTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
-                {p.included.map((li) => (
-                  <div key={li} style={{ display: "flex", alignItems: "baseline", gap: 8, fontFamily: SANS, fontSize: 13, color: "#0E1216" }}>
-                    <span style={{ fontFamily: MONO, fontSize: 10, color: "#43494F" }}>·</span>
-                    <span>{li}</span>
-                  </div>
-                ))}
-              </div>
-              <a
-                href="/signup"
-                className="pm-hoverable"
+        <div className="pm-cols-2">
+          {PRICING.map((p, i) => {
+            // The recommended plan is the page's single accent surface: peach
+            // ground, sienna type, and nothing else on the page is warm.
+            const accent = p.highlight === true;
+            return (
+              <Reveal
+                key={p.tier}
+                delay={i * 300}
                 style={{
-                  marginTop: "auto",
-                  fontFamily: MONO,
-                  fontSize: 12,
-                  letterSpacing: "0.06em",
-                  padding: "10px 12px",
-                  textAlign: "center",
-                  background: p.highlight ? "#0E1216" : "transparent",
-                  color: p.highlight ? "#F5F5F0" : "#0E1216",
-                  border: p.highlight ? "1px solid #0E1216" : "1px solid #DDE1E4",
-                  textDecoration: "none",
-                  borderRadius: 3,
+                  background: accent ? "var(--pm-peach)" : "var(--pm-mist)",
+                  color: accent ? "var(--pm-sienna)" : "var(--pm-ink)",
+                  borderRadius: "var(--pm-r-card)",
+                  padding: 20,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 20,
                 }}
               >
-                {p.cta.toUpperCase()} →
-              </a>
-            </div>
-          ))}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, minHeight: 28 }}>
+                  <p className="pm-eyebrow" style={{ margin: 0, color: accent ? "var(--pm-sienna)" : "var(--pm-ash)" }}>
+                    {p.tier}
+                  </p>
+                  {accent && (
+                    <span
+                      className="pm-caption"
+                      style={{
+                        border: "1px solid var(--pm-sienna)",
+                        borderRadius: "var(--pm-r-pill)",
+                        padding: "2px 12px",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      Recommended
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                  <span style={{ fontFamily: "var(--pm-serif)", fontWeight: 400, fontSize: 64, letterSpacing: "-0.025em", lineHeight: 1 }}>
+                    {p.price}
+                  </span>
+                  <span className="pm-caption" style={{ color: accent ? "var(--pm-sienna)" : "var(--pm-slate)" }}>
+                    {p.unit}
+                  </span>
+                </div>
+
+                <p className="pm-body" style={{ color: accent ? "var(--pm-sienna)" : "var(--pm-slate)" }}>
+                  {p.body}
+                </p>
+
+                <ul
+                  style={{
+                    listStyle: "none",
+                    margin: 0,
+                    padding: "16px 0 0",
+                    borderTop: accent ? "1px solid rgba(93,42,26,0.2)" : "1px solid var(--pm-hairline)",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                  }}
+                >
+                  {p.included.map((li) => (
+                    <li key={li} className="pm-body" style={{ display: "flex", gap: 10 }}>
+                      <span aria-hidden="true" style={{ opacity: 0.5 }}>
+                        ·
+                      </span>
+                      <span>{li}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <a href="/signup" className={accent ? "pm-btn pm-btn-filled" : "pm-btn pm-btn-ghost"} style={{ marginTop: "auto" }}>
+                  {p.cta}
+                </a>
+              </Reveal>
+            );
+          })}
         </div>
       </div>
     </section>

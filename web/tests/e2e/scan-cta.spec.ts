@@ -8,26 +8,26 @@ import { rail } from "./helpers";
 // by tests/e2e/helpers.ts's `upload()`, exercised throughout the other e2e
 // specs) is what actually opens the picker.
 
-test("START A SCAN scrolls the Evidence Rail into view without opening the file picker", async ({ page }) => {
+test("Start a scan scrolls the Evidence Rail into view without opening the file picker", async ({ page }) => {
   await page.goto("/");
   let fileChooserFired = false;
   page.once("filechooser", () => {
     fileChooserFired = true;
   });
 
-  await page.getByRole("button", { name: "START A SCAN →" }).click();
+  await page.getByRole("button", { name: "Start a scan" }).click();
   await expect(rail(page)).toBeInViewport();
   expect(fileChooserFired).toBe(false);
 });
 
-test("GET ACCESS (topbar) scrolls the Evidence Rail into view without opening the file picker", async ({ page }) => {
+test("Get access (topbar) scrolls the Evidence Rail into view without opening the file picker", async ({ page }) => {
   await page.goto("/");
   let fileChooserFired = false;
   page.once("filechooser", () => {
     fileChooserFired = true;
   });
 
-  await page.getByRole("button", { name: "GET ACCESS →" }).click();
+  await page.getByRole("button", { name: "Get access" }).click();
   await expect(rail(page)).toBeInViewport();
   expect(fileChooserFired).toBe(false);
 });

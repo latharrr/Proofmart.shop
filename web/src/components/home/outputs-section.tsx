@@ -1,156 +1,224 @@
-import { MONO, SANS } from "@/lib/evidence-data";
+import Reveal from "@/components/home/reveal";
+
+// On the ink band the JSON is set in two neutrals plus one verdict colour:
+// keys and punctuation recede, values read as paper, and the only saturated
+// token in the whole block is the verdict itself.
+const KEY = { color: "var(--pm-smoke)" };
+const PUNCT = { color: "var(--pm-slate)" };
+const VAL = { color: "var(--pm-paper)" };
+const FAIL = { color: "var(--pm-fail)" };
 
 export default function OutputsSection() {
   return (
-    <section id="outputs" style={{ borderTop: "1px solid #DDE1E4", background: "#0E1216", color: "#F5F5F0" }}>
-      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "88px 32px" }}>
-        <div
-          className="pm-split-grid-48"
-          style={{
-            display: "grid",
-            gap: 56,
-            alignItems: "start",
-            marginBottom: 48,
-          }}
-        >
+    <section id="outputs" className="pm-band-ink">
+      <div className="pm-shell pm-section">
+        <Reveal className="pm-section-head">
           <div>
-            <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.1em", marginBottom: 12 }}>§ 05 · OUTPUTS</div>
-            <h2 className="pm-h2" style={{ fontFamily: SANS, fontWeight: 500, lineHeight: 1.02, letterSpacing: "-0.025em", margin: "0 0 16px", color: "#F5F5F0" }}>
-              The JSON is real.
-              <br />
-              So is the dossier.
+            <p className="pm-eyebrow" style={{ color: "var(--pm-smoke)" }}>
+              § 05 · Outputs
+            </p>
+            <h2 className="pm-h2" style={{ color: "var(--pm-paper)" }}>
+              The JSON is real. So is the dossier.
             </h2>
           </div>
-          <p style={{ fontFamily: SANS, fontSize: 17, lineHeight: 1.55, color: "#C2C7CC", maxWidth: "60ch", margin: "8px 0 0" }}>
-            The JSON below is what the API returns today. A signed-in scan can also be exported as an Ed25519-signed PDF dossier your
-            reviewers can countersign, built from the same finding graph — anyone can check that signature back against ProofMart, no
-            account required.
+          <p className="pm-lead" style={{ color: "var(--pm-smoke)" }}>
+            The JSON below is what the API returns today. A signed-in scan can also be exported as an Ed25519-signed PDF dossier your reviewers can
+            countersign, built from the same finding graph — anyone can check that signature back against ProofMart, no account required.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="pm-cols-2" style={{ display: "grid", gap: 32 }}>
-          {/* JSON output */}
-          <div style={{ background: "#14181D", border: "1px solid #2A2F35", borderRadius: 4, overflow: "hidden" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #2A2F35" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.08em" }}>POST /v1/verify → 200 OK</span>
-              </div>
-              <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83" }}>application/json</span>
+        <div className="pm-cols-2">
+          <Reveal style={{ background: "var(--pm-ink-raised)", borderRadius: "var(--pm-r-card)", overflow: "hidden" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 16,
+                padding: "14px 20px",
+                borderBottom: "1px solid var(--pm-ink-hairline)",
+              }}
+            >
+              <span className="pm-mono" style={{ color: "var(--pm-smoke)" }}>
+                POST /v1/verify → 200 OK
+              </span>
+              <span className="pm-mono" style={{ color: "var(--pm-smoke)" }}>
+                application/json
+              </span>
             </div>
-            <pre style={{ margin: 0, padding: "18px 20px", fontFamily: MONO, fontSize: 12, lineHeight: 1.65, color: "#F5F5F0", overflowX: "auto" }}>
-              <span style={{ color: "#767C83" }}>{'{\n  "document": { '}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;filename&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#E2C48A" }}>&quot;hdfc_apr25_statement.pdf&quot;</span>
-              <span style={{ color: "#767C83" }}>{", "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;pageCount&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#C9D1B6" }}>6</span>
-              <span style={{ color: "#767C83" }}>{" },\n  "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;verification&quot;</span>
-              <span style={{ color: "#767C83" }}>{": {\n    "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;verdict&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#E38A82" }}>&quot;FAIL&quot;</span>
-              <span style={{ color: "#767C83" }}>{",\n    "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;findings&quot;</span>
-              <span style={{ color: "#767C83" }}>{": [{\n      "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;markerId&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#E2C48A" }}>&quot;BALANCE_BREAK&quot;</span>
-              <span style={{ color: "#767C83" }}>{",\n      "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;verdict&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#E38A82" }}>&quot;FAIL&quot;</span>
-              <span style={{ color: "#767C83" }}>{",\n      "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;evidence&quot;</span>
-              <span style={{ color: "#767C83" }}>{": { "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;summary&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#E2C48A" }}>&quot;Running balance differs by -5,000.00&quot;</span>
-              <span style={{ color: "#767C83" }}>{",\n        "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;coordinates&quot;</span>
-              <span style={{ color: "#767C83" }}>{": [{ "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;page&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#C9D1B6" }}>4</span>
-              <span style={{ color: "#767C83" }}>{", "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;rect&quot;</span>
-              <span style={{ color: "#767C83" }}>{": { "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;x&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#C9D1B6" }}>548</span>
-              <span style={{ color: "#767C83" }}>{", "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;y&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#C9D1B6" }}>528</span>
-              <span style={{ color: "#767C83" }}>{" } }]\n      }\n    }],\n    "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;documentKind&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#E2C48A" }}>&quot;bank_statement&quot;</span>
-              <span style={{ color: "#767C83" }}>{"\n  }\n}"}</span>
+            <pre className="pm-mono" style={{ margin: 0, padding: 20, lineHeight: 1.7, letterSpacing: "0.02em", overflowX: "auto" }}>
+              <span style={PUNCT}>{'{\n  "document": { '}</span>
+              <span style={KEY}>&quot;filename&quot;</span>
+              <span style={PUNCT}>{": "}</span>
+              <span style={VAL}>&quot;hdfc_apr25_statement.pdf&quot;</span>
+              <span style={PUNCT}>{", "}</span>
+              <span style={KEY}>&quot;pageCount&quot;</span>
+              <span style={PUNCT}>{": "}</span>
+              <span style={VAL}>6</span>
+              <span style={PUNCT}>{" },\n  "}</span>
+              <span style={KEY}>&quot;verification&quot;</span>
+              <span style={PUNCT}>{": {\n    "}</span>
+              <span style={KEY}>&quot;verdict&quot;</span>
+              <span style={PUNCT}>{": "}</span>
+              <span style={FAIL}>&quot;FAIL&quot;</span>
+              <span style={PUNCT}>{",\n    "}</span>
+              <span style={KEY}>&quot;findings&quot;</span>
+              <span style={PUNCT}>{": [{\n      "}</span>
+              <span style={KEY}>&quot;markerId&quot;</span>
+              <span style={PUNCT}>{": "}</span>
+              <span style={VAL}>&quot;BALANCE_BREAK&quot;</span>
+              <span style={PUNCT}>{",\n      "}</span>
+              <span style={KEY}>&quot;verdict&quot;</span>
+              <span style={PUNCT}>{": "}</span>
+              <span style={FAIL}>&quot;FAIL&quot;</span>
+              <span style={PUNCT}>{",\n      "}</span>
+              <span style={KEY}>&quot;evidence&quot;</span>
+              <span style={PUNCT}>{": { "}</span>
+              <span style={KEY}>&quot;summary&quot;</span>
+              <span style={PUNCT}>{": "}</span>
+              <span style={VAL}>&quot;Running balance differs by -5,000.00&quot;</span>
+              <span style={PUNCT}>{",\n        "}</span>
+              <span style={KEY}>&quot;coordinates&quot;</span>
+              <span style={PUNCT}>{": [{ "}</span>
+              <span style={KEY}>&quot;page&quot;</span>
+              <span style={PUNCT}>{": "}</span>
+              <span style={VAL}>4</span>
+              <span style={PUNCT}>{", "}</span>
+              <span style={KEY}>&quot;rect&quot;</span>
+              <span style={PUNCT}>{": { "}</span>
+              <span style={KEY}>&quot;x&quot;</span>
+              <span style={PUNCT}>{": "}</span>
+              <span style={VAL}>548</span>
+              <span style={PUNCT}>{", "}</span>
+              <span style={KEY}>&quot;y&quot;</span>
+              <span style={PUNCT}>{": "}</span>
+              <span style={VAL}>528</span>
+              <span style={PUNCT}>{" } }]\n      }\n    }],\n    "}</span>
+              <span style={KEY}>&quot;documentKind&quot;</span>
+              <span style={PUNCT}>{": "}</span>
+              <span style={VAL}>&quot;bank_statement&quot;</span>
+              <span style={PUNCT}>{"\n  }\n}"}</span>
             </pre>
-          </div>
+          </Reveal>
 
-          {/* PDF dossier */}
-          <div style={{ background: "#14181D", border: "1px solid #2A2F35", borderRadius: 4, overflow: "hidden" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #2A2F35" }}>
-              <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.08em" }}>req_8fk2.dossier.pdf</span>
-              <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83" }}>signed-in scans only</span>
+          <Reveal delay={300} style={{ background: "var(--pm-ink-raised)", borderRadius: "var(--pm-r-card)", overflow: "hidden" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 16,
+                padding: "14px 20px",
+                borderBottom: "1px solid var(--pm-ink-hairline)",
+              }}
+            >
+              <span className="pm-mono" style={{ color: "var(--pm-smoke)" }}>
+                req_8fk2.dossier.pdf
+              </span>
+              <span className="pm-caption" style={{ color: "var(--pm-smoke)" }}>
+                Signed-in scans only
+              </span>
             </div>
-            <div style={{ padding: 24, background: "#14181D", height: "100%", display: "flex", alignItems: "stretch" }}>
+            <div style={{ padding: 20 }}>
               <div
                 style={{
-                  flex: 1,
-                  background: "#F5F5F0",
-                  color: "#0E1216",
-                  padding: "22px 24px",
-                  fontFamily: SANS,
-                  boxShadow: "0 10px 30px -10px rgba(0,0,0,0.6)",
+                  background: "var(--pm-paper)",
+                  color: "var(--pm-ink)",
+                  borderRadius: "var(--pm-r-image)",
+                  padding: 20,
                   display: "flex",
                   flexDirection: "column",
-                  gap: 14,
+                  gap: 16,
                   minHeight: 380,
                 }}
               >
-                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", borderBottom: "1px solid #DDE1E4", paddingBottom: 10 }}>
-                  <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 15, letterSpacing: "-0.01em" }}>ProofMart Dossier</div>
-                  <div style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", letterSpacing: "0.08em" }}>REQ_8FK2 · 12 AUG 2026</div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    justifyContent: "space-between",
+                    gap: 12,
+                    borderBottom: "1px solid var(--pm-hairline)",
+                    paddingBottom: 12,
+                  }}
+                >
+                  <span className="pm-h3" style={{ fontSize: 20 }}>
+                    ProofMart Dossier
+                  </span>
+                  <span className="pm-mono" style={{ color: "var(--pm-ash)" }}>
+                    req_8fk2
+                  </span>
                 </div>
                 <div>
-                  <div style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", letterSpacing: "0.12em" }}>SUBJECT</div>
-                  <div style={{ fontFamily: MONO, fontSize: 12, marginTop: 2 }}>hdfc_apr25_statement.pdf</div>
+                  <p className="pm-eyebrow" style={{ marginBottom: 4 }}>
+                    Subject
+                  </p>
+                  <p className="pm-mono">hdfc_apr25_statement.pdf</p>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", background: "rgba(180,35,31,0.08)", borderLeft: "2px solid #B4231F" }}>
-                  <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, color: "#B4231F", letterSpacing: "0.08em" }}>× FAIL</span>
-                  <span style={{ fontFamily: SANS, fontSize: 13, color: "#0E1216" }}>4 markers · 2 fail, 2 review</span>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: "10px 14px",
+                    background: "rgba(180,35,31,0.07)",
+                    borderLeft: "3px solid var(--pm-fail)",
+                    borderRadius: "0 var(--pm-r-image) var(--pm-r-image) 0",
+                  }}
+                >
+                  <span className="pm-mono" style={{ color: "var(--pm-fail)" }}>
+                    × FAIL
+                  </span>
+                  <span className="pm-caption">4 markers · 2 fail, 2 review</span>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "60px 1fr", rowGap: 10, columnGap: 10, fontSize: 12 }}>
-                  <div style={{ fontFamily: MONO, fontSize: 10, color: "#767C83" }}>01 · p4</div>
-                  <div>
-                    <div style={{ fontFamily: MONO, fontSize: 11, fontWeight: 500 }}>BALANCE_BREAK</div>
-                    <div style={{ color: "#43494F", fontSize: 11, lineHeight: 1.4 }}>Running balance short ₹5,000 on row 17.</div>
-                  </div>
-                  <div style={{ fontFamily: MONO, fontSize: 10, color: "#767C83" }}>02 · p4</div>
-                  <div>
-                    <div style={{ fontFamily: MONO, fontSize: 11, fontWeight: 500 }}>CROSS_PAGE_TOTAL_MISMATCH</div>
-                    <div style={{ color: "#43494F", fontSize: 11, lineHeight: 1.4 }}>Balance carried from page 3 to page 4 differs by ₹1,240.</div>
-                  </div>
+                <div style={{ display: "grid", gap: 12 }}>
+                  {[
+                    { addr: "01 · p4", id: "BALANCE_BREAK", body: "Running balance short ₹5,000 on row 17." },
+                    { addr: "02 · p4", id: "CROSS_PAGE_TOTAL_MISMATCH", body: "Balance carried from page 3 to page 4 differs by ₹1,240." },
+                  ].map((f) => (
+                    <div key={f.id} style={{ display: "grid", gridTemplateColumns: "64px minmax(0, 1fr)", gap: 12 }}>
+                      <span className="pm-mono" style={{ color: "var(--pm-ash)" }}>
+                        {f.addr}
+                      </span>
+                      <div>
+                        <p className="pm-mono">{f.id}</p>
+                        <p className="pm-caption" style={{ color: "var(--pm-slate)", marginTop: 4 }}>
+                          {f.body}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div style={{ marginTop: "auto", paddingTop: 10, borderTop: "1px solid #DDE1E4", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ fontFamily: MONO, fontSize: 9, color: "#767C83", letterSpacing: "0.1em" }}>SIGNATURE · ED25519</div>
-                  <div style={{ width: 44, height: 44, border: "1px solid #1F6B4A", display: "grid", placeItems: "center", fontFamily: MONO, fontSize: 8, letterSpacing: "0.1em", color: "#1F6B4A" }}>
-                    ✓ SIGNED
-                  </div>
+                <div
+                  style={{
+                    marginTop: "auto",
+                    paddingTop: 12,
+                    borderTop: "1px solid var(--pm-hairline)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 12,
+                  }}
+                >
+                  <span className="pm-eyebrow" style={{ margin: 0 }}>
+                    Signature
+                  </span>
+                  <span
+                    className="pm-mono"
+                    style={{ border: "1px solid var(--pm-ink)", borderRadius: "var(--pm-r-pill)", padding: "4px 14px", whiteSpace: "nowrap" }}
+                  >
+                    ed25519 · signed
+                  </span>
                 </div>
               </div>
             </div>
-          </div>
+          </Reveal>
         </div>
 
-        <div style={{ marginTop: 24, display: "flex", alignItems: "center", gap: 24, fontFamily: MONO, fontSize: 11, color: "#767C83" }}>
-          <span>The JSON above matches the live API response shape. The dossier PDF renders and signs from a saved, signed-in scan at /api/documents/[id]/dossier — anonymous scans aren&rsquo;t saved, so there&rsquo;s nothing to sign.</span>
-        </div>
+        <p className="pm-body" style={{ marginTop: 24, color: "var(--pm-smoke)" }}>
+          The JSON above matches the live API response shape. The dossier renders and signs from a saved, signed-in scan at{" "}
+          <span className="pm-mono">/api/documents/[id]/dossier</span> — anonymous scans aren&rsquo;t saved, so there&rsquo;s nothing to sign.
+        </p>
       </div>
     </section>
   );

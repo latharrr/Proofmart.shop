@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Wordmark from "@/components/brand/wordmark";
 import { redirect } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { MONO, SANS } from "@/lib/evidence-data";
@@ -37,17 +38,14 @@ export default async function ApiKeysPage({ searchParams }: { searchParams: Prom
   const hasMore = (count ?? 0) > from + PAGE_SIZE;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#FFFFFF" }}>
+    <div style={{ minHeight: "100vh", background: "var(--pm-paper)" }}>
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "56px 24px" }}>
-        <Link href="/" className="pm-hoverable" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 40, width: "fit-content" }}>
-          <div aria-hidden="true" style={{ width: 22, height: 22, background: "#0E1216", position: "relative" }}>
-            <div style={{ position: "absolute", inset: 5, border: "1.5px solid #F5F5F0" }} />
-          </div>
-          <span style={{ fontFamily: SANS, fontWeight: 600, letterSpacing: "-0.01em", fontSize: 17, color: "#0E1216" }}>ProofMart</span>
-        </Link>
+        <div style={{ marginBottom: 40 }}>
+          <Wordmark href="/" />
+        </div>
 
         <h1 style={{ fontFamily: SANS, fontWeight: 500, fontSize: 24, letterSpacing: "-0.01em", margin: "0 0 6px" }}>API keys</h1>
-        <p style={{ fontFamily: SANS, fontSize: 14, color: "#767C83", margin: "0 0 32px", lineHeight: 1.5 }}>
+        <p style={{ fontFamily: SANS, fontSize: 17, color: "var(--pm-ash)", margin: "0 0 32px", lineHeight: 1.5 }}>
           Use a key to call <code style={{ fontFamily: MONO }}>/v1/verify</code>, <code style={{ fontFamily: MONO }}>/v1/inspect</code>, and{" "}
           <code style={{ fontFamily: MONO }}>/v1/extract</code> directly. Each key is shown in full only once, at creation.
         </p>
@@ -57,9 +55,9 @@ export default async function ApiKeysPage({ searchParams }: { searchParams: Prom
         </div>
 
         {!keys || keys.length === 0 ? (
-          <p style={{ fontFamily: SANS, fontSize: 14, color: "#767C83" }}>No API keys yet.</p>
+          <p style={{ fontFamily: SANS, fontSize: 17, color: "var(--pm-ash)" }}>No API keys yet.</p>
         ) : (
-          <div style={{ border: "1px solid #DDE1E4", borderRadius: 3 }}>
+          <div style={{ border: "1px solid var(--pm-hairline)", borderRadius: "var(--pm-r-image)" }}>
             {keys.map((key, i) => (
               <div
                 key={key.id}
@@ -69,18 +67,18 @@ export default async function ApiKeysPage({ searchParams }: { searchParams: Prom
                   alignItems: "center",
                   gap: 12,
                   padding: "14px 16px",
-                  borderTop: i === 0 ? "none" : "1px solid #DDE1E4",
+                  borderTop: i === 0 ? "none" : "1px solid var(--pm-hairline)",
                   opacity: key.revoked_at ? 0.5 : 1,
                 }}
               >
                 <div style={{ minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 4 }}>
-                    <span style={{ fontFamily: SANS, fontSize: 14, color: "#0E1216", fontWeight: 500 }}>{key.name}</span>
+                    <span style={{ fontFamily: SANS, fontSize: 17, color: "var(--pm-ink)", fontWeight: 500 }}>{key.name}</span>
                     {key.revoked_at && (
-                      <span style={{ fontFamily: MONO, fontSize: 10, color: "#B4231F", letterSpacing: "0.06em" }}>REVOKED</span>
+                      <span style={{ fontFamily: MONO, fontSize: 12, color: "var(--pm-fail)", letterSpacing: "0.06em" }}>REVOKED</span>
                     )}
                   </div>
-                  <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.02em" }}>
+                  <div style={{ fontFamily: MONO, fontSize: 12, color: "var(--pm-ash)", letterSpacing: "0.02em" }}>
                     {key.key_prefix}… · created {new Date(key.created_at).toLocaleDateString()} ·{" "}
                     {key.last_used_at ? `last used ${new Date(key.last_used_at).toLocaleDateString()}` : "never used"}
                   </div>
@@ -93,10 +91,10 @@ export default async function ApiKeysPage({ searchParams }: { searchParams: Prom
                       style={{
                         fontFamily: MONO,
                         fontSize: 11,
-                        color: "#767C83",
+                        color: "var(--pm-ash)",
                         background: "none",
-                        border: "1px solid #DDE1E4",
-                        borderRadius: 3,
+                        border: "1px solid var(--pm-hairline)",
+                        borderRadius: "var(--pm-r-image)",
                         padding: "6px 10px",
                         cursor: "pointer",
                       }}
@@ -113,14 +111,14 @@ export default async function ApiKeysPage({ searchParams }: { searchParams: Prom
         {(page > 1 || hasMore) && (
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20, fontFamily: MONO, fontSize: 12 }}>
             {page > 1 ? (
-              <Link href={`/account/api-keys?page=${page - 1}`} className="pm-hoverable" style={{ color: "#0E1216" }}>
+              <Link href={`/account/api-keys?page=${page - 1}`} className="pm-hoverable" style={{ color: "var(--pm-ink)" }}>
                 ← Newer
               </Link>
             ) : (
               <span />
             )}
             {hasMore && (
-              <Link href={`/account/api-keys?page=${page + 1}`} className="pm-hoverable" style={{ color: "#0E1216" }}>
+              <Link href={`/account/api-keys?page=${page + 1}`} className="pm-hoverable" style={{ color: "var(--pm-ink)" }}>
                 Older →
               </Link>
             )}

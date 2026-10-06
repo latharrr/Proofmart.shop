@@ -110,13 +110,47 @@ export const PRICING: PricingTier[] = [
   },
 ];
 
-export interface FooterColumn {
-  h: string;
-  links: string[];
+export interface FooterLink {
+  label: string;
+  href: string;
 }
 
+export interface FooterColumn {
+  h: string;
+  links: FooterLink[];
+}
+
+// Every link here resolves to something that actually exists — an anchor on
+// this page or a real route. The previous version listed 15 links of which
+// 14 were href="#" placeholders (Changelog, Status page, Press kit, a
+// "Careers · 4" headcount, and so on). On a product whose entire pitch is
+// not claiming more than it can evidence, a footer full of dead ends was
+// the wrong thing to ship. Anything added back here needs a destination.
 export const FOOTER: FooterColumn[] = [
-  { h: "Product", links: ["Pipeline", "Marker catalog", "Dossier format", "Changelog", "Status page"] },
-  { h: "Developers", links: ["REST reference", "Webhooks", "CLI", "Verify signatures", "Sample vault"] },
-  { h: "Company", links: ["Manifesto", "Trust & security", "Careers", "Press kit", "Contact"] },
+  {
+    h: "Product",
+    links: [
+      { label: "Pipeline", href: "#pipeline" },
+      { label: "Marker catalog", href: "#markers" },
+      { label: "Outputs & dossier", href: "#outputs" },
+      { label: "Pricing", href: "#pricing" },
+    ],
+  },
+  {
+    h: "Developers",
+    links: [
+      { label: "Integrations", href: "#integrate" },
+      { label: "API keys", href: "/account/api-keys" },
+      { label: "Webhooks", href: "/account/webhooks" },
+      { label: "My documents", href: "/documents" },
+    ],
+  },
+  {
+    h: "Company",
+    links: [
+      { label: "Trust & security", href: "/security" },
+      { label: "Sign in", href: "/login" },
+      { label: "Create account", href: "/signup" },
+    ],
+  },
 ];

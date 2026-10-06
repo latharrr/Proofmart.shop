@@ -10,7 +10,7 @@ import SiteFooter from "@/components/home/site-footer";
 
 export default function Home() {
   return (
-    <div style={{ width: "100%", minHeight: "100vh", background: "#FFFFFF", color: "#0E1216" }}>
+    <div className="pm-page">
       <Topbar />
       <main id="main">
         <Hero />

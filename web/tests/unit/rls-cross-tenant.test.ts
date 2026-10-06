@@ -50,6 +50,20 @@ describe.skipIf(!hasCreds)("cross-tenant RLS isolation (live Supabase project)",
   let deliveryId: string;
 
   beforeAll(async () => {
+    // Reachability first, so an unreachable project doesn't masquerade as a
+    // failed sign-in. A paused Supabase project (the free tier pauses after
+    // inactivity) stops resolving in DNS entirely, and the resulting
+    // "fetch failed" on signInWithPassword reads exactly like a credentials
+    // or policy problem. This suite stays RED in that case — RLS really is
+    // unverified — but says which of the two it is.
+    await fetch(`${SUPABASE_URL}/auth/v1/health`, { method: "GET" }).catch((cause) => {
+      throw new Error(
+        `Cannot reach Supabase at ${SUPABASE_URL} (${cause instanceof Error ? cause.message : String(cause)}). ` +
+          `RLS is unverified, not necessarily broken. If the project is paused, restore it in the Supabase dashboard; ` +
+          `if it no longer exists, apply web/supabase/migrations/ to a new one and update .env.local.`,
+      );
+    });
+
     clientA = createClient(SUPABASE_URL!, SUPABASE_KEY!, { auth: { autoRefreshToken: false, persistSession: false } });
     clientB = createClient(SUPABASE_URL!, SUPABASE_KEY!, { auth: { autoRefreshToken: false, persistSession: false } });
 
