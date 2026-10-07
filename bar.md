@@ -1,97 +1,121 @@
 # bar.md — the craft bar
 
-**Reference:** https://steep.app (refero: *Steep — "serif analytics on warm paper"*)
-**Measured:** 2026-09-16, Chromium 1440×900 @2x, computed styles + stylesheet extraction.
-**Judged against:** rendered output only. Never the code.
+**Reference:** https://lusion.co (home), captured 2026-10-07, Chromium 1440×900 with GPU.
+**Replaces:** the Steep bar (archived as `bar-steep.md`). The owner rejected the calm,
+flat result; this bar asks for real-time 3D and choreographed motion.
+**Judged against:** rendered output only: screenshots, scroll filmstrips, cursor and
+hover captures. Never the code.
 
-Seven mechanisms. Every one is checkable by looking at a screenshot or a filmstrip.
-A critic that cannot point at the pixel that fails a line has not found a failure.
+Seven mechanisms. Each one is checkable by looking. A critic that can't point at the
+frame or pixel that fails a line hasn't found a failure.
 
 ---
 
-## 1. The display face is a serif at 400 weight, and only 400
+## 1. The hero is a live 3D scene, lit like a product shot, inside a framed stage
 
-Hero display **90px**, tracking **−2.25px**. Section heads **64px**, tracking **−1.6px**.
-Body and all UI is sans. Measured on steep.app: `90px w400 ls-2.25px Signifier`, `64px w400 ls-1.6px Signifier`, `16px w400 Sohne`.
+Lusion opens on a real-time WebGL scene: glossy and matte 3D objects with specular
+highlights, soft shadows and depth of field. It sits in a **rounded stage**
+(~20px radius) inset from the page gutters, and **the scene responds to the cursor**:
+objects drift and rotate toward the pointer.
 
-- **Fail if:** a headline renders in sans, or any serif renders above weight 400, or display tracking is looser than −0.02em.
-- **Ours today:** Instrument Sans 72px w500. Every headline on the site fails this.
+- **ProofMart adaptation:** the scene is made from the subject itself, never abstract
+  blobs: 3D document pages or statement sheets, a pinned finding box, the verdict. It
+  must read as "a document being examined" in the first frame.
+- **Fail if:** the hero has no real 3D (a flat image, a CSS gradient, an SVG
+  pretending), the objects are flat-shaded with no highlight or shadow, the scene
+  ignores the cursor (two cursor captures 400px apart show the same frame), or the
+  scene is abstract decoration unrelated to documents.
 
-## 2. Emphasis inside a headline is carried by *italic serif* — never colour, weight, or underline
+## 2. Scroll moves things in depth, not only in opacity
 
-steep.app: "AI analytics for faster insights and *zero chaos*" — the payload phrase is italic, same size, same weight, same colour.
+Lusion's scroll filmstrip changes the 3D composition: the hero stage scales and
+recedes, a 3D **ribbon in the accent blue** sweeps through and behind the headline,
+and media planes **tilt in perspective** (visible rotateX/rotateY or skew) before
+settling flat.
 
-- **Exactly one** italic phrase per headline. **At most one** headline per page uses it.
-- **Fail if:** a headline emphasises with a colour span, a bolder weight, a highlight, or an underline. Or if two phrases in one headline are italic.
-- **Ours today:** `on the record.` is emphasised with a grey colour span (`#43494F`). Fails.
+- At least **two** scroll-linked depth moves per page on marketing: stage scale or
+  recede, perspective tilt of cards or media, a 3D ribbon or path, layered parallax.
+- **Fail if:** a scroll filmstrip of 8+ frames shows only fades or plain slide-ups,
+  or every element moves at the same speed (no parallax layers), or a depth move
+  jitters or tears between frames.
 
-## 3. Product artifacts float free and bleed past the viewport edge
+## 3. Display type is huge, regular weight, tightly set, and reveals by line
 
-Above the fold, steep.app has **four** floating UI cards; **three are cropped by the viewport edge** (Region card cut off left, Registrations cut off right, Activation cut off bottom-left). None sits inside a bordered container.
+Measured: headline ~150px at 1440 (`Bold Ideas, / Brought to Life`), weight 400,
+negative tracking, one grotesk family for everything. Supporting copy ~22px w400.
+Labels and buttons are **14px w500, uppercase**. Headlines enter **line by line from a
+mask**: each line slides up from below its own clipping box, staggered.
 
-- At least **two** artifacts above the fold, **at least one cropped by an edge**. White surface, 20px radius, three-layer soft shadow.
-- **Fail if:** every product visual is fully contained, centred, or sits inside a visible frame/border.
-- **Crop on a boundary, never through the proof.** The reference can crop its cards because their contents are ambient — a number, a label, a sparkline. Ours carry the argument: the arithmetic that proves a finding, and the response shape a developer is evaluating. A crop that severs `84,210.00 + 12,500.00 = 96,7` or `"summary": "Running balanc` has taken the one thing the page exists to show and made it unreadable.
-  The bleed must fall on a structural seam — a preview pane, a column gutter, a chart's far edge — so that everything load-bearing stays wholly inside the viewport and only context runs off it.
-  **Fail if:** any clipped edge cuts through a number, a JSON key/value, a marker ID, or a line of running text.
-- **Ours today:** one Evidence Rail, fully contained, inside a grey panel, nothing bleeds. Fails.
+- Display ≥ 120px desktop and ≥ 56px mobile, weight 400, tracking ≤ −0.03em.
+- **Fail if:** a display headline is bold (≥ 600), under those sizes, set in a serif,
+  or appears all at once with a plain fade instead of a per-line masked rise.
 
-## 4. The page is 97% achromatic, with one warm accent used at most once
+## 4. Light cool field, ink controls, one electric accent
 
-Measured background inventory: white, `#17191c`, `#f7f7f8`, `#ececec` dominate. Peach `#fbe1d1` appears **3 times in the whole document**. Sienna `#5d2a1a` only ever on peach.
+Measured: page field `#f0f1fa` (cool lavender-white), ink `#000`, dark pill `#2b2e3a`,
+light pill `#e4e6ef`, accent blue `#3b49f4`→`#5981fe` used on the 3D ribbon and
+highlights. Colour lives in the 3D and the media. The UI chrome is achromatic.
 
-- **Fail if:** a second chromatic hue appears anywhere decorative, or the peach surface appears more than once per page, or sienna appears off-peach.
-- **ProofMart adaptation — read this, it is the one place we deliberately break the reference:**
-  `FAIL` / `REVIEW` / `CLEAR` colours are **functional signal, not decoration**. A forensics product cannot render a verdict in greyscale. They are exempt from this rule and stay saturated. Everything that is *not* a verdict obeys the achromatic rule — including the current red `#B4231F` used as a brand accent in the eyebrow and logo, which must go achromatic or become peach.
-  A critic must not fail a page for showing red on a FAIL badge. It *must* fail a page for red anywhere else.
+- **ProofMart adaptation:** `FAIL` / `REVIEW` / `CLEAR` stay as functional verdict
+  colours, exempt. The verdict red is the only red anywhere.
+- **Fail if:** UI chrome (buttons, text, borders, cards) uses a hue other than the accent
+  blue or a verdict colour; or the accent appears as flat UI fill on more than one
+  control per screen; or red appears outside a verdict.
 
-## 5. Buttons are pills, cards are 24px, and only floating artifacts get a shadow
+## 5. Pills with a dot, and the label rolls on hover
 
-Measured: buttons `border-radius: 9999px`. Cards 24px, elevated 20px, inputs 16px. Content cards have **no shadow**; only the floating artifacts carry `subtle-3`.
+Measured: buttons are full pills (radius ≥ height/2), uppercase 14px w500, many carry a
+small **dot** indicator. On hover the **label rolls**: the text slides up and an
+identical copy rises from below. `transform 0.3s cubic-bezier(0.4,0,0.1,1)`, background
+`0.4s`. Primary is the dark `#2b2e3a` pill; secondary is the light `#e4e6ef` or white
+pill.
 
-- Exactly **one filled** button per cluster, paired with a **ghost**. Never two filled side by side.
-- **Fail if:** any button is not fully pill. Any card is below 16px radius. Any static content card has a drop shadow.
-- **Ours today:** `--pm-r-control: 2px`, `--pm-r-card: 6px`, `--pm-r-panel: 10px`. Every control on the site fails this.
+- **Fail if:** a button isn't a full pill, its label is sentence case, hover is only a
+  colour change (no roll), or hover is slower than 450ms or uses a bouncy or overshoot
+  curve.
 
-## 6. Enter motion is one gesture, 500ms, and nothing else
+## 6. The page is drawn on a measured frame, and the frame is visible
 
-Extracted keyframes from steep.app:
-```
-@keyframes fade-in-y { 0% { opacity:0; transform: translateY(10px) } 100% { opacity:1; transform: translateY(0) } }
-.animate-fade-in-y { animation: 0.5s ease-out 0s 1 normal forwards }
-.animation-delay-300 { opacity: 0; animation-delay: 0.3s }
-```
-- **10px** of travel. **500ms**. **ease-out**. **300ms** stagger. Opacity and translateY only.
-- **Fail if:** anything scales in, slides horizontally, bounces, springs, blurs in, or travels more than ~12px. If two different enter animations appear on one page, that is a fail.
-- **Ours today:** 620ms, 14px travel, `cubic-bezier(0.16,1,0.3,1)`. Close, but slower and softer than the bar.
+Lusion marks its grid with **`+` crosshair marks** at the corners and column lines of
+framed media, at fixed gutters (72px desktop). Media, video and 3D stages sit in
+rounded frames (~20px radius) on that grid. Sections breathe: at least 160px
+between major sections on desktop.
 
-## 7. Hover is colour-only and fast — the one exception is the arrow
+- **Fail if:** framed media or 3D stages have no structural marks at all on a page that
+  has them elsewhere (inconsistent), gutters differ between sections, or two major
+  sections sit closer than 120px on desktop.
 
-Measured on steep.app buttons:
-```
-transition-property: color, background-color, border-color, outline-color, fill, stroke
-transition-duration: 0.2s
-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1)
-```
-Secondary/icon controls: `0.15s`, same curve. **No transform on hover anywhere.**
+## 7. Motion has one easing family and nothing feels cheap
 
-The single exception is the link arrow, which wraps rather than slides:
-```
-@keyframes arrow-slide-frames { 0%{translate(0)} 50%{translate(100%)} 51%{translate(-100%)} 100%{translate(0)} }
-```
-- Inline text links are **not underlined at rest** — the `→` suffix carries the affordance.
-- **Fail if:** a button lifts, scales, or shifts on hover. If hover takes longer than 250ms. If inline links are underlined at rest.
-- **Ours today:** `pm-hoverable` transitions `transform` and `box-shadow` over 220ms — controls lift on hover. Fails.
+Measured curves: `cubic-bezier(0.4,0,0.1,1)` and `cubic-bezier(0.35,0,0,1)`, both
+fast-out and long-settle. Durations 300–600ms for UI and 800–1400ms for scene moves.
+3D runs at a steady frame rate.
+
+- Under `prefers-reduced-motion` the page shows a **still, fully composed** frame:
+  the 3D renders one static pose, and reveals are instant. Nothing is hidden or broken.
+- **Fail if:** any spring or overshoot bounce, any linear tween on UI, visible frame
+  drops or stutter in the 3D filmstrip, layout shift when the 3D loads, or a blank
+  stage while it loads (it needs a designed poster or placeholder frame).
 
 ---
 
 ## Not mechanisms — do not let these into a critique
 
-- "Feels premium", "looks clean", "more modern", "needs more polish" — unfalsifiable. Reject.
-- Copywriting quality. The Brief critic owns whether the page does its job; craft does not rewrite headlines.
-- Anything requiring the implementation to be read. Screenshots and filmstrips only.
+- "Feels premium", "more wow", "needs more polish": unfalsifiable. Reject.
+- Copywriting quality belongs to the Brief critic.
+- Anything that requires reading the implementation.
 
-## Known conflict, resolved once, here
+## Known conflicts, resolved once, here
 
-Steep sells *editorial calm*. ProofMart sells *evidence*. Where the two collide, the resolution is fixed:
-**adopt Steep's system entirely, except that verdict state stays loud.** The serif, the pills, the achromatic field and the 500ms fade are not in tension with forensics — they make the red mean something, because nothing else on the page is red.
+- **Lusion is a studio showreel. ProofMart is a product.** Adopt the craft: 3D stage,
+  scroll depth, masked type, roll-hover pills, crosshair frame, easing. Don't adopt
+  the loader or the "PLAY REEL" theatre. **No intro loader that blocks content.**
+  The first frame shows the product within 1s.
+- **App pages (auth, documents, account) are tools.** They carry the same
+  type, pills, colour, frame and easing (mechanisms 3–7, with display sizes scaled
+  to the page). Each one also carries **one** 3D or depth moment where it helps, such
+  as a 3D document stack beside the auth form or a tilt-on-hover report card. They
+  don't need a full-screen scene, and nothing animates in a way that slows a task.
+- **Mobile:** the lusion mobile capture never finished loading in headless Chromium,
+  so it's blind. On mobile, judge against the desktop mechanisms scaled down. The 3D
+  may simplify (fewer objects, no cursor) but must still be real 3D on the home hero.

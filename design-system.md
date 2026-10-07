@@ -1,175 +1,157 @@
 # design-system.md — ProofMart
 
-Derived from the Steep system (https://steep.app), adapted for a document-forensics product.
-This file is the **objective** reference. The System critic checks adherence against this and nothing else.
-Where this file and `bar.md` disagree, `bar.md` wins — it describes the bar, this describes our tokens.
+Derived from lusion.co, adapted for a document-forensics product.
+This file is the **objective** reference: the System critic checks adherence against
+it and nothing else. Where this file and `bar.md` disagree, `bar.md` wins.
+The previous Steep-derived system is archived as `design-system-steep.md`.
 
 ---
 
 ## 1. Type
 
-| Role | Family | Size | Weight | Tracking | Line-height |
-|---|---|---|---|---|---|
-| display | Instrument Serif | 90px | 400 | −2.25px | 1.05 |
-| heading-lg | Instrument Serif | 64px | 400 | −1.6px | 1.1 |
-| heading | Instrument Serif | 44px | 400 | −0.88px (−0.02em, per bar.md §1) | 1.15 |
-| heading-sm | Instrument Sans | 26px | 450 | −0.23px | 1.18 |
-| body-lg | Instrument Sans | 20px | 450 | normal | 1.35 |
-| body | Instrument Sans | 17px | 400 | normal | 1.5 |
-| caption | Instrument Sans | 15px | 400 | normal | 1.5 |
-| identifier | IBM Plex Mono | 12px | 400 | 0.06em | 1.5 |
+One grotesk for everything, plus a mono reserved for machine strings.
 
-**Font choices.** Signifier and Sohne are commercial. Free equivalents, both already on Google Fonts:
-- **Instrument Serif** replaces Signifier. Ships 400 + a true italic and *nothing else* — it cannot violate the weight rule.
-- **Instrument Sans** replaces Sohne. Already installed in `layout.tsx`.
-- **IBM Plex Mono** stays, already installed. Mono is **not** in the Steep system; it is ours, and it is reserved.
+| Role | Family | Desktop | Mobile | Weight | Tracking | Line-height | Case |
+|---|---|---|---|---|---|---|---|
+| display | Geist | 148px | 60px | 400 | −0.045em | 0.95 | sentence |
+| heading-lg | Geist | 88px | 44px | 400 | −0.04em | 1.0 | sentence |
+| heading | Geist | 48px | 32px | 400 | −0.03em | 1.08 | sentence |
+| heading-sm | Geist | 28px | 24px | 400 | −0.02em | 1.2 | sentence |
+| body-lg | Geist | 22px | 18px | 400 | −0.01em | 1.4 | sentence |
+| body | Geist | 17px | 16px | 400 | normal | 1.5 | sentence |
+| label | Geist | 14px | 13px | 500 | 0.02em | 1.2 | UPPERCASE |
+| identifier | Geist Mono | 13px | 12px | 400 | 0 | 1.5 | as data |
 
-**Rules**
-- Serif is display only. Never body, never UI, never below 44px.
-- Serif never leaves weight 400. Italic is the only variant permitted.
-- Mono is reserved for machine strings: marker IDs (`BALANCE_BREAK`), endpoints (`/v1/verify`), request IDs, JSON, page/row coordinates, amounts inside a finding's arithmetic. Never for prose, never for labels that are merely technical-sounding.
-- Body text never below 15px.
-- **Every size on the page is one of the eight roles above.** The page's own
-  chrome uses no size that is not in that table.
-
-  An earlier draft of this file capped a viewport at four distinct sizes. That
-  was invented rather than measured, and the reference does not obey it: a
-  count of steep.app's own fold returns **six** distinct sizes (90, 22, 18, 16,
-  15, 14). The constraint that actually describes the bar is that every size is
-  a role, not that there are few of them.
-
-- **A product artifact carries its own internal scale.** The Evidence Rail
-  reproduces an application looking at a document, and neither an app's labels
-  nor a bank statement's fine print is page prose. Inside an artifact:
-  - the artifact's own UI chrome never goes below **11px**;
-  - the reproduced document may go smaller, because it is a photograph of a
-    printed page — a statement's CIN line and column headers are 9-10px in
-    life, and setting them at 15px would make the specimen look forged.
-
-  This carve-out covers only what is inside a floating artifact. Page chrome
-  gets no such licence.
+- Geist and Geist Mono load through `next/font/google` (CSP is `font-src 'self'`).
+- Nothing on the page is bold. 500 is used only by `label`.
+- Display and heading lines enter through a **line mask** (see §6).
+- Mono is reserved for machine strings: marker IDs (`BALANCE_BREAK`), endpoints,
+  request IDs, JSON, page/row coordinates, amounts inside a finding's arithmetic.
+- Every page-chrome text size is one of the roles above. **Inside a 3D scene or a
+  floating product artifact** (a reproduced statement, a finding card) the artifact
+  may use its own internal scale, down to 10px for the reproduced document.
 
 ## 2. Colour
 
-**Achromatic field — everything that is not a verdict**
+**Field and ink, the achromatic UI**
 
 | Token | Hex | Role |
 |---|---|---|
-| ink | `#17191c` | primary text, filled buttons, logo |
-| paper | `#ffffff` | canvas, elevated surfaces |
-| mist | `#f2f2f3` | content cards, input fills |
-| fog | `#fafafb` | alternating section bands, hover surfaces |
-| slate | `#777b86` | links, muted helper text |
-| ash | `#979799` | tertiary labels, category tags |
-| smoke | `#a3a6af` | placeholders, disabled |
-| hairline | `#ececec` | borders, dividers |
+| field | `#f0f1fa` | page background |
+| paper | `#ffffff` | cards, inputs, light pills, artifacts |
+| haze | `#e4e6ef` | secondary pill, input rest fill, subtle panels |
+| line | `#d9dbe6` | hairlines, crosshair marks at 40% ink, dividers |
+| mute | `#6b6f80` | secondary text, helper text, inline links at rest |
+| ink | `#0b0c10` | primary text, display type |
+| graphite | `#2b2e3a` | primary pill, dark stages, dark bands |
 
-**Warm accent — max one surface per page**
-
-| Token | Hex | Role |
-|---|---|---|
-| peach | `#fbe1d1` | accent card background, once per page |
-| sienna | `#5d2a1a` | text and strokes **on peach only** |
-
-**Verdict signal — functional, exempt from the achromatic rule**
+**Electric accent**: only in 3D, ribbons, focus rings and one highlight per screen.
 
 | Token | Hex | Role |
 |---|---|---|
-| fail | `#B4231F` | `FAIL` badges, fail finding rail edge, fail count |
-| review | `#8A6A1F` | `REVIEW` badges, review rail edge, review count |
-| clear | `#1F6B4A` | `CLEAR` badges, clear count |
+| volt | `#3b49f4` | 3D ribbon, focus ring, active nav dot, one emphasised word or line |
+| volt-2 | `#5981fe` | gradient partner of volt, inside 3D/ribbons only |
 
-Verdict colours appear **only** on verdict semantics. Never a brand accent, never a decorative rule, never a hover state, never the logo mark, never the eyebrow.
+**Verdict signal**: functional and exempt.
 
-## 3. Space
+| Token | Hex | Role |
+|---|---|---|
+| fail | `#e5342b` | FAIL badge, pin box, fail count |
+| review | `#c98a12` | REVIEW badge, review count |
+| clear | `#1d9a63` | CLEAR badge, clear count |
 
-Base unit **4px**. Scale: `4 8 12 16 20 24 28 32 40 64 80 96 124 128 160`.
+Rules
+- UI chrome uses only field/paper/haze/line/mute/ink/graphite plus volt.
+- volt as a solid UI fill: at most one control per screen (e.g. the active step).
+- Verdict colours never decorate. Red only ever means FAIL.
+- Exception: the Google "G" on "Continue with Google" keeps its official colours.
+- Dark bands (`graphite` background, `paper` text) are allowed for 3D stages and at
+  most one content section per page.
 
-- Page max-width **1200px**
-- Section gap **80px**
-- Card padding **20px**
-- Element gap **8px**
-- Component padding uses 4/8/12/16/20/24 only
+## 3. Space and frame
 
-## 4. Shape
+- Base unit 4px. Component padding from {4, 8, 12, 16, 20, 24, 32}.
+- Page gutter **72px** desktop, **20px** mobile. Max content width 1296px.
+- Major section spacing **≥160px** desktop, **≥96px** mobile.
+- **Crosshair marks**: `+` glyphs, 13px, `ink` at 40%, at the four corners of every
+  framed stage or media frame and on its column lines. Same size and colour
+  everywhere.
+
+## 4. Shape and depth
 
 | Element | Radius |
 |---|---|
-| buttons, pills, badges | `9999px` |
-| content cards | `24px` |
-| elevated / floating artifacts | `20px` |
-| inputs, small cards | `16px` |
-| images, screenshots | `12px` |
+| pill (buttons, chips, nav) | 9999px |
+| stage / media frame | 20px |
+| card | 20px |
+| input | 14px |
 
-Nothing renders at a radius between 1px and 11px. The old `--pm-r-control: 2px`
-/ `--pm-r-card: 6px` / `--pm-r-panel: 10px` scale is retired.
+- Shadows only on things floating above the field (artifacts, popovers, the
+  account menu): `0 1px 2px rgba(11,12,16,.06), 0 12px 32px -8px rgba(11,12,16,.18)`.
+  Flat content cards have no shadow.
+- **Perspective:** depth moves use `perspective: 1200px`. Card tilt at most 8° on any
+  axis. Media planes may enter from up to 12° and settle at 0°.
 
-**Radius belongs to surfaces.** An element earns a radius by having a surface at
-rest — a fill, a border on all sides, or a shadow. A cell that is defined only by
-the rule between it and its neighbour is a row in a table, not a card, and takes
-**no radius at all**. Zero is the absence of a radius, not a small one, and is
-the correct value for the marker catalog's rows and the integrate grid's columns.
+## 5. Components
 
-Getting this wrong in either direction is visible: a 24px radius on a full-width
-divider-separated row bends the hairline away from the row's own corners, and a
-6px radius on a card reads as the retired scale.
-
-## 5. Elevation
-
-```
---shadow-subtle:   oklab(0 0 0 / .05) 0 0 0 1px, rgba(0,0,0,.08) 0 4px 24px;
---shadow-modal:    oklab(0 0 0 / .05) 0 0 0 1px, rgba(0,0,0,.10) 0 8px 40px;
---shadow-artifact: rgba(4,23,43,.05) 0 0 0 1px,
-                   rgba(0,0,0,.10) 0 20px 25px -5px,
-                   rgba(0,0,0,.10) 0 8px 10px -6px;
-```
-Content cards get **no shadow** — they are separated by `mist` fill, not elevation.
-Only floating product artifacts use `--shadow-artifact`. At most two shadow styles per page.
+- **Primary pill:** graphite fill, paper label, `label` type, padding 16px 24px
+  (min-height 48px), optional 6px dot after the label.
+- **Secondary pill:** haze fill (or paper on haze surfaces), ink label, same metrics.
+- **Icon pill:** 48px circle, haze.
+- **Pill hover:** label rolls up (the label translates −100% while a duplicate rises
+  from +100%) in 300ms `--ease-out`; background shifts one step in 400ms. No lift,
+  no scale.
+- **Inline link:** `mute` at rest with a `→` suffix and no underline, `ink` on hover;
+  the arrow nudges 4px right.
+- **Input:** paper fill, 1px line border, 14px radius, padding 14px 16px; focus is a
+  2px volt ring.
+- **Stage:** 20px radius, crosshair marks, a 3D canvas or media inside, a designed
+  poster frame shown until the 3D is ready (same composition, no layout shift).
+- **Finding row:** paper, 3px left edge in the verdict colour, mono identifier, body
+  description, mono arithmetic on haze.
 
 ## 6. Motion
 
-```
---ease-enter: ease-out;                        /* 500ms */
---ease-hover: cubic-bezier(0.4, 0, 0.2, 1);    /* 200ms */
-```
+| Token | Value |
+|---|---|
+| `--ease-out` | `cubic-bezier(0.4, 0, 0.1, 1)` |
+| `--ease-scene` | `cubic-bezier(0.35, 0, 0, 1)` |
+| UI duration | 300–450ms |
+| reveal duration | 900ms, stagger 80ms per line |
+| scene duration | 800–1400ms |
 
-| Event | Property | Duration | Easing |
-|---|---|---|---|
-| enter (scroll reveal) | `opacity 0→1`, `translateY 10px→0` | 500ms | ease-out |
-| enter stagger | per sibling | 300ms offset | — |
-| hover (primary) | colour / background / border only | 200ms | `cubic-bezier(.4,0,.2,1)` |
-| hover (secondary, icon) | colour only | 150ms | `cubic-bezier(.4,0,.2,1)` |
-| link arrow | `translateX 0→100%, −100%→0` | 300ms | ease-out |
-| logo marquee | `translateX` loop | 50s | linear |
+- **Line reveal:** each display or heading line sits in an `overflow: hidden` box and
+  rises from `translateY(105%)` to 0. This is the only text entrance.
+- **Block reveal:** non-text blocks rise 32px and fade in 900ms `--ease-scene`,
+  triggered on entering the viewport. Content is visible at rest without JS
+  (progressive enhancement).
+- **Scroll-linked:** stage scale or recede, perspective tilt to flat, ribbon path
+  draw, parallax layers (0.85×–1.15× scroll speed).
+- No springs, no overshoot, no bounce, no linear UI tweens.
+- `prefers-reduced-motion: reduce`: the 3D renders one static pose, reveals are
+  instant, and scroll-linked motion is off.
 
-- **No transform on hover.** No lift, no scale, no shift.
-- One enter gesture for the whole site. Travel never exceeds 12px.
-- `prefers-reduced-motion: reduce` → all enter animation removed, elements visible at first paint. Non-negotiable; the reveal's resting state is `opacity: 0`.
+## 7. 3D
 
-## 7. Components
-
-- **Button, filled** — `ink` bg, white text, `9999px`, padding `12px 20px`, 17px w450.
-- **Button, ghost** — transparent, `ink` text, 1px `ink` border, `9999px`. Pairs with filled. **Never two filled side by side.**
-- **Content card** — `mist` bg, `24px`, no shadow, 20px padding.
-- **Accent card** — `peach` bg, `sienna` text, `24px`. Once per page. Only on a white section.
-- **Floating artifact** — white, `20px`, `--shadow-artifact`, may bleed past the viewport edge.
-- **Input / composer** — white, `16px`, `hairline` border, `smoke` placeholder.
-- **Inline link** — `slate`, no underline at rest, `→` suffix carries affordance, underline on hover only.
-- **Finding row** — white, 3px left edge in the verdict colour, mono identifier, sans description, mono arithmetic block on `mist`.
+- three.js (`three` package), client-only, loaded lazily after first paint. The page
+  is usable before it loads.
+- Physically based materials (`MeshPhysicalMaterial` / `MeshStandardMaterial`),
+  an environment map for reflections, soft shadows or contact shadows, gentle depth.
+- Cursor parallax: the scene eases toward the pointer (damped, never snapping).
+- Device pixel ratio capped at 2. Pause rendering when off-screen or the tab is hidden.
+- Mobile: fewer objects, no cursor; still real 3D on the home hero.
+- Subject matter is documents: paper sheets, statement rows, the pin box, the
+  verdict. No abstract blobs.
 
 ## 8. Hard don'ts
 
-1. No sans headline above 44px, no serif at any weight but 400.
-2. No chromatic hue outside peach/sienna and the three verdict colours.
-   *Exception:* a third-party sign-in mark whose owner forbids recolouring
-   (the Google "G" on "Continue with Google") renders in its official colours.
-   It is the only one, it sits inside a ghost button, and nothing else takes
-   its hues.
-3. No verdict colour used decoratively.
-4. No shadow on a content card.
-5. No radius below 12px.
-6. No transform on hover.
-7. No second enter animation.
+1. No bold display type, no serif.
+2. No hue in UI chrome outside volt and the verdict colours.
+3. No verdict colour used decoratively or as a hover state.
+4. No shadow on a flat content card.
+5. No button that isn't a full pill, and no sentence-case button label.
+6. No spring, overshoot or bounce easing.
+7. No content hidden behind a loader; the first frame is the product.
 8. No underline on an inline link at rest.
-9. No peach on a non-white section background.
-10. No mono on prose.
+9. No mono on prose.
+10. No layout shift when 3D or media loads.
