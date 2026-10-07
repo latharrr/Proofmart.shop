@@ -1,5 +1,413 @@
 @import "tailwindcss";
 
+/* ── foundation ── ───────────────────────────────────────────────────────────
+   Shared tokens and primitive styles for the Lusion-derived system
+   (design-system.md, bar.md). Page rules below this block are being replaced
+   page by page; everything here is meant to be read by all of them.
+   Primitives that use these classes live in src/components/motion/ and
+   src/components/three/ — see src/components/README-design.md.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  /* Families — next/font sets --font-geist-sans / --font-geist-mono on <html>.
+     Older names are mapped so nothing renders in a fallback face. */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-serif: var(--font-sans); /* retired: the system has no serif */
+
+  /* §2 Field and ink — the achromatic UI */
+  --field: #f0f1fa;
+  --paper: #ffffff;
+  --haze: #e4e6ef;
+  --line: #d9dbe6;
+  --mute: #6b6f80;
+  --ink: #0b0c10;
+  --graphite: #2b2e3a;
+  --graphite-deep: #1c1e26; /* graphite stage vignette edge — 3D stages only */
+
+  /* §2 Electric accent — 3D, ribbons, focus rings, one highlight per screen */
+  --volt: #3b49f4;
+  --volt-2: #5981fe;
+  --volt-gradient: linear-gradient(100deg, var(--volt), var(--volt-2));
+
+  /* §2 Verdict signal — functional, never decorative */
+  --fail: #e5342b;
+  --review: #c98a12;
+  --clear: #1d9a63;
+  --fail-wash: color-mix(in srgb, var(--fail) 10%, var(--paper));
+  --review-wash: color-mix(in srgb, var(--review) 12%, var(--paper));
+  --clear-wash: color-mix(in srgb, var(--clear) 10%, var(--paper));
+
+  /* §3 Space — 4px base. Component padding uses 1–8. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+  --space-40: 160px;
+  --gutter: 72px;
+  --content-max: 1296px;
+  --section-gap: 160px;
+
+  /* §3 Crosshair marks */
+  --cross-size: 13px;
+  --cross-color: rgb(11 12 16 / 0.4);
+  --cross-gap: 10px; /* mark row to frame edge */
+
+  /* §4 Shape and depth */
+  --r-pill: 9999px;
+  --r-stage: 20px;
+  --r-card: 20px;
+  --r-input: 14px;
+  --shadow-float: 0 1px 2px rgb(11 12 16 / 0.06), 0 12px 32px -8px rgb(11 12 16 / 0.18);
+  --perspective: 1200px;
+  --tilt-max: 8deg;
+  --enter-tilt: 12deg;
+
+  /* §1 Type scale (fluid between the mobile and desktop values) */
+  --fs-display: clamp(60px, 10.28vw, 148px);
+  --fs-heading-lg: clamp(44px, 6.11vw, 88px);
+  --fs-heading: clamp(32px, 3.34vw, 48px);
+  --fs-heading-sm: clamp(24px, 1.95vw, 28px);
+  --fs-body-lg: clamp(18px, 1.53vw, 22px);
+  --fs-body: 17px;
+  --fs-label: 14px;
+  --fs-identifier: 13px;
+
+  /* §6 Motion — one easing family, no springs */
+  --ease-out: cubic-bezier(0.4, 0, 0.1, 1);
+  --ease-scene: cubic-bezier(0.35, 0, 0, 1);
+  --dur-ui: 300ms;
+  --dur-ui-bg: 400ms;
+  --dur-reveal: 900ms;
+  --stagger: 80ms;
+  --dur-scene: 1100ms;
+  --rise: 32px;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --gutter: 20px;
+    --section-gap: 96px;
+    --fs-body: 16px;
+    --fs-label: 13px;
+    --fs-identifier: 12px;
+  }
+}
+
+body {
+  background: var(--field);
+  color: var(--ink);
+}
+
+/* Type roles — §1. Nothing is bold; 500 is the label only. */
+.pm-t-display,
+.pm-t-heading-lg,
+.pm-t-heading,
+.pm-t-heading-sm {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  margin: 0;
+}
+.pm-t-display { font-size: var(--fs-display); letter-spacing: -0.045em; line-height: 0.95; }
+.pm-t-heading-lg { font-size: var(--fs-heading-lg); letter-spacing: -0.04em; line-height: 1; }
+.pm-t-heading { font-size: var(--fs-heading); letter-spacing: -0.03em; line-height: 1.08; }
+.pm-t-heading-sm { font-size: var(--fs-heading-sm); letter-spacing: -0.02em; line-height: 1.2; }
+.pm-t-body-lg { font-size: var(--fs-body-lg); font-weight: 400; letter-spacing: -0.01em; line-height: 1.4; }
+.pm-t-body { font-size: var(--fs-body); font-weight: 400; line-height: 1.5; }
+.pm-t-label {
+  font-family: var(--font-sans);
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+.pm-t-mono {
+  font-family: var(--font-mono);
+  font-size: var(--fs-identifier);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* Page container — 72px gutters, 1296px content. */
+.pm-wrap {
+  width: 100%;
+  max-width: calc(var(--content-max) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Inline link — mute at rest with an arrow, ink on hover, arrow nudges 4px. */
+.pm-inline-link {
+  color: var(--mute);
+  text-decoration: none;
+  transition: color var(--dur-ui) var(--ease-out);
+}
+.pm-inline-link::after {
+  content: "→";
+  display: inline-block;
+  margin-left: 0.35em;
+  transition: transform var(--dur-ui) var(--ease-out);
+}
+.pm-inline-link:hover { color: var(--ink); }
+.pm-inline-link:hover::after { transform: translateX(4px); }
+
+/* ── RollPill (components/motion/roll-pill.tsx) — §5 ── */
+.pm-pill {
+  --pill-bg: var(--graphite);
+  --pill-bg-hover: var(--ink);
+  --pill-fg: var(--paper);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--pill-bg);
+  color: var(--pill-fg);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--dur-ui-bg) var(--ease-out),
+    opacity var(--dur-ui) var(--ease-out);
+}
+.pm-pill[data-variant="secondary"] { --pill-bg: var(--haze); --pill-bg-hover: var(--line); --pill-fg: var(--ink); }
+.pm-pill[data-variant="paper"] { --pill-bg: var(--paper); --pill-bg-hover: var(--haze); --pill-fg: var(--ink); }
+.pm-pill[data-size="sm"] { min-height: 40px; padding: 0 18px; font-size: 13px; gap: 8px; }
+.pm-pill[data-block] { display: flex; width: 100%; }
+.pm-pill:focus-visible { outline: 2px solid var(--volt); outline-offset: 3px; }
+.pm-pill:disabled,
+.pm-pill[aria-disabled="true"] { cursor: default; }
+.pm-pill:disabled:not([aria-busy="true"]),
+.pm-pill[aria-disabled="true"]:not([aria-busy="true"]) { opacity: 0.42; }
+
+.pm-pill-roll {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  height: 1.2em;
+}
+.pm-pill-roll > span {
+  display: block;
+  transition: transform var(--dur-ui) var(--ease-out);
+}
+.pm-pill-roll > span + span {
+  position: absolute;
+  inset: 0;
+  transform: translateY(100%);
+}
+.pm-pill-dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.pm-pill-icon { display: inline-flex; flex: none; }
+.pm-pill[aria-busy="true"] .pm-pill-dot { animation: pm-pill-busy 1.2s var(--ease-out) infinite alternate; }
+@keyframes pm-pill-busy { to { opacity: 0.25; } }
+
+@media (hover: hover) {
+  .pm-pill:not(:disabled):not([aria-disabled="true"]):hover { background-color: var(--pill-bg-hover); }
+  .pm-pill:not(:disabled):not([aria-disabled="true"]):hover .pm-pill-roll > span:first-child { transform: translateY(-100%); }
+  .pm-pill:not(:disabled):not([aria-disabled="true"]):hover .pm-pill-roll > span + span { transform: none; }
+}
+.pm-pill:focus-visible .pm-pill-roll > span:first-child { transform: translateY(-100%); }
+.pm-pill:focus-visible .pm-pill-roll > span + span { transform: none; }
+
+/* ── LineReveal (components/motion/line-reveal.tsx) — §6 line mask ──
+   Every word sits in its own clip box; words on the same rendered line share a
+   --line index, so they rise together exactly like a per-line mask. The clip
+   box is padded (and the padding cancelled by negative margin) so descenders
+   and overhangs are never cropped at rest. */
+.pm-lines-word {
+  display: inline-block;
+  overflow: hidden;
+  margin: -0.12em -0.06em -0.2em;
+  vertical-align: baseline;
+}
+.pm-lines-word > span {
+  display: inline-block;
+  padding: 0.12em 0.06em 0.2em;
+  transform: translateY(105%);
+}
+.pm-lines[data-reveal="shown"] .pm-lines-word > span {
+  transform: none;
+  transition: transform var(--dur-reveal) var(--ease-scene);
+  transition-delay: calc(var(--line, 0) * var(--stagger) + var(--pm-delay, 0ms));
+}
+.pm-lines[data-reveal="parked"] .pm-lines-word > span { transform: none; }
+
+/* ── Reveal (components/motion/reveal.tsx) — §6 block reveal ── */
+.pm-rise {
+  opacity: 0;
+  transform: translateY(var(--rise));
+}
+.pm-rise[data-reveal="shown"] {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--dur-reveal) var(--ease-scene),
+    transform var(--dur-reveal) var(--ease-scene);
+  transition-delay: var(--pm-delay, 0ms);
+}
+.pm-rise[data-reveal="parked"] { opacity: 1; transform: none; }
+
+/* ── Frame + Crosshair (components/motion/frame.tsx) — §3 / bar §6 ── */
+.pm-cross {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: var(--cross-size);
+  height: var(--cross-size);
+  color: var(--cross-color);
+}
+.pm-cross::before,
+.pm-cross::after {
+  content: "";
+  position: absolute;
+  background: currentColor;
+}
+.pm-cross::before { left: 0; right: 0; top: calc(50% - 0.75px); height: 1.5px; }
+.pm-cross::after { top: 0; bottom: 0; left: calc(50% - 0.75px); width: 1.5px; }
+
+.pm-frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cross-gap);
+}
+.pm-frame-marks {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--cross-size);
+}
+.pm-frame-marks > .pm-cross[data-col] {
+  position: absolute;
+  top: 0;
+  left: calc(var(--col) * 100% - var(--cross-size) / 2);
+}
+.pm-frame-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+}
+.pm-frame-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-stage);
+  isolation: isolate;
+  background: var(--frame-bg, transparent);
+}
+.pm-frame[data-tone="graphite"] { --frame-bg: radial-gradient(120% 120% at 50% 35%, var(--graphite) 0%, var(--graphite-deep) 100%); }
+.pm-frame[data-tone="paper"] { --frame-bg: var(--paper); }
+.pm-frame[data-tone="haze"] { --frame-bg: var(--haze); }
+.pm-frame[data-tone="field"] { --frame-bg: var(--field); }
+
+/* ── Tilt (components/motion/tilt.tsx) — §4 perspective, max 8° ── */
+.pm-tilt { perspective: var(--perspective); }
+.pm-tilt-inner {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* Scroll-linked helpers. <ScrollVar> writes --p (0→1) on its element; these
+   read it. All are inert under reduced motion. */
+.pm-scroll-recede {
+  transform: scale(calc(1 - var(--p, 0) * var(--recede, 0.12)));
+  transform-origin: 50% 0%;
+}
+.pm-scroll-tilt {
+  transform: perspective(var(--perspective)) rotateX(calc((1 - var(--p, 1)) * var(--enter-tilt)));
+  transform-origin: 50% 100%;
+}
+.pm-parallax {
+  transform: translate3d(0, calc((var(--p, 0.5) - 0.5) * var(--parallax, 0) * 1px), 0);
+}
+
+/* ── DocumentStage (components/three/document-stage.tsx) ── */
+.pm-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  contain: layout paint;
+}
+.pm-scene-poster,
+.pm-scene-gl,
+.pm-scene canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.pm-scene-poster {
+  object-fit: contain; /* the scene's camera fits its box the same way */
+  object-position: 50% 50%;
+  pointer-events: none;
+  user-select: none;
+}
+.pm-scene canvas {
+  display: block;
+  opacity: 0;
+  transition: opacity 700ms var(--ease-scene);
+}
+.pm-scene[data-ready] canvas { opacity: 1; }
+/* The canvas is transparent, so once it has faded in over the poster the
+   poster must go, or it would show through as a ghost when the scene moves. */
+.pm-scene[data-ready] .pm-scene-poster {
+  visibility: hidden;
+  transition: visibility 0s 700ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-lines-word > span,
+  .pm-lines[data-reveal] .pm-lines-word > span,
+  .pm-rise,
+  .pm-rise[data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .pm-pill,
+  .pm-pill-roll > span { transition: none; }
+  .pm-pill[aria-busy="true"] .pm-pill-dot { animation: none; }
+  .pm-scroll-recede,
+  .pm-scroll-tilt,
+  .pm-parallax,
+  .pm-tilt-inner { transform: none !important; }
+  .pm-scene canvas,
+  .pm-scene[data-ready] .pm-scene-poster { transition: none; }
+}
+
+@media print {
+  .pm-lines-word > span,
+  .pm-rise { opacity: 1 !important; transform: none !important; }
+}
+/* ── /foundation ── ──────────────────────────────────────────────────────── */
+
+
 *,
 *::before,
 *::after {
@@ -29,68 +437,64 @@ body {
 }
 
 /* ==========================================================================
-   Tokens — design-system.md §2 colour, §4 shape, §5 elevation, §6 motion.
+   Legacy tokens — the names page rules still read, re-pointed at the
+   foundation values above so every existing page picks up the new palette,
+   radii and easing. Page builders: prefer the foundation names.
    ========================================================================== */
 :root {
-  /* Achromatic field — everything that is not a verdict */
-  --pm-ink: #17191c;
-  --pm-paper: #ffffff;
-  --pm-mist: #f2f2f3;
-  --pm-fog: #fafafb;
-  --pm-slate: #777b86;
-  --pm-ash: #979799;
-  --pm-smoke: #a3a6af;
-  --pm-hairline: #ececec;
+  /* Achromatic field */
+  --pm-ink: var(--ink);
+  --pm-paper: var(--paper);
+  --pm-mist: var(--haze);
+  --pm-fog: var(--field);
+  --pm-slate: var(--mute);
+  --pm-ash: var(--mute);
+  --pm-smoke: #9a9eb0; /* tertiary text / disabled — cool, between mute and line */
+  --pm-hairline: var(--line);
 
-  /* Dark band surfaces — ink, and one step up from it for cards on ink. */
-  --pm-ink-raised: #212429;
-  --pm-ink-hairline: #2c3036;
+  /* Dark band surfaces */
+  --pm-ink-raised: var(--graphite);
+  --pm-ink-hairline: #3a3e4c;
 
-  /* Warm accent — at most one surface on the page */
-  --pm-peach: #fbe1d1;
-  --pm-sienna: #5d2a1a;
+  /* The old warm accent is retired (UI chrome is achromatic): mapped to haze/ink. */
+  --pm-peach: var(--haze);
+  --pm-sienna: var(--ink);
 
-  /* Verdict signal — functional, never decorative */
-  --pm-fail: #b4231f;
-  --pm-review: #8a6a1f;
-  --pm-clear: #1f6b4a;
+  /* Verdict signal */
+  --pm-fail: var(--fail);
+  --pm-review: var(--review);
+  --pm-clear: var(--clear);
 
-  /* Shape. Nothing on this page renders below 12px radius. */
-  --pm-r-pill: 9999px;
-  --pm-r-card: 24px;
-  --pm-r-artifact: 20px;
-  --pm-r-input: 16px;
+  /* Shape */
+  --pm-r-pill: var(--r-pill);
+  --pm-r-card: var(--r-card);
+  --pm-r-artifact: var(--r-card);
+  --pm-r-input: var(--r-input);
   --pm-r-image: 12px;
+  --pm-r-control: var(--r-input);
+  --pm-r-panel: var(--r-card);
 
-  /*
-   * Legacy aliases. /login, /signup, /account/*, /documents and the Evidence
-   * Rail still reference these names; they are kept so retiring the old 2/6/10px
-   * scale doesn't square off every control outside the marketing page.
-   */
-  --pm-r-control: 16px;
-  --pm-r-panel: 20px;
-
-  /* Elevation. Content cards get none — they separate by fill, not by light. */
-  --shadow-subtle: oklab(0 0 0 / 0.05) 0 0 0 1px, rgba(0, 0, 0, 0.08) 0 4px 24px;
-  --shadow-modal: oklab(0 0 0 / 0.05) 0 0 0 1px, rgba(0, 0, 0, 0.1) 0 8px 40px;
-  --shadow-artifact: rgba(4, 23, 43, 0.05) 0 0 0 1px, rgba(0, 0, 0, 0.1) 0 20px 25px -5px, rgba(0, 0, 0, 0.1) 0 8px 10px -6px;
+  /* Elevation — floating things only */
+  --shadow-subtle: 0 0 0 1px rgb(11 12 16 / 0.05), 0 4px 24px rgb(11 12 16 / 0.06);
+  --shadow-modal: var(--shadow-float);
+  --shadow-artifact: var(--shadow-float);
   --pm-shadow-sm: var(--shadow-subtle);
   --pm-shadow-md: var(--shadow-subtle);
-  --pm-shadow-lg: var(--shadow-artifact);
+  --pm-shadow-lg: var(--shadow-float);
 
-  /* Motion. One enter gesture for the whole site; hover never transforms. */
-  --ease-enter: ease-out;
-  --ease-hover: cubic-bezier(0.4, 0, 0.2, 1);
-  --pm-ease: cubic-bezier(0.4, 0, 0.2, 1);
-  --pm-ease-out: ease-out;
+  /* Motion */
+  --ease-enter: var(--ease-scene);
+  --ease-hover: var(--ease-out);
+  --pm-ease: var(--ease-out);
+  --pm-ease-out: var(--ease-out);
 
-  --pm-sans: var(--font-sans), system-ui, sans-serif;
-  --pm-serif: var(--font-serif), "Iowan Old Style", Georgia, serif;
-  --pm-mono: var(--font-mono), ui-monospace, monospace;
+  --pm-sans: var(--font-sans);
+  --pm-serif: var(--font-sans); /* retired serif → Geist */
+  --pm-mono: var(--font-mono);
 }
 
 body {
-  background: var(--pm-paper);
+  background: var(--field);
   color: var(--pm-ink);
   font-family: var(--pm-sans);
   font-size: 17px;
@@ -119,7 +523,7 @@ button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--pm-ink);
+  outline: 2px solid var(--volt);
   outline-offset: 3px;
   border-radius: var(--pm-r-image);
 }

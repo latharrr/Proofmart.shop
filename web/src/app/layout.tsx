@@ -1,35 +1,29 @@
 import type { Metadata } from "next";
-import { Instrument_Sans, Instrument_Serif, IBM_Plex_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-// All three are self-hosted by next/font at build time. The CSP allows
+// Both are self-hosted by next/font at build time. The CSP allows
 // `font-src 'self'` only, so a <link> to fonts.googleapis.com would be
 // blocked by the browser and the page would silently fall back to a system
 // stack — next/font is the only way these can load here.
-
-// Loaded without `weight` so the variable wght axis ships: the design system
-// asks for 450 on body-lg/heading-sm/buttons, which is not a static instance.
-const instrumentSans = Instrument_Sans({
-  variable: "--font-sans",
+//
+// design-system.md §1: one grotesk for everything (Geist, 400 + 500 only in
+// practice), plus Geist Mono reserved for machine strings. Loaded without
+// `weight` so the variable wght axis ships as one file per family.
+//
+// The next/font variables are `--font-geist-sans` / `--font-geist-mono`.
+// globals.css maps the names the rest of the app reads onto them:
+// `--font-sans`, `--font-mono`, `--pm-sans`, `--pm-mono`, and the retired
+// `--font-serif` / `--pm-serif` (now Geist too — the system has no serif).
+const geistSans = Geist({
+  variable: "--font-geist-sans",
   subsets: ["latin"],
   display: "swap",
 });
 
-// The display face. Instrument Serif ships 400 regular + 400 italic and
-// nothing else, which is deliberate: the system forbids serif at any weight
-// but 400, and this family cannot violate that rule even by accident.
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-serif",
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
-  display: "swap",
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  weight: ["400", "500"],
   display: "swap",
 });
 
@@ -57,11 +51,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${instrumentSans.variable} ${instrumentSerif.variable} ${ibmPlexMono.variable}`}>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
         {/* Scroll reveals rest at opacity 0 until JS shows them — without this, a no-JS visitor would get a blank page. */}
         <noscript>
-          <style>{".pm-reveal{opacity:1!important;transform:none!important}"}</style>
+          <style>{".pm-reveal,.pm-rise,.pm-lines .pm-lines-word>span{opacity:1!important;transform:none!important}"}</style>
         </noscript>
         <a href="#main" className="pm-skip-link">
           Skip to content
