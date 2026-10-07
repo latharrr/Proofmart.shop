@@ -1,38 +1,38 @@
-import Link from "next/link";
-import AuthControls from "@/components/home/auth-controls";
+import AuthControls, { getSessionClaims } from "@/components/home/auth-controls";
 import MobileMenu from "@/components/home/mobile-menu";
 import NavLinks from "@/components/home/nav-links";
 import OpenScanButton from "@/components/home/open-scan-button";
+import RollPill from "@/components/motion/roll-pill";
 import Wordmark from "@/components/brand/wordmark";
-import { APP_VERSION } from "@/lib/evidence-data";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
+/**
+ * Marketing header. Signed out: wordmark · nav · SIGN IN · GET ACCESS.
+ * Signed in: wordmark · nav · NEW SCAN · ACCOUNT (one pill holding the
+ * email, account links and sign out) — the same footprint, so it never
+ * wraps at 1440. Below 1180px the nav and account collapse into MENU.
+ */
 export default async function Topbar() {
-  // Same check AuthControls makes: a missing Supabase config degrades to the
-  // signed-out header instead of crashing every page.
-  const signedIn = isSupabaseConfigured() ? Boolean((await (await createClient()).auth.getClaims()).data?.claims) : false;
+  const signedIn = Boolean(await getSessionClaims());
 
   return (
-    <header className="pm-topbar">
-      <div className="pm-shell pm-topbar-inner">
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flex: "none" }}>
-          <Wordmark href="/#main" />
-          <span className="pm-mono pm-topbar-version">v{APP_VERSION}</span>
-        </div>
+    <header className="pm-mk-top" data-signed-in={signedIn ? "" : undefined}>
+      <div className="pm-wrap pm-mk-top-inner">
+        <Wordmark href="/#main" />
         <NavLinks />
-        <div className="pm-topbar-actions">
-          <div className="pm-topbar-auth">
+        <div className="pm-mk-top-actions">
+          <div className="pm-mk-top-auth">
             <AuthControls />
           </div>
-          {/* The header CTA grants access, so it goes where access is granted:
-              an account. Signed in, the account links sit beside it already,
-              so it becomes the next useful action instead. */}
+          {/* Signed out, the header CTA grants access; signed in, the account
+              is already there, so it becomes the next useful action. */}
           {signedIn ? (
-            <OpenScanButton className="pm-btn pm-btn-filled pm-btn-sm">New scan</OpenScanButton>
+            <OpenScanButton size="sm" className="pm-mk-top-cta">
+              New scan
+            </OpenScanButton>
           ) : (
-            <Link href="/signup" className="pm-btn pm-btn-filled pm-btn-sm">
+            <RollPill href="/signup" size="sm" dot className="pm-mk-top-cta">
               Get access
-            </Link>
+            </RollPill>
           )}
           <MobileMenu account={<AuthControls layout="menu" />} />
         </div>

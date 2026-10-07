@@ -77,7 +77,7 @@ export interface Integration {
 }
 
 export const INTEGRATIONS: Integration[] = [
-  { name: "Upload", kind: "No account", body: "The rail at the top of this page. Drop, paste or pick a PDF and get real findings back.", code: "drag · paste · click" },
+  { name: "Upload", kind: "No account", body: "The live scan on this page. Drop, paste or pick a PDF and get real findings back.", code: "drag · paste · click" },
   { name: "REST API", kind: "API key", body: "Three depths of the same pipeline: classify only, extract, or the full verification.", code: "/v1/verify · /v1/extract · /v1/inspect" },
   { name: "Webhooks", kind: "API key", body: "Every verification also posts its result to your URL, HMAC-signed and retried on failure.", code: "verification.completed · .failed" },
   { name: "CLI", kind: "API key", body: "A small, dependency-free client for the same public API, for scripts and batch jobs.", code: "proofmart verify statement.pdf" },

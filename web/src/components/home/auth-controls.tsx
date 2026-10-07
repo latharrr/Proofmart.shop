@@ -3,19 +3,21 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { recordAuditEvent } from "@/lib/audit";
+import RollPill from "@/components/motion/roll-pill";
+import TopAccount from "@/components/home/top-account";
 
 // Server component: reads the session on the server (getClaims — verifies
-// the JWT locally/against Supabase's JWKS, not the unrevalidated
-// getSession) and renders either a "Sign in" link or the signed-in user's
-// email with a "Sign out" button (a zero-JS server-action form).
+// the JWT, not the unrevalidated getSession) and renders the signed-out
+// pills or the signed-in account controls. Sign out is a zero-JS
+// server-action form.
 //
-// This renders on every page via Topbar, so a missing Supabase config
-// (env vars not yet set, e.g. on a fresh Vercel deploy) must degrade to
-// the signed-out state, not crash every page on the site — createClient()
-// itself would throw synchronously if it ran.
+// Renders on every marketing page via Topbar, so a missing Supabase config
+// must degrade to the signed-out state, not crash the page.
 //
-// `layout="menu"` is the same controls stacked for the phone menu sheet,
-// where the account links are shown rather than hidden for lack of width.
+// layout="bar"  — desktop header: Sign in, or an ACCOUNT pill that opens a
+//                 panel (email, account links, sign out). One pill, so the
+//                 signed-in header never wraps.
+// layout="menu" — the same controls stacked for the phone menu sheet.
 const ACCOUNT_LINKS = [
   { href: "/documents", label: "Documents" },
   { href: "/account/api-keys", label: "API keys" },
@@ -23,56 +25,81 @@ const ACCOUNT_LINKS = [
   { href: "/account/billing", label: "Billing" },
 ];
 
+export async function getSessionClaims() {
+  return isSupabaseConfigured() ? ((await (await createClient()).auth.getClaims()).data?.claims ?? null) : null;
+}
+
 export default async function AuthControls({ layout = "bar" }: { layout?: "bar" | "menu" }) {
-  const claims = isSupabaseConfigured() ? (await (await createClient()).auth.getClaims()).data?.claims : null;
+  const claims = await getSessionClaims();
   const menu = layout === "menu";
 
   if (!claims) {
+    if (menu) {
+      return (
+        <div className="pm-mk-menu-account">
+          <RollPill href="/signup" dot block>
+            Get access
+          </RollPill>
+          <RollPill href="/login" variant="secondary" block>
+            Sign in
+          </RollPill>
+        </div>
+      );
+    }
     return (
-      <Link href="/login" className="pm-nav-link" style={{ whiteSpace: "nowrap" }}>
+      <RollPill href="/login" variant="secondary" size="sm" className="pm-mk-top-signin">
         Sign in
-      </Link>
+      </RollPill>
     );
   }
 
   const email = typeof claims.email === "string" ? claims.email : "Account";
   const userId = typeof claims.sub === "string" ? claims.sub : null;
 
-  return (
-    <div
-      style={
-        menu
-          ? { display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 16 }
-          : { display: "flex", alignItems: "center", gap: 16, minWidth: 0 }
-      }
+  const signOut = (
+    <form
+      action={async () => {
+        "use server";
+        const supabase = await createClient();
+        await supabase.auth.signOut();
+        await recordAuditEvent({ userId, eventType: "sign_out" });
+        revalidatePath("/", "layout");
+        redirect("/");
+      }}
     >
-      <div className={menu ? "pm-account-links-menu" : "pm-account-links"}>
-        <span
-          className="pm-mono"
-          style={{ color: "var(--pm-ash)", maxWidth: menu ? "100%" : 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-        >
-          {email}
-        </span>
-        {ACCOUNT_LINKS.map((l) => (
-          <Link key={l.href} href={l.href} className="pm-nav-link" style={{ whiteSpace: "nowrap" }}>
+      <RollPill type="submit" variant="secondary" size="sm" block={menu}>
+        Sign out
+      </RollPill>
+    </form>
+  );
+
+  const links = (
+    <ul className="pm-mk-account-links">
+      {ACCOUNT_LINKS.map((l) => (
+        <li key={l.href}>
+          <Link href={l.href} className="pm-mk-account-link">
             {l.label}
           </Link>
-        ))}
+        </li>
+      ))}
+    </ul>
+  );
+
+  if (menu) {
+    return (
+      <div className="pm-mk-menu-account">
+        <span className="pm-mk-account-email">{email}</span>
+        {links}
+        {signOut}
       </div>
-      <form
-        action={async () => {
-          "use server";
-          const supabase = await createClient();
-          await supabase.auth.signOut();
-          await recordAuditEvent({ userId, eventType: "sign_out" });
-          revalidatePath("/", "layout");
-          redirect("/");
-        }}
-      >
-        <button type="submit" className="pm-btn pm-btn-ghost pm-btn-sm">
-          Sign out
-        </button>
-      </form>
-    </div>
+    );
+  }
+
+  return (
+    <TopAccount email={email}>
+      <span className="pm-mk-account-email">{email}</span>
+      {links}
+      {signOut}
+    </TopAccount>
   );
 }

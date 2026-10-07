@@ -14,17 +14,9 @@ export const SECTION_LINKS = [
 ];
 
 /**
- * Primary nav with a scroll spy. Hrefs are root-relative (`/#pipeline`) so the
- * same topbar can render on /security or /login and still get you to the right
- * section; from the home page itself the browser treats them as ordinary
- * same-document fragment links. Off-home the spy finds no sections and leaves
- * every section link inactive.
- *
- * Tracks the last section whose top edge has passed just below the sticky
- * header — rather than "first intersecting" — because several of these
- * sections are tall enough to intersect the viewport at the same time.
- *
- * The active state is carried by colour alone (see `.pm-nav-link`).
+ * Scroll spy: the last home section whose top has passed just below the
+ * sticky header. Hrefs are root-relative (`/#pipeline`) so the same topbar
+ * works on /security; off-home there are no sections and nothing is active.
  */
 export function useActiveSection(): string | null {
   const [active, setActive] = useState<string | null>(null);
@@ -36,18 +28,15 @@ export function useActiveSection(): string | null {
     let frame = 0;
     const update = () => {
       frame = 0;
-      // The sticky header is ~68px; anything above this line is "passed".
-      const line = 96;
+      const line = 120;
       let current: string | null = null;
       for (const section of sections) {
         if (section.getBoundingClientRect().top <= line) current = section.id;
       }
       setActive(current);
     };
-
     const onScroll = () => {
-      if (frame) return;
-      frame = requestAnimationFrame(update);
+      if (!frame) frame = requestAnimationFrame(update);
     };
 
     frame = requestAnimationFrame(update);
@@ -63,22 +52,23 @@ export function useActiveSection(): string | null {
   return active;
 }
 
+/** Desktop primary nav. The active link carries the volt dot (design-system §2). */
 export default function NavLinks() {
   const active = useActiveSection();
   const pathname = usePathname();
   const onSecurity = pathname === "/security";
 
   return (
-    <nav aria-label="Primary" className="pm-nav-links">
+    <nav aria-label="Primary" className="pm-mk-nav">
       {SECTION_LINKS.map((l) => {
         const isActive = active === l.id;
         return (
-          <a key={l.id} href={`/#${l.id}`} className="pm-nav-link" data-active={isActive ? "true" : "false"} aria-current={isActive ? "true" : undefined}>
+          <a key={l.id} href={`/#${l.id}`} className="pm-mk-nav-link" data-active={isActive ? "true" : "false"} aria-current={isActive ? "true" : undefined}>
             {l.label}
           </a>
         );
       })}
-      <Link href="/security" className="pm-nav-link" data-active={onSecurity ? "true" : "false"} aria-current={onSecurity ? "page" : undefined}>
+      <Link href="/security" className="pm-mk-nav-link" data-active={onSecurity ? "true" : "false"} aria-current={onSecurity ? "page" : undefined}>
         Security
       </Link>
     </nav>

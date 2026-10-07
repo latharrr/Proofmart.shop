@@ -8,21 +8,19 @@ import type { DocumentStatus } from "@/lib/documents";
  */
 export type VerdictValue = "FAIL" | "REVIEW" | "CLEAR" | "INCONCLUSIVE";
 
-/** Hex, not CSS variables: these also feed SVG presentation attributes (the page overlay), which don't resolve var(). Kept identical to --pm-fail / --pm-review / --pm-clear / --pm-slate. */
+/** Hex, not CSS variables: these also feed SVG presentation attributes (the page overlay), which don't resolve var(). Kept identical to --fail / --review / --clear / --mute (design-system.md §2). */
 export const VERDICT_TONE: Record<VerdictValue, { color: string; fill: string; glyph: string; label: string }> = {
-  FAIL: { color: "#b4231f", fill: "rgba(180, 35, 31, 0.10)", glyph: "×", label: "Fail" },
-  REVIEW: { color: "#8a6a1f", fill: "rgba(138, 106, 31, 0.12)", glyph: "~", label: "Review" },
-  CLEAR: { color: "#1f6b4a", fill: "rgba(31, 107, 74, 0.10)", glyph: "=", label: "Clear" },
-  INCONCLUSIVE: { color: "#777b86", fill: "rgba(119, 123, 134, 0.12)", glyph: "?", label: "Inconclusive" },
+  FAIL: { color: "#e5342b", fill: "rgba(229, 52, 43, 0.12)", glyph: "×", label: "Fail" },
+  REVIEW: { color: "#c98a12", fill: "rgba(201, 138, 18, 0.14)", glyph: "~", label: "Review" },
+  CLEAR: { color: "#1d9a63", fill: "rgba(29, 154, 99, 0.12)", glyph: "=", label: "Clear" },
+  INCONCLUSIVE: { color: "#6b6f80", fill: "rgba(107, 111, 128, 0.12)", glyph: "?", label: "Inconclusive" },
 };
 
+/** The verdict as a pill: wash fill, verdict-coloured dot and uppercase label. */
 export function VerdictBadge({ verdict, className }: { verdict: VerdictValue; className?: string }) {
-  const tone = VERDICT_TONE[verdict];
   return (
     <span className={className ? `pm-verdict ${className}` : "pm-verdict"} data-verdict={verdict}>
-      <span aria-hidden="true" className="pm-verdict-glyph">
-        {tone.glyph}
-      </span>
+      <span aria-hidden="true" className="pm-verdict-dot" />
       {verdict}
     </span>
   );
@@ -32,6 +30,7 @@ export function VerdictBadge({ verdict, className }: { verdict: VerdictValue; cl
 export function StatusBadge({ status }: { status: Exclude<DocumentStatus, "ready"> }) {
   return (
     <span className="pm-status" data-status={status}>
+      <span aria-hidden="true" className="pm-verdict-dot" />
       {status === "processing" ? "PROCESSING" : "ERROR"}
     </span>
   );
@@ -69,7 +68,7 @@ export function plural(n: number, one: string, many = `${one}s`): string {
 
 /**
  * A filename with soft break opportunities after `_ - .` — so a long name set
- * in the 44px serif wraps at its own separators instead of mid-word.
+ * in the heading role wraps at its own separators instead of mid-word.
  */
 export function BreakableFilename({ name }: { name: string }) {
   const parts = name.split(/(?<=[_\-.])/);
@@ -83,4 +82,9 @@ export function BreakableFilename({ name }: { name: string }) {
       ))}
     </>
   );
+}
+
+/** A filename cut after each `_ - .`, for <LineReveal>: every piece becomes its own masked word, so a long name wraps at its separators and each line still rises on its own. */
+export function filenameParts(name: string): string[] {
+  return name.split(/(?<=[_\-.])/);
 }

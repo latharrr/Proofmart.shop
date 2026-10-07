@@ -1,100 +1,91 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
-import Reveal from "@/components/home/reveal";
+import LineReveal from "@/components/motion/line-reveal";
+import Reveal from "@/components/motion/reveal";
+import RollPill from "@/components/motion/roll-pill";
+import { ScrollVar } from "@/components/motion/scroll-progress";
+import Tilt from "@/components/motion/tilt";
+import SectionKicker from "@/components/home/section-kicker";
 import { INTEGRATIONS } from "@/lib/home-data";
 
-// The terminal is a content card, so it carries no shadow and no syntax
-// rainbow: the only saturated colour in it is the verdict, which is the one
-// thing in the transcript that actually means something.
-const DIM = { color: "var(--pm-smoke)" };
-const FAIL = { color: "var(--pm-fail)" };
-const REVIEW = { color: "var(--pm-review)" };
-
-// One entry per line, rendered as blocks so a line that has to wrap on a
-// phone hangs under its own indent instead of falling back to the margin.
+// The only saturated colour in the transcript is the verdict, which is the
+// one thing in it that actually means something.
 const TERMINAL: { indent?: number; parts: ReactNode[] }[] = [
-  { parts: [<span key="p" style={DIM}>$</span>, " curl https://proofmart.shop/v1/verify \\"] },
-  { indent: 4, parts: ["-H ", <span key="h" style={DIM}>&quot;Authorization: Bearer $PROOFMART_API_KEY&quot;</span>, " \\"] },
-  { indent: 4, parts: ["-F ", <span key="f" style={DIM}>&quot;file=@hdfc_apr25.pdf&quot;</span>] },
+  { parts: [<span key="p" className="pm-mk-t-dim">$</span>, " curl https://proofmart.shop/v1/verify \\"] },
+  { indent: 4, parts: ["-H ", <span key="h" className="pm-mk-t-dim">&quot;Authorization: Bearer $PROOFMART_API_KEY&quot;</span>, " \\"] },
+  { indent: 4, parts: ["-F ", <span key="f" className="pm-mk-t-dim">&quot;file=@hdfc_apr25.pdf&quot;</span>] },
   { parts: [] },
-  { parts: [<span key="c" style={DIM}># 200 OK in 4.8 s — summarised</span>] },
-  { parts: [<span key="v" style={FAIL}>× FAIL</span>, "  4 findings"] },
-  { indent: 2, parts: [<span key="g" style={FAIL}>×</span>, " BALANCE_BREAK              p4 · r17"] },
-  { indent: 2, parts: [<span key="g" style={FAIL}>×</span>, " CROSS_PAGE_TOTAL_MISMATCH  p3 → p4"] },
-  { indent: 2, parts: [<span key="g" style={REVIEW}>~</span>, " DUPLICATE_TRANSACTION      p2 · r04"] },
-  { indent: 2, parts: [<span key="g" style={REVIEW}>~</span>, " OCR_LOW_CONFIDENCE         p4 · r14"] },
+  { parts: [<span key="c" className="pm-mk-t-dim"># 200 OK in 4.8 s, summarised</span>] },
+  { parts: [<span key="v" className="pm-mk-t-fail">× FAIL</span>, "  4 findings"] },
+  { indent: 2, parts: [<span key="g" className="pm-mk-t-fail">×</span>, " BALANCE_BREAK              p4 · r17"] },
+  { indent: 2, parts: [<span key="g" className="pm-mk-t-fail">×</span>, " CROSS_PAGE_TOTAL_MISMATCH  p3 → p4"] },
+  { indent: 2, parts: [<span key="g" className="pm-mk-t-review">~</span>, " DUPLICATE_TRANSACTION      p2 · r04,r07"] },
+  { indent: 2, parts: [<span key="g" className="pm-mk-t-review">~</span>, " OCR_LOW_CONFIDENCE         p4 · r14"] },
 ];
 
 export default function IntegrateSection() {
   return (
-    <section id="integrate" className="pm-band-fog">
-      <div className="pm-shell pm-section">
-        <Reveal className="pm-section-head">
+    <section id="integrate" className="pm-mk-section pm-mk-integrate" aria-labelledby="integrate-title">
+      <div className="pm-wrap">
+        <div className="pm-mk-head pm-mk-head-split">
           <div>
-              <p className="pm-eyebrow">04 · Integrate</p>
-              <h2 className="pm-h2">One POST. Same engine everywhere.</h2>
+            <SectionKicker n="05">Integrate</SectionKicker>
+            <LineReveal as="h2" id="integrate-title" className="pm-t-heading-lg">
+              One POST. <br />
+              Same engine everywhere.
+            </LineReveal>
           </div>
-          <p className="pm-lead">
-            Send a PDF as multipart form data with your API key; the response arrives inline. The upload on this page, the API, webhooks and the CLI
-            all run the same pipeline.
-          </p>
-        </Reveal>
-
-        <div className="pm-integrate-grid">
-          <div>
-            <Reveal className="pm-terminal">
-              <div className="pm-ink-card-head">
-                <span className="pm-mono" style={{ color: "var(--pm-paper)" }}>
-                  terminal
-                </span>
-                <span className="pm-mono" style={{ color: "var(--pm-smoke)" }}>
-                  PDF up to 20 MB
-                </span>
-              </div>
-              <div className="pm-mono pm-terminal-body" role="figure" aria-label="Sample curl request and summarised response">
-                {TERMINAL.map((line, i) => (
-                  <div key={i} className="pm-json-line" style={{ ["--pm-indent" as string]: line.indent ?? 0 }}>
-                    {line.parts.length === 0 ? "\u00a0" : line.parts}
-                  </div>
-                ))}
-              </div>
+          <div className="pm-mk-head-aside">
+            <Reveal as="p" className="pm-t-body-lg pm-mk-lead">
+              Send a PDF as multipart form data with your API key; the response arrives inline. The upload on this page, the API, webhooks and the CLI
+              all run the same pipeline.
             </Reveal>
-            <div className="pm-integrate-links">
-              <Link href="/account/api-keys" className="pm-btn pm-btn-filled">
+          </div>
+        </div>
+
+        <div className="pm-mk-integrate-grid">
+          <ScrollVar range="enter" className="pm-scroll-tilt pm-mk-terminal-depth">
+            <Tilt max={4} className="pm-mk-terminal-tilt">
+              <div className="pm-mk-terminal">
+                <div className="pm-mk-terminal-head">
+                  <span className="pm-mk-terminal-lights" aria-hidden="true">
+                    <span />
+                    <span />
+                    <span />
+                  </span>
+                  <span className="pm-t-mono">terminal</span>
+                  <span className="pm-t-mono pm-mk-t-dim">PDF up to 20 MB</span>
+                </div>
+                <div className="pm-mk-terminal-body" role="figure" aria-label="Sample curl request and summarised response">
+                  {TERMINAL.map((line, i) => (
+                    <div key={i} className="pm-mk-json-line" style={{ ["--indent" as string]: line.indent ?? 0 }}>
+                      {line.parts.length === 0 ? " " : line.parts}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Tilt>
+            <div className="pm-mk-integrate-cta">
+              <RollPill href="/account/api-keys" dot>
                 Create an API key
-              </Link>
-              <Link href="/account/webhooks" className="pm-link">
+              </RollPill>
+              <a href="/account/webhooks" className="pm-inline-link">
                 Register a webhook
-                <span className="pm-arrow" aria-hidden="true">
-                  <span>→</span>
-                </span>
-              </Link>
-              <a href="#outputs" className="pm-link">
-                See the full response
-                <span className="pm-arrow" aria-hidden="true">
-                  <span>→</span>
-                </span>
               </a>
             </div>
-          </div>
+          </ScrollVar>
 
-          <ul className="pm-ways">
+          <ul className="pm-mk-ways">
             {INTEGRATIONS.map((it, i) => (
-              <Reveal key={it.name} as="li" delay={(i + 1) * 300} className="pm-way">
-                <div className="pm-way-top">
-                  <h3 className="pm-body" style={{ fontWeight: 450, margin: 0 }}>
-                    {it.name}
-                  </h3>
-                  <span className="pm-caption" style={{ color: "var(--pm-ash)", whiteSpace: "nowrap" }}>
-                    {it.kind}
+              <Reveal key={it.name} as="li" delay={i * 80} className="pm-mk-way">
+                <span className="pm-mk-way-n pm-t-label">{String(i + 1).padStart(2, "0")}</span>
+                <span className="pm-mk-way-main">
+                  <span className="pm-mk-way-top">
+                    <h3 className="pm-t-heading-sm">{it.name}</h3>
+                    <span className="pm-t-label pm-mk-mute">{it.kind}</span>
                   </span>
-                </div>
-                <p className="pm-caption" style={{ color: "var(--pm-slate)" }}>
-                  {it.body}
-                </p>
-                <p className="pm-mono" style={{ color: "var(--pm-ink)", marginTop: 8 }}>
-                  {it.code}
-                </p>
+                  <span className="pm-t-body pm-mk-mute">{it.body}</span>
+                  <span className="pm-t-mono pm-mk-way-code">{it.code}</span>
+                </span>
               </Reveal>
             ))}
           </ul>

@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import type { DocumentRow } from "@/lib/documents";
 import AppShell, { AppPage, AppPageHeader } from "@/components/app/app-shell";
+import RollPill from "@/components/motion/roll-pill";
 import DocumentList from "@/components/documents/document-list";
 import DocumentsEmpty from "@/components/documents/documents-empty";
 
@@ -42,11 +42,15 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
           title="My documents"
           description="Every PDF you verify while signed in is saved here with its report. Only you can see them."
           meta={
-            hasDocs ? (
-              <p className="pm-app-count">
-                {total} {total === 1 ? "document" : "documents"}
-              </p>
-            ) : undefined
+            <p className="pm-app-count">
+              {hasDocs ? (
+                <>
+                  {total} {total === 1 ? "document" : "documents"}
+                </>
+              ) : (
+                "Workspace"
+              )}
+            </p>
           }
         />
 
@@ -54,9 +58,9 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
           <div className="pm-app-notice" role="alert">
             <p className="pm-app-notice-title">Your documents couldn&apos;t be loaded.</p>
             <p className="pm-app-notice-body">Nothing has been lost — this is a problem reaching storage. Reload the page to try again.</p>
-            <Link href={page > 1 ? `/documents?page=${page}` : "/documents"} className="pm-btn pm-btn-ghost pm-btn-sm">
+            <RollPill href={page > 1 ? `/documents?page=${page}` : "/documents"} variant="secondary" size="sm">
               Reload
-            </Link>
+            </RollPill>
           </div>
         ) : hasDocs && docs ? (
           <DocumentList docs={docs} />
@@ -64,9 +68,9 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
           <div className="pm-app-notice">
             <p className="pm-app-notice-title">There&apos;s nothing on page {page}.</p>
             <p className="pm-app-notice-body">You may have deleted the documents that were here.</p>
-            <Link href="/documents" className="pm-btn pm-btn-ghost pm-btn-sm">
+            <RollPill href="/documents" variant="secondary" size="sm">
               Back to the newest
-            </Link>
+            </RollPill>
           </div>
         ) : (
           <DocumentsEmpty />
@@ -75,9 +79,9 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
         {(page > 1 || hasMore) && hasDocs && (
           <nav className="pm-pager" aria-label="Pages">
             {page > 1 ? (
-              <Link href={`/documents?page=${page - 1}`} className="pm-app-chip" rel="prev">
+              <RollPill href={`/documents?page=${page - 1}`} variant="secondary" size="sm" rel="prev">
                 ← Newer
-              </Link>
+              </RollPill>
             ) : (
               <span />
             )}
@@ -85,9 +89,9 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
               Page {page} of {totalPages}
             </span>
             {hasMore ? (
-              <Link href={`/documents?page=${page + 1}`} className="pm-app-chip" rel="next">
+              <RollPill href={`/documents?page=${page + 1}`} variant="secondary" size="sm" rel="next">
                 Older →
-              </Link>
+              </RollPill>
             ) : (
               <span />
             )}

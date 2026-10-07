@@ -4,17 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useState, type ReactNode } from "react";
 import { SECTION_LINKS, useActiveSection } from "@/components/home/nav-links";
+import OpenScanButton from "@/components/home/open-scan-button";
 
 /**
- * Phone-width navigation. Below 880px the inline nav is hidden, and before
- * this existed a phone visitor had no way to reach a section — or /security —
- * except by scrolling the whole page. A plain disclosure: a pill button
- * toggles a sheet under the header. It appears without animation; the site
- * has exactly one enter gesture and it belongs to scroll reveals.
- *
- * `account` is the server-rendered auth block (sign in, or the signed-in
- * account links and sign out), passed through so the session is still read
- * on the server.
+ * Narrow-screen navigation (below 1180px the inline nav is hidden). A MENU
+ * pill opens a sheet under the header with every section, /security, a
+ * Start-a-scan pill and the server-rendered account block (`account`).
+ * Escape or following a link closes it.
  */
 export default function MobileMenu({ account }: { account: ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -28,47 +24,49 @@ export default function MobileMenu({ account }: { account: ReactNode }) {
       if (e.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    document.documentElement.dataset.menuOpen = "";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      delete document.documentElement.dataset.menuOpen;
+    };
   }, [open]);
 
   return (
-    <div className="pm-mobile-menu">
-      <button
-        type="button"
-        className="pm-btn pm-btn-ghost pm-btn-sm"
-        aria-expanded={open}
-        aria-controls={panelId}
-        onClick={() => setOpen((v) => !v)}
-      >
-        {open ? "Close" : "Menu"}
+    <div className="pm-mk-menu">
+      <button type="button" className="pm-pill pm-mk-menu-btn" data-variant="secondary" data-size="sm" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen((v) => !v)}>
+        <span className="pm-pill-roll">
+          <span>{open ? "Close" : "Menu"}</span>
+          <span aria-hidden="true">{open ? "Close" : "Menu"}</span>
+        </span>
+        <span className="pm-mk-menu-dots" aria-hidden="true" data-open={open ? "" : undefined}>
+          <span />
+          <span />
+        </span>
       </button>
-      <div id={panelId} className="pm-mobile-panel" hidden={!open}>
-        <nav aria-label="Primary, mobile" className="pm-shell">
-          <ul>
-            {SECTION_LINKS.map((l) => (
-              <li key={l.id}>
-                <a
-                  href={`/#${l.id}`}
-                  className="pm-nav-link"
-                  data-active={active === l.id ? "true" : "false"}
-                  onClick={() => setOpen(false)}
-                >
+      <div id={panelId} className="pm-mk-menu-panel" hidden={!open}>
+        <nav aria-label="Primary, mobile" className="pm-wrap pm-mk-menu-inner">
+          <ul className="pm-mk-menu-links">
+            {SECTION_LINKS.map((l, i) => (
+              <li key={l.id} style={{ ["--i" as string]: i }}>
+                <a href={`/#${l.id}`} data-active={active === l.id ? "true" : "false"} onClick={() => setOpen(false)}>
+                  <span className="pm-mk-menu-n">{String(i + 1).padStart(2, "0")}</span>
                   {l.label}
                 </a>
               </li>
             ))}
-            <li>
-              <Link
-                href="/security"
-                className="pm-nav-link"
-                data-active={pathname === "/security" ? "true" : "false"}
-                onClick={() => setOpen(false)}
-              >
+            <li style={{ ["--i" as string]: SECTION_LINKS.length }}>
+              <Link href="/security" data-active={pathname === "/security" ? "true" : "false"} onClick={() => setOpen(false)}>
+                <span className="pm-mk-menu-n">{String(SECTION_LINKS.length + 1).padStart(2, "0")}</span>
                 Security
               </Link>
             </li>
           </ul>
-          <div className="pm-mobile-account">{account}</div>
+          <div className="pm-mk-menu-foot">
+            <OpenScanButton variant="primary" onDone={() => setOpen(false)} className="pm-mk-menu-scan">
+              Start a scan
+            </OpenScanButton>
+            {account}
+          </div>
         </nav>
       </div>
     </div>

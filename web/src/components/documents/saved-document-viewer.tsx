@@ -7,6 +7,7 @@ import { getPageDimensions, loadPdfDocument, renderPageToCanvas, type PageDimens
 import type { VerifyEnvelope } from "@/lib/api/envelope";
 import type { PdfRect } from "@/lib/pdf/types";
 import type { PDFDocumentProxy } from "pdfjs-dist";
+import Frame from "@/components/motion/frame";
 import { VERDICT_TONE, VerdictBadge, documentKindLabel, plural, type VerdictValue } from "./verdict";
 
 const CANVAS_TARGET_WIDTH = 1000;
@@ -238,41 +239,39 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
   return (
     <div className="pm-report" data-testid="saved-document-report">
       <section className="pm-report-summary" aria-label="Verdict">
-        <div className="pm-report-verdict">
-          <p className="pm-eyebrow" style={{ margin: 0 }}>
-            Verdict
-          </p>
-          <p className="pm-report-verdict-word" style={{ color: tone.color }}>
-            <span aria-hidden="true" className="pm-report-verdict-glyph">
-              {tone.glyph}
-            </span>
-            {tone.label}
-          </p>
-          <p className="pm-report-verdict-line">{sentence}</p>
-          <p className="pm-report-docline">
-            {documentKindLabel(verification.documentKind)} · {plural(pageCount, "page")} · <span className="pm-mono">{doc.pdfType}</span>
-          </p>
-        </div>
-        <dl className="pm-report-stats">
-          <div data-verdict="FAIL" data-zero={counts.fail === 0 || undefined}>
-            <dt>Failed</dt>
-            <dd>{counts.fail}</dd>
+        <Frame columns={5} tone="paper" stageClassName="pm-report-summary-stage">
+          <div className="pm-report-verdict" data-verdict={verification.verdict}>
+            <p className="pm-report-label">Verdict</p>
+            <p className="pm-report-verdict-word" style={{ color: tone.color }}>
+              <span aria-hidden="true" className="pm-report-verdict-dot" />
+              {tone.label}
+            </p>
+            <p className="pm-report-verdict-line">{sentence}</p>
+            <p className="pm-report-docline">
+              {documentKindLabel(verification.documentKind)} · {plural(pageCount, "page")} · <span className="pm-mono">{doc.pdfType}</span>
+            </p>
           </div>
-          <div data-verdict="REVIEW" data-zero={counts.review === 0 || undefined}>
-            <dt>Need review</dt>
-            <dd>{counts.review}</dd>
-          </div>
-          <div data-verdict="CLEAR" data-zero={counts.clear === 0 || undefined}>
-            <dt>Markers clear</dt>
-            <dd>{counts.clear}</dd>
-          </div>
-        </dl>
+          <dl className="pm-report-stats">
+            <div data-verdict="FAIL" data-zero={counts.fail === 0 || undefined}>
+              <dt>Failed</dt>
+              <dd>{counts.fail}</dd>
+            </div>
+            <div data-verdict="REVIEW" data-zero={counts.review === 0 || undefined}>
+              <dt>Need review</dt>
+              <dd>{counts.review}</dd>
+            </div>
+            <div data-verdict="CLEAR" data-zero={counts.clear === 0 || undefined}>
+              <dt>Markers clear</dt>
+              <dd>{counts.clear}</dd>
+            </div>
+          </dl>
+        </Frame>
       </section>
 
       <div className="pm-report-body">
         <section className="pm-report-findings" aria-labelledby="pm-findings-h">
           <div className="pm-report-section-head">
-            <h2 id="pm-findings-h" className="pm-eyebrow" style={{ margin: 0 }}>
+            <h2 id="pm-findings-h" className="pm-report-label">
               Findings
             </h2>
             <span className="pm-report-section-count">{findings.length === 0 ? "None" : plural(findings.length, "finding")}</span>
@@ -317,7 +316,7 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
         </section>
 
         <aside ref={previewRef} className="pm-report-page" aria-label="Page preview">
-          <div className="pm-report-page-card pm-artifact">
+          <Frame tone="haze" className="pm-report-page-frame" stageClassName="pm-report-page-card">
             <div className="pm-report-page-bar">
               <span className="pm-report-page-pos" aria-live="polite">
                 Page <span className="pm-mono">{page}</span> of <span className="pm-mono">{pageCount}</span>
@@ -361,12 +360,12 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
             <div className="pm-report-page-foot">
               <span>{active ? <><span className="pm-mono">{active.marker}</span> outlined on this page</> : "Select a finding to outline it on the page."}</span>
               {selectedId && (
-                <button type="button" className="pm-link pm-report-back" onClick={backToSelected}>
+                <button type="button" className="pm-report-back" onClick={backToSelected}>
                   Back to finding
                 </button>
               )}
             </div>
-          </div>
+          </Frame>
         </aside>
       </div>
     </div>

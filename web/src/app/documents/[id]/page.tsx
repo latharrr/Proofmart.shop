@@ -1,12 +1,13 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import type { DocumentRow } from "@/lib/documents";
 import AppShell, { AppPage, AppPageHeader, VERIFY_HREF } from "@/components/app/app-shell";
 import ConfirmSubmitButton from "@/components/confirm-submit-button";
+import RollLabel from "@/components/app/roll-label";
+import RollPill from "@/components/motion/roll-pill";
 import SavedDocumentViewer from "@/components/documents/saved-document-viewer";
 import PendingSubmitButton from "@/components/documents/pending-submit-button";
-import { BreakableFilename, StatusBadge, VerdictBadge, formatDayTime } from "@/components/documents/verdict";
+import { StatusBadge, VerdictBadge, filenameParts, formatDayTime } from "@/components/documents/verdict";
 import { deleteDocument, rerunDocument } from "../actions";
 
 export default async function DocumentDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -34,16 +35,13 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
   const actions = (
     <>
       {doc.status === "ready" && doc.document_hash && (
-        <a href={`/api/documents/${doc.id}/dossier`} className="pm-btn pm-btn-filled pm-btn-sm">
+        <RollPill href={`/api/documents/${doc.id}/dossier`} native size="sm" dot>
           Download dossier
-          <span aria-hidden="true" style={{ marginLeft: 8 }}>
-            ↓
-          </span>
-        </a>
+        </RollPill>
       )}
       {doc.storage_pathname && (
         <form action={rerunDocument.bind(null, doc.id)}>
-          <PendingSubmitButton className="pm-btn pm-btn-ghost pm-btn-sm" pendingLabel="Re-running…">
+          <PendingSubmitButton variant="secondary" pendingLabel="Re-running">
             Re-run
           </PendingSubmitButton>
         </form>
@@ -57,9 +55,11 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
       >
         <ConfirmSubmitButton
           confirmMessage={`Delete "${doc.filename}"? The stored file and its findings will be permanently removed — this can't be undone.`}
-          className="pm-app-chip pm-app-chip-quiet pm-app-chip-lg"
+          className="pm-pill"
+          data-variant="paper"
+          data-size="sm"
         >
-          Delete
+          <RollLabel>Delete</RollLabel>
         </ConfirmSubmitButton>
       </form>
     </>
@@ -70,12 +70,14 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
       <AppPage>
         <AppPageHeader
           back={{ href: "/documents", label: "My documents" }}
+          size="md"
           meta={
             <div className="pm-report-badges">
               {verdict ? <VerdictBadge verdict={verdict} /> : doc.status !== "ready" ? <StatusBadge status={doc.status} /> : null}
+              <span className="pm-app-count">Report</span>
             </div>
           }
-          title={<span className="pm-report-title"><BreakableFilename name={doc.filename} /></span>}
+          title={filenameParts(doc.filename)}
           description={
             <>
               Verified <time dateTime={doc.created_at}>{formatDayTime(doc.created_at)}</time>
@@ -100,9 +102,9 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
                 : "The file wasn't kept, so it can't be re-run here. Upload it again to get a report."}
             </p>
             {!doc.storage_pathname && (
-              <Link href={VERIFY_HREF} className="pm-btn pm-btn-ghost pm-btn-sm">
+              <RollPill href={VERIFY_HREF} variant="secondary" size="sm">
                 Verify a document
-              </Link>
+              </RollPill>
             )}
           </div>
         )}
@@ -111,9 +113,9 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
           <div className="pm-app-notice" role="status">
             <p className="pm-app-notice-title">Still being checked.</p>
             <p className="pm-app-notice-body">The report appears here as soon as every marker has run.</p>
-            <Link href={`/documents/${doc.id}`} className="pm-btn pm-btn-ghost pm-btn-sm">
+            <RollPill href={`/documents/${doc.id}`} variant="secondary" size="sm">
               Refresh
-            </Link>
+            </RollPill>
           </div>
         )}
 

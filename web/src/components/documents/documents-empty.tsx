@@ -1,117 +1,97 @@
-import Link from "next/link";
 import { FINDINGS } from "@/lib/evidence-data";
 import { VERIFY_HREF } from "@/components/app/app-shell";
+import Frame from "@/components/motion/frame";
+import LineReveal from "@/components/motion/line-reveal";
+import Reveal from "@/components/motion/reveal";
+import RollPill from "@/components/motion/roll-pill";
+import Tilt from "@/components/motion/tilt";
+import DocumentStage from "@/components/three/document-stage";
 import { VerdictBadge } from "./verdict";
 
+const STEPS = [
+  { title: "Upload a PDF", body: "Bank statement, invoice, salary slip or payment proof." },
+  { title: "Every marker re-checks the numbers", body: "Running balances, page carry-overs, duplicate rows." },
+  { title: "The report lands on this page", body: "One verdict, each finding pinned to its box." },
+] as const;
+
 /**
- * First-run state for My documents: what to do (three steps, one primary
- * action) beside what you get back (a sample report, labelled as one). The
- * sample is the same bundled statement the home page's Evidence Rail opens
- * with, so the two never disagree about what a finding looks like.
- *
- * The sample floats free on the page field and runs off the viewport's right
- * edge through its page preview — a column of placeholder lines with no text
- * in it — so the crop never touches a number, a marker id or the arithmetic.
+ * First-run state for My documents: what to do (three ruled steps, one
+ * primary pill) beside what you get back — the live 3D statement on a framed
+ * graphite stage, with the finding it would raise floating over it as a
+ * paper card that tilts toward the pointer. The card is the same bundled
+ * BALANCE_BREAK finding the home page opens with (the scene's boxed row is
+ * that row), so the example and the product never disagree.
  */
 export default function DocumentsEmpty() {
-  const fail = FINDINGS.find((f) => f.verdict === "FAIL") ?? FINDINGS[0];
-  const review = FINDINGS.find((f) => f.verdict === "REVIEW") ?? FINDINGS[1];
+  const fail = FINDINGS.find((f) => f.marker === "BALANCE_BREAK") ?? FINDINGS[0];
   const failCount = FINDINGS.filter((f) => f.verdict === "FAIL").length;
   const reviewCount = FINDINGS.filter((f) => f.verdict === "REVIEW").length;
 
   return (
-    <section className="pm-empty" aria-labelledby="pm-empty-title" data-testid="documents-empty">
-      <div className="pm-empty-text">
-        <p className="pm-eyebrow" style={{ marginBottom: 12 }}>
+    <section className="pm-docs-empty" aria-labelledby="pm-docs-empty-title" data-testid="documents-empty">
+      <div className="pm-docs-empty-text">
+        <p className="pm-app-eyebrow">
+          <span className="pm-app-eyebrow-dot" aria-hidden="true" />
           No documents yet
         </p>
-        <h2 id="pm-empty-title" className="pm-empty-lead">
-          Verify your first PDF and its report is saved here, private to your account.
-        </h2>
+        <LineReveal as="h2" id="pm-docs-empty-title" className="pm-docs-empty-lead" delay={160}>
+          Verify your first PDF. Its report is saved here, private to you.
+        </LineReveal>
 
-        <ol className="pm-empty-steps">
-          <li>
-            <span className="pm-empty-step-n" aria-hidden="true">
-              1
-            </span>
-            <div>
-              <span className="pm-empty-step-title">Upload a PDF</span>
-              <span className="pm-empty-step-body">A bank statement, invoice, salary slip or payment proof. Drop it on the verifier while you&apos;re signed in.</span>
-            </div>
-          </li>
-          <li>
-            <span className="pm-empty-step-n" aria-hidden="true">
-              2
-            </span>
-            <div>
-              <span className="pm-empty-step-title">Every marker checks the numbers</span>
-              <span className="pm-empty-step-body">Running balances, totals carried between pages, duplicate rows — each check shows the arithmetic it did.</span>
-            </div>
-          </li>
-          <li>
-            <span className="pm-empty-step-n" aria-hidden="true">
-              3
-            </span>
-            <div>
-              <span className="pm-empty-step-title">The report lands on this page</span>
-              <span className="pm-empty-step-body">One verdict, every finding pinned to its spot on the page. Open, re-run or delete it whenever you like.</span>
-            </div>
-          </li>
-        </ol>
+        <Reveal as="ol" className="pm-docs-steps" delay={240}>
+          {STEPS.map((s, i) => (
+            <li key={s.title}>
+              <span className="pm-docs-step-n" aria-hidden="true">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <span className="pm-docs-step-text">
+                <span className="pm-docs-step-title">{s.title}</span>
+                <span className="pm-docs-step-body">{s.body}</span>
+              </span>
+            </li>
+          ))}
+        </Reveal>
 
-        <div className="pm-empty-cta">
-          <Link href={VERIFY_HREF} className="pm-btn pm-btn-filled">
+        <Reveal className="pm-docs-empty-cta" delay={320}>
+          <RollPill href={VERIFY_HREF} dot>
             Verify a document
-          </Link>
-          <Link href="/#markers" className="pm-link">
+          </RollPill>
+          <a href="/#markers" className="pm-inline-link">
             See what gets checked
-            <span className="pm-arrow" aria-hidden="true">
-              <span>→</span>
-            </span>
-          </Link>
-        </div>
+          </a>
+        </Reveal>
       </div>
 
-      <figure className="pm-empty-figure" aria-label="Example of a saved report">
-        <figcaption className="pm-empty-caption">Example report</figcaption>
-        <div className="pm-sample pm-artifact" aria-hidden="true">
-          <div className="pm-sample-findings">
-            <div className="pm-sample-head">
-              <span className="pm-sample-file">hdfc_apr25_statement.pdf</span>
-              <VerdictBadge verdict="FAIL" />
-            </div>
-            <div className="pm-sample-counts">
-              <span data-verdict="FAIL">{failCount} fail</span>
-              <span data-verdict="REVIEW">{reviewCount} review</span>
-              <span>6 pages · Bank statement</span>
-            </div>
-
-            <div className="pm-sample-finding" data-verdict="FAIL">
-              <div className="pm-sample-finding-top">
-                <span className="pm-sample-marker">{fail.marker}</span>
-                <span className="pm-sample-addr">{fail.addr1}</span>
-              </div>
-              <p className="pm-sample-summary">{fail.explanation}</p>
-              <pre className="pm-sample-math">{fail.arithmetic}</pre>
-            </div>
-            <div className="pm-sample-finding" data-verdict="REVIEW">
-              <div className="pm-sample-finding-top">
-                <span className="pm-sample-marker">{review.marker}</span>
-                <span className="pm-sample-addr">{review.addr1}</span>
-              </div>
-              <p className="pm-sample-summary">{review.explanation}</p>
-            </div>
+      <Reveal as="figure" className="pm-docs-empty-figure" delay={120} aria-label="Example of a saved report">
+        <Frame columns={2} tone="graphite" label="Example report" className="pm-docs-empty-frame" stageClassName="pm-docs-empty-stage">
+          <DocumentStage
+            variant="single"
+            tone="graphite"
+            verdict="FAIL"
+            preload
+            label="Example: a bank statement under examination, one row boxed in red and marked FAIL."
+          />
+          <div className="pm-docs-empty-meta" aria-hidden="true">
+            <span>hdfc_apr25_statement.pdf</span>
+            <span>
+              {failCount} fail · {reviewCount} review · 6 pages
+            </span>
           </div>
+        </Frame>
 
-          <div className="pm-sample-page">
-            <div className="pm-sample-sheet">
-              {Array.from({ length: 15 }, (_, i) => (
-                <span key={i} className="pm-sample-line" data-hit={i === 10 ? "fail" : i === 4 ? "review" : undefined} style={{ width: `${[92, 70, 84, 64, 88, 78, 90, 60, 82, 74, 86, 80, 68, 90, 76, 58, 84, 72][i]}%` }} />
-              ))}
-            </div>
+        <Tilt max={6} className="pm-docs-empty-card-wrap" innerClassName="pm-docs-empty-card">
+          <div className="pm-docs-card-top">
+            <span className="pm-docs-card-marker">{fail.marker}</span>
+            <VerdictBadge verdict="FAIL" />
           </div>
-        </div>
-      </figure>
+          <p className="pm-docs-card-summary">{fail.explanation}</p>
+          <pre className="pm-docs-card-math">{fail.arithmetic}</pre>
+          <p className="pm-docs-card-foot">
+            <span>{fail.addr1}</span>
+            <span>rect {fail.rect ? `${fail.rect.x},${fail.rect.y},${fail.rect.w},${fail.rect.h}` : "doc"}</span>
+          </p>
+        </Tilt>
+      </Reveal>
     </section>
   );
 }

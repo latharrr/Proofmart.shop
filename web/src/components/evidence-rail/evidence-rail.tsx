@@ -4,12 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import AnnotationOverlay from "./annotation-overlay";
 import { FindingRow } from "./finding-row";
 import { useLiveDocument } from "./use-live-document";
+import { TONE } from "./verdict-tone";
+import { SAMPLE_FINDINGS, SAMPLE_PAGE_COUNT, SAMPLE_PAGES, SAMPLE_VIEWBOX, ROW_H, ROW_TOP, type SampleFinding } from "./sample-statement";
 import { railFindingsForPage, verdictCounts, formatBytes } from "@/lib/pdf/rail-adapter";
 import type { ProcessingErrorCode, ProcessingStage, RailFinding } from "@/lib/pdf/types";
-import { FINDINGS, MONO, SANS, TXNS, VERDICT, fmt } from "@/lib/evidence-data";
+import { fmt } from "@/lib/evidence-data";
 import { SCAN_INTENT_EVENT } from "./scan-intent";
-
-const mutedOrInk = (v: number | null) => (v ? "#0E1216" : "#C2C7CC");
+import RollPill from "@/components/motion/roll-pill";
 
 const STAGE_LABEL: Record<ProcessingStage, string> = {
   idle: "",
@@ -28,15 +29,21 @@ function isPdfFile(file: File): boolean {
   return file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 }
 
-// The bundled sample's hardcoded verification findings, widened to the
-// rail's generic shape — structurally identical to `Finding` plus `origin`,
-// so this changes no rendered output, only lets sample and live findings
-// share one row renderer.
-const SAMPLE_RAIL_FINDINGS: RailFinding[] = FINDINGS.map((f) => ({ ...f, origin: "verification-finding" as const }));
+const SAMPLE_DEFAULT_PIN = "f1";
 
+/**
+ * The Evidence Rail: the bundled sample scan, and the real upload. Drop,
+ * paste or pick a PDF and the same panel runs the real pipeline on it.
+ *
+ * Sample findings know their page: pinning one turns the sample to that page
+ * and boxes the rows it names (sample-statement.ts holds the geometry). The
+ * box follows the pinned finding only — hover gives a neutral fill, never a
+ * verdict-coloured preview.
+ */
 export default function EvidenceRail() {
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const [pinnedId, setPinnedId] = useState<string | null>("f1");
+  const [, setHoveredId] = useState<string | null>(null);
+  const [pinnedId, setPinnedId] = useState<string | null>(SAMPLE_DEFAULT_PIN);
+  const [samplePage, setSamplePage] = useState(4);
   const [copied, setCopied] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   // Set by a "Start a scan" CTA (see open-scan-button.tsx): the drop zone
@@ -48,22 +55,19 @@ export default function EvidenceRail() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const live = useLiveDocument(canvasRef, {
-    // Mirrors the sample's default-pinned finding: whenever a live document
-    // (re)settles on a page, pin its first finding. Fired from the event
-    // handler that triggered the change (drop/pick/paste, page nav), never
-    // from an effect.
     onPageSettled: (firstId) => {
       setPinnedId(firstId);
       setHoveredId(null);
     },
     onReset: () => {
-      setPinnedId("f1");
+      setPinnedId(SAMPLE_DEFAULT_PIN);
+      setSamplePage(4);
       setHoveredId(null);
     },
   });
   const isLive = live.stage !== "idle";
 
-  // Paste-to-upload while the rail is mounted — there's only one rail on the page (the hero), so a page-scoped listener is the practical reading of "paste where practical."
+  // Paste-to-upload while the rail is mounted (one rail per page).
   useEffect(() => {
     const onPaste = (e: ClipboardEvent) => {
       const file = Array.from(e.clipboardData?.files ?? []).find(isPdfFile);
@@ -117,18 +121,28 @@ export default function EvidenceRail() {
   };
 
   const liveFindings = live.document ? railFindingsForPage(live.document, live.verification, live.page) : [];
-  const displayFindings = isLive ? liveFindings : SAMPLE_RAIL_FINDINGS;
-  const activeId = hoveredId || pinnedId;
-  const activeFinding = displayFindings.find((f) => f.id === activeId) ?? null;
+  const displayFindings: RailFinding[] = isLive ? liveFindings : SAMPLE_FINDINGS;
+  const activeFinding = displayFindings.find((f) => f.id === pinnedId) ?? null;
+  const sampleActive = !isLive ? (activeFinding as SampleFinding | null) : null;
+
+  // Pinning a sample finding turns the sample to the page it lives on.
+  const pin = (updater: (prev: string | null) => string | null) => {
+    const next = updater(pinnedId);
+    setPinnedId(next);
+    if (!isLive && next) {
+      const f = SAMPLE_FINDINGS.find((x) => x.id === next);
+      if (f) setSamplePage(f.page);
+    }
+  };
 
   const counts = isLive
     ? live.verification
       ? verdictCounts(live.verification)
       : { fail: 0, review: 0, clear: 0 }
     : {
-        fail: FINDINGS.filter((f) => f.verdict === "FAIL").length,
-        review: FINDINGS.filter((f) => f.verdict === "REVIEW").length,
-        clear: FINDINGS.filter((f) => f.verdict === "CLEAR").length,
+        fail: SAMPLE_FINDINGS.filter((f) => f.verdict === "FAIL").length,
+        review: SAMPLE_FINDINGS.filter((f) => f.verdict === "REVIEW").length,
+        clear: SAMPLE_FINDINGS.filter((f) => f.verdict === "CLEAR").length,
       };
 
   const handleCopyJson = async () => {
@@ -149,11 +163,11 @@ export default function EvidenceRail() {
       : {
           request_id: "req_8fk2",
           verdict: "FAIL",
-          findings: FINDINGS.map((f) => ({
+          findings: SAMPLE_FINDINGS.map((f) => ({
             marker: f.marker,
             verdict: f.verdict,
-            page: 4,
-            box: [f.rect.x, f.rect.y, f.rect.w, f.rect.h],
+            page: f.page,
+            boxes: f.rects.map((r) => [r.x, r.y, r.w, r.h]),
             explanation: f.explanation,
           })),
         };
@@ -167,22 +181,21 @@ export default function EvidenceRail() {
   };
 
   // ---- Header badge: verdict for sample, stage/error/real-verdict for live ----
-  let badgeGlyph = "×";
-  let badgeColor = "#B4231F";
+  let badgeGlyph = TONE.FAIL.glyph;
+  let badgeTone = "FAIL";
   let badgeLabel = "FAIL";
   if (isLive) {
     if (live.stage === "ready" && live.verification) {
-      const v = VERDICT[live.verification.verdict];
-      badgeGlyph = v.glyph;
-      badgeColor = v.color;
+      badgeGlyph = TONE[live.verification.verdict].glyph;
+      badgeTone = live.verification.verdict;
       badgeLabel = live.verification.verdict;
     } else if (live.stage === "error") {
       badgeGlyph = "×";
-      badgeColor = "#B4231F";
+      badgeTone = "FAIL";
       badgeLabel = live.error ? errorLabel(live.error.code) : "ERROR";
     } else {
       badgeGlyph = "·";
-      badgeColor = "#767C83";
+      badgeTone = "PENDING";
       badgeLabel = STAGE_LABEL[live.stage];
     }
   }
@@ -196,10 +209,14 @@ export default function EvidenceRail() {
         : ""
     : "6 pages · 2.1 MB · 4.8s";
 
-  const findingsCountLabel = isLive ? (live.verification ? `${live.verification.findings.length} findings` : "·") : `${FINDINGS.length} markers`;
+  const findingsCountLabel = isLive ? (live.verification ? `${live.verification.findings.length} findings` : "·") : `${SAMPLE_FINDINGS.length} findings`;
 
-  const pageCount = isLive ? Math.max(1, live.document?.pageCount ?? 1) : 6;
-  const currentPage = isLive ? live.page : 4;
+  const pageCount = isLive ? Math.max(1, live.document?.pageCount ?? 1) : SAMPLE_PAGE_COUNT;
+  const currentPage = isLive ? live.page : samplePage;
+  const goPage = (delta: number) => {
+    if (isLive) live.goToPage(delta);
+    else setSamplePage((p) => Math.min(SAMPLE_PAGE_COUNT, Math.max(1, p + delta)));
+  };
 
   return (
     <div
@@ -210,159 +227,87 @@ export default function EvidenceRail() {
       onDragLeave={() => setDragActive(false)}
       onDrop={handleDrop}
       data-testid="evidence-rail"
-      style={{
-        width: "100%",
-        height: "100%",
-        minHeight: 560,
-        display: "flex",
-        flexDirection: "column",
-        background: "#FFFFFF",
-        border: dragActive ? "1px solid #0E1216" : "1px solid #DDE1E4",
-        fontFamily: SANS,
-        color: "#0E1216",
-        overflowX: "auto",
-        overflowY: "hidden",
-      }}
+      className="pm-mk-rail"
+      data-drag={dragActive ? "" : undefined}
+      data-live={isLive ? "" : undefined}
     >
-      <input
-        ref={fileInputRef}
-        id="pm-file-input"
-        type="file"
-        accept="application/pdf,.pdf"
-        style={{ display: "none" }}
-        onChange={handleFilePicked}
-      />
+      <input ref={fileInputRef} id="pm-file-input" type="file" accept="application/pdf,.pdf" style={{ display: "none" }} onChange={handleFilePicked} />
 
       {/* Rail header */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr auto",
-          alignItems: "center",
-          padding: "10px 14px 10px 16px",
-          borderBottom: "1px solid #DDE1E4",
-          background: "#FFFFFF",
-          gap: 16,
-        }}
-        className="pm-rail-head"
-      >
-        <div style={{ display: "flex", alignItems: "baseline", gap: 12, minWidth: 0 }}>
-          <span style={{ fontFamily: MONO, fontSize: 12, color: "#0E1216", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {headerFilename}
-          </span>
-          <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{headerMeta}</span>
+      <div className="pm-mk-rail-head">
+        <div className="pm-mk-rail-file">
+          <span className="pm-mk-rail-fileicon" aria-hidden="true" />
+          <span className="pm-mk-rail-filename">{headerFilename}</span>
+          <span className="pm-mk-rail-meta">{headerMeta}</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              fontFamily: MONO,
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: "0.06em",
-              color: badgeColor,
-            }}
-          >
-            <span aria-hidden="true" style={{ display: "inline-block", width: 12, textAlign: "center", fontWeight: 500 }}>
-              {badgeGlyph}
-            </span>
+        <div className="pm-mk-rail-tools">
+          <span className="pm-mk-verdict" data-tone={badgeTone}>
+            <span aria-hidden="true">{badgeGlyph}</span>
             {badgeLabel}
           </span>
-          <span style={{ fontFamily: MONO, fontSize: 11, color: "#43494F", letterSpacing: "0.02em" }}>{findingsCountLabel}</span>
-          <span aria-hidden="true" style={{ width: 1, height: 16, background: "#DDE1E4" }} />
-          <button
-            aria-label="Copy JSON"
-            onClick={handleCopyJson}
-            className="pm-hoverable"
-            style={{ fontFamily: MONO, fontSize: 11, color: "#43494F", padding: "4px 10px", border: "1px solid #DDE1E4", borderRadius: "var(--pm-r-pill)" }}
-          >
+          <span className="pm-mk-rail-count">{findingsCountLabel}</span>
+          <button type="button" aria-label="Copy JSON" onClick={handleCopyJson} className="pm-mk-chip">
             {copied ? "Copied" : "Copy JSON"}
           </button>
           <button
+            type="button"
             aria-label={isLive ? "Clear document" : "Close"}
-            onClick={() => live.reset()}
-            className="pm-hoverable"
-            style={{ fontFamily: MONO, fontSize: 14, color: "#767C83", width: 22, height: 22, display: "grid", placeItems: "center" }}
+            onClick={() => {
+              if (isLive) live.reset();
+              else setArmed(false);
+            }}
+            className="pm-mk-iconbtn"
           >
             ×
           </button>
         </div>
       </div>
 
-      {/* Split body. Deliberately not a stacking responsive grid like the
-          marketing sections above: both panels need real width to render
-          the document/findings legibly, so on narrow viewports this scrolls
-          horizontally at its proven desktop proportions rather than
-          reflowing into two height-constrained rows with no minimum size. */}
-      <div
-        className="pm-rail-panes"
-        style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 1fr)", flex: 1, minHeight: 0, minWidth: 560, overflowX: "auto" }}
-      >
+      <div className="pm-mk-rail-panes">
         {/* Document panel */}
-        <div
-          style={{
-            position: "relative",
-            background: "#EDEFF1",
-            borderRight: "1px solid #DDE1E4",
-            padding: 20,
-            display: "flex",
-            flexDirection: "column",
-            gap: 10,
-            minHeight: 0,
-          }}
-        >
+        <div className="pm-mk-rail-docpane">
+          {/* Inline `cursor` on purpose: tests/e2e/helpers.ts finds the click
+              target that opens the file picker by it. */}
           <div
+            className="pm-mk-rail-page"
             onClick={() => fileInputRef.current?.click()}
-            style={{
-              position: "relative",
-              flex: 1,
-              minHeight: 0,
-              background: "#FFFFFF",
-              border: "1px solid #DDE1E4",
-              overflow: "hidden",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: isLive && live.stage === "ready" ? "default" : "pointer",
-            }}
+            style={{ cursor: isLive && live.stage === "ready" ? "default" : "pointer" }}
           >
-            {!isLive && <SampleDocument activeFinding={activeFinding} />}
+            {!isLive && <SampleDocument page={samplePage} active={sampleActive && sampleActive.page === samplePage ? sampleActive : null} />}
 
             {!isLive && (armed || dragActive) && (
-              <div className="pm-dropzone" data-testid="rail-dropzone">
-                <span className="pm-dropzone-title">{dragActive ? "Drop it here" : "Drop a PDF here"}</span>
-                <span className="pm-dropzone-sub">or paste one, or</span>
-                <button
+              <div className="pm-mk-dropzone" data-testid="rail-dropzone" onClick={(e) => e.stopPropagation()}>
+                <span className="pm-mk-dropzone-ring" aria-hidden="true">
+                  <span />
+                </span>
+                <span className="pm-mk-dropzone-title">{dragActive ? "Drop it here" : "Drop a PDF here"}</span>
+                <span className="pm-mk-dropzone-sub">or paste one, or</span>
+                <RollPill
                   ref={chooseRef}
-                  type="button"
-                  className="pm-btn pm-btn-filled pm-btn-sm"
+                  dot
                   onClick={(e) => {
                     e.stopPropagation();
                     fileInputRef.current?.click();
                   }}
                 >
                   Choose a PDF
-                </button>
-                <span className="pm-dropzone-note">Up to 20 MB. Signed-out scans are deleted after processing.</span>
+                </RollPill>
+                <span className="pm-mk-dropzone-note">Up to 20 MB. Signed-out scans are deleted after processing.</span>
               </div>
             )}
 
-            {isLive && (live.stage === "reading" || live.stage === "inspecting" || live.stage === "extracting") && (
-              <ProcessingNotice stage={live.stage} />
-            )}
+            {isLive && (live.stage === "reading" || live.stage === "inspecting" || live.stage === "extracting") && <ProcessingNotice stage={live.stage} />}
 
             {isLive && live.stage === "error" && live.error && <ErrorNotice message={live.error.message} />}
 
             {isLive && live.stage === "ready" && live.document && (
               <>
-                <canvas ref={canvasRef} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }} />
+                <canvas ref={canvasRef} className="pm-mk-rail-canvas" />
                 {activeFinding?.rect && live.pageDims && (
                   <AnnotationOverlay
                     rect={activeFinding.rect}
-                    color={VERDICT[activeFinding.verdict].color}
-                    fill={VERDICT[activeFinding.verdict].fill}
+                    color={TONE[activeFinding.verdict].color}
+                    fill={TONE[activeFinding.verdict].wash}
                     viewBoxWidth={live.pageDims.widthPt}
                     viewBoxHeight={live.pageDims.heightPt}
                     animationKey={activeFinding.id}
@@ -373,97 +318,54 @@ export default function EvidenceRail() {
           </div>
 
           {/* Page toolbar row */}
-          <div
-            className="pm-rail-doc-foot"
-            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: MONO, fontSize: 11, color: "#767C83" }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 12, whiteSpace: "nowrap" }}>
+          <div className="pm-mk-rail-docfoot">
+            <div className="pm-mk-rail-pager">
               <span>page</span>
-              <span style={{ display: "inline-flex", alignItems: "center", border: "1px solid #DDE1E4", borderRadius: "var(--pm-r-pill)", overflow: "hidden" }}>
-                <button
-                  onClick={() => isLive && live.goToPage(-1)}
-                  disabled={isLive ? currentPage <= 1 : true}
-                  style={{ padding: "2px 8px", color: "#43494F", background: "#FFFFFF", opacity: isLive && currentPage > 1 ? 1 : 0.4 }}
-                >
+              <span className="pm-mk-rail-stepper">
+                <button type="button" onClick={() => goPage(-1)} disabled={currentPage <= 1}>
                   ‹
                 </button>
-                <span style={{ padding: "2px 8px", borderLeft: "1px solid #DDE1E4", borderRight: "1px solid #DDE1E4", background: "#FFFFFF", color: "#0E1216" }}>
-                  {currentPage}
-                </span>
-                <button
-                  onClick={() => isLive && live.goToPage(1)}
-                  disabled={isLive ? currentPage >= pageCount : true}
-                  style={{ padding: "2px 8px", color: "#43494F", background: "#FFFFFF", opacity: isLive && currentPage < pageCount ? 1 : 0.4 }}
-                >
+                <span>{currentPage}</span>
+                <button type="button" onClick={() => goPage(1)} disabled={currentPage >= pageCount}>
                   ›
                 </button>
               </span>
               <span>of {pageCount}</span>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <span aria-hidden="true" style={{ width: 6, height: 6, background: isLive ? "#1F6B4A" : "#B4231F", display: "inline-block" }} />
-              <span style={{ letterSpacing: "0.02em" }}>
-                {isLive ? "UPLOADED · REAL DOCUMENT" : "SAMPLE · synthetic document. Drop, paste, or click to try a real one"}
-              </span>
+            <div className="pm-mk-rail-source">
+              <span aria-hidden="true" className="pm-mk-rail-source-dot" />
+              <span>{isLive ? "UPLOADED · REAL DOCUMENT" : "SAMPLE · synthetic document. Drop, paste, or click to try a real one"}</span>
             </div>
           </div>
         </div>
 
         {/* Findings panel */}
-        <div style={{ display: "flex", flexDirection: "column", minHeight: 0, background: "#FFFFFF" }}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "76px minmax(0, 1fr)",
-              alignItems: "center",
-              padding: "10px 16px 10px 0",
-              borderBottom: "1px solid #DDE1E4",
-              background: "#FFFFFF",
-            }}
-          >
-            <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.12em", paddingLeft: 14 }}>04</span>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-              <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.12em" }}>FINDINGS</span>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: MONO, fontSize: 11, letterSpacing: "0.06em" }}>
-                <span style={{ color: "#B4231F", fontWeight: 600 }}>{counts.fail} FAIL</span>
-                <span style={{ color: VERDICT.REVIEW.color, fontWeight: 600 }}>{counts.review} REVIEW</span>
-                <span style={{ color: "#767C83" }}>{counts.clear} CLEAR</span>
-              </div>
+        <div className="pm-mk-rail-findings">
+          <div className="pm-mk-rail-fhead">
+            <span>FINDINGS</span>
+            <div className="pm-mk-rail-counts">
+              <span data-tone="FAIL">{counts.fail} FAIL</span>
+              <span data-tone="REVIEW">{counts.review} REVIEW</span>
+              <span data-tone="CLEAR">{counts.clear} CLEAR</span>
             </div>
           </div>
 
-          <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+          <div className="pm-mk-rail-flist">
             {isLive && live.stage !== "ready" && (
-              <div style={{ padding: "24px 16px", fontFamily: MONO, fontSize: 11, color: "#767C83" }}>
-                {live.stage === "error" ? "No findings. Processing failed." : "Findings will appear once processing completes."}
-              </div>
+              <div className="pm-mk-rail-empty">{live.stage === "error" ? "No findings. Processing failed." : "Findings will appear once processing completes."}</div>
             )}
 
-            {isLive && live.stage === "ready" && displayFindings.length === 0 && (
-              <div style={{ padding: "24px 16px", fontFamily: MONO, fontSize: 11, color: "#767C83" }}>No findings or facts on this page.</div>
-            )}
+            {isLive && live.stage === "ready" && displayFindings.length === 0 && <div className="pm-mk-rail-empty">No findings or facts on this page.</div>}
 
             {(!isLive || live.stage === "ready") &&
               displayFindings.map((f) => (
-                <FindingRow key={f.id} finding={f} isActive={f.id === activeId} isPinned={f.id === pinnedId} onHover={setHoveredId} onPin={setPinnedId} />
+                <FindingRow key={f.id} finding={f} isActive={f.id === pinnedId} isPinned={f.id === pinnedId} onHover={setHoveredId} onPin={pin} />
               ))}
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "76px minmax(0, 1fr)",
-              alignItems: "center",
-              padding: "10px 16px 10px 0",
-              borderTop: "1px solid #DDE1E4",
-              background: "#FFFFFF",
-            }}
-          >
-            <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.12em", paddingLeft: 14 }}>↵</span>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "2px 12px", fontFamily: MONO, fontSize: 11, color: "#767C83" }}>
-              <span>Tab · Enter to pin · Esc to clear</span>
-              <span>{isLive ? "local · not persisted" : "proofmart.shop/d/req_8fk2"}</span>
-            </div>
+          <div className="pm-mk-rail-ffoot">
+            <span>Click or Enter to pin · Esc to clear</span>
+            <span>{isLive ? "local · not persisted" : "proofmart.shop/d/req_8fk2"}</span>
           </div>
         </div>
       </div>
@@ -473,162 +375,158 @@ export default function EvidenceRail() {
 
 function ProcessingNotice({ stage }: { stage: ProcessingStage }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-      <span aria-hidden="true" style={{ width: 8, height: 8, background: "#767C83", display: "inline-block" }} />
-      <span style={{ fontFamily: MONO, fontSize: 12, color: "#43494F", letterSpacing: "0.12em" }}>{STAGE_LABEL[stage]}…</span>
+    <div className="pm-mk-rail-notice">
+      <span aria-hidden="true" className="pm-mk-rail-pulse" />
+      <span className="pm-mk-rail-notice-label">{STAGE_LABEL[stage]}…</span>
     </div>
   );
 }
 
 function ErrorNotice({ message }: { message: string }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: "0 32px", textAlign: "center" }}>
-      <span
-        aria-hidden="true"
-        style={{ width: 22, height: 22, borderRadius: "50%", border: "1.5px solid #B4231F", display: "grid", placeItems: "center", color: "#B4231F", fontFamily: MONO, fontSize: 13 }}
-      >
+    <div className="pm-mk-rail-notice" data-error="">
+      <span aria-hidden="true" className="pm-mk-rail-errmark">
         ×
       </span>
-      <span style={{ fontFamily: SANS, fontSize: 13, color: "#43494F", lineHeight: 1.5 }}>{message}</span>
+      <span className="pm-mk-rail-notice-msg">{message}</span>
     </div>
   );
 }
 
-function SampleDocument({ activeFinding }: { activeFinding: RailFinding | null }) {
+const MONO = "var(--font-mono), ui-monospace, monospace";
+const SANS = "var(--font-sans), system-ui, sans-serif";
+const INK = "#0b0c10";
+const MUTE = "#6b6f80";
+const LINE = "#d9dbe6";
+
+function SampleDocument({ page, active }: { page: number; active: SampleFinding | null }) {
+  const data = SAMPLE_PAGES[page - 1];
+  const tableEnd = ROW_TOP + data.rows.length * ROW_H;
   return (
     <>
-      <svg viewBox="0 0 640 800" preserveAspectRatio="xMidYMid meet" style={{ width: "100%", height: "100%", display: "block" }}>
-        <text x={32} y={30} fontFamily={MONO} fontSize={10} fontWeight={500} fill="#767C83" letterSpacing={1.2}>
-          PAGE 04 · APR 2025
+      <svg
+        viewBox={`0 0 ${SAMPLE_VIEWBOX.w} ${SAMPLE_VIEWBOX.h}`}
+        preserveAspectRatio="xMidYMid meet"
+        className="pm-mk-rail-sample"
+        aria-label={`Sample statement, page ${page} of ${SAMPLE_PAGE_COUNT}`}
+        role="img"
+      >
+        <text x={32} y={34} fontFamily={MONO} fontSize={11} fill={MUTE} letterSpacing={1.2}>
+          PAGE {String(page).padStart(2, "0")} · {data.period}
         </text>
-        <text x={608} y={30} fontFamily={MONO} fontSize={10} fill="#767C83" textAnchor="end">
-          continued from p3
+        <text x={608} y={34} fontFamily={MONO} fontSize={11} fill={MUTE} textAnchor="end">
+          {page > 1 ? `continued from p${page - 1}` : "statement of account"}
         </text>
 
-        <g transform="translate(32, 54)">
-          <rect x={0} y={0} width={14} height={14} fill="#0E1216" />
-          <text x={24} y={12} fontFamily={SANS} fontSize={16} fontWeight={600} fill="#0E1216" letterSpacing="0.02em">
+        <g transform="translate(32, 62)">
+          <rect x={0} y={-2} width={18} height={18} rx={5} fill={INK} />
+          <text x={28} y={13} fontFamily={SANS} fontSize={18} fill={INK} letterSpacing="-0.01em">
             HDFC BANK
           </text>
-          <text x={120} y={12} fontFamily={SANS} fontSize={12} fill="#767C83">
+          <text x={136} y={13} fontFamily={SANS} fontSize={13} fill={MUTE}>
             Statement of Account
           </text>
         </g>
 
-        <g transform="translate(32, 100)">
-          <text x={0} y={0} fontFamily={MONO} fontSize={10} fill="#767C83" letterSpacing={1.2}>
+        <g transform="translate(32, 112)">
+          <text x={0} y={0} fontFamily={MONO} fontSize={10} fill={MUTE} letterSpacing={1.2}>
             ACCOUNT
           </text>
-          <text x={0} y={18} fontFamily={MONO} fontSize={14} fill="#0E1216">
+          <text x={0} y={20} fontFamily={MONO} fontSize={14} fill={INK}>
             XXXX-XX-4821
           </text>
-
-          <text x={200} y={0} fontFamily={MONO} fontSize={10} fill="#767C83" letterSpacing={1.2}>
+          <text x={200} y={0} fontFamily={MONO} fontSize={10} fill={MUTE} letterSpacing={1.2}>
             HOLDER
           </text>
-          <text x={200} y={18} fontFamily={SANS} fontSize={14} fill="#0E1216">
+          <text x={200} y={20} fontFamily={SANS} fontSize={15} fill={INK}>
             Rajesh Sharma
           </text>
-
-          <text x={0} y={46} fontFamily={MONO} fontSize={10} fill="#767C83" letterSpacing={1.2}>
-            PERIOD
-          </text>
-          <text x={0} y={64} fontFamily={MONO} fontSize={14} fill="#0E1216">
-            01 Apr 2025 – 30 Apr 2025
-          </text>
-
-          <text x={304} y={46} fontFamily={MONO} fontSize={10} fill="#767C83" letterSpacing={1.2}>
+          <text x={392} y={0} fontFamily={MONO} fontSize={10} fill={MUTE} letterSpacing={1.2}>
             PRODUCER
           </text>
-          <text x={304} y={64} fontFamily={MONO} fontSize={14} fill="#0E1216">
+          <text x={392} y={20} fontFamily={MONO} fontSize={14} fill={INK}>
             Microsoft Word 2016
           </text>
         </g>
 
-        <line x1={32} y1={196} x2={608} y2={196} stroke="#DDE1E4" strokeWidth={1} />
+        <line x1={32} y1={160} x2={608} y2={160} stroke={LINE} strokeWidth={1} />
 
         <g transform="translate(0, 218)">
-          <text x={32} y={0} fontFamily={MONO} fontSize={10} fill="#767C83" letterSpacing={1.2}>
-            #
-          </text>
-          <text x={60} y={0} fontFamily={MONO} fontSize={10} fill="#767C83" letterSpacing={1.2}>
-            DATE
-          </text>
-          <text x={120} y={0} fontFamily={MONO} fontSize={10} fill="#767C83" letterSpacing={1.2}>
-            DESCRIPTION
-          </text>
-          <text x={430} y={0} fontFamily={MONO} fontSize={10} fill="#767C83" letterSpacing={1.2} textAnchor="end">
-            DEBIT
-          </text>
-          <text x={520} y={0} fontFamily={MONO} fontSize={10} fill="#767C83" letterSpacing={1.2} textAnchor="end">
-            CREDIT
-          </text>
-          <text x={612} y={0} fontFamily={MONO} fontSize={10} fill="#767C83" letterSpacing={1.2} textAnchor="end">
-            BALANCE
-          </text>
+          {[
+            { x: 46, t: "#", a: "end" as const },
+            { x: 56, t: "DATE" },
+            { x: 116, t: "DESCRIPTION" },
+            { x: 424, t: "DEBIT", a: "end" as const },
+            { x: 518, t: "CREDIT", a: "end" as const },
+            { x: 612, t: "BALANCE", a: "end" as const },
+          ].map((h) => (
+            <text key={h.t} x={h.x} y={0} fontFamily={MONO} fontSize={10} fill={MUTE} letterSpacing={1.2} textAnchor={h.a}>
+              {h.t}
+            </text>
+          ))}
         </g>
-        <line x1={32} y1={228} x2={608} y2={228} stroke="#C2C7CC" strokeWidth={1.25} />
+        <line x1={28} y1={229} x2={616} y2={229} stroke="#b9bccb" strokeWidth={1.25} />
 
-        {TXNS.map((t, idx) => {
-          const y = 240 + idx * 26;
-          const balColor = t.breakBalance ? "#B4231F" : "#0E1216";
-          const balWeight = t.breakBalance ? 600 : 400;
+        {data.rows.map((t) => {
+          const y = ROW_TOP + (t.n - 1) * ROW_H;
+          const muted = t.debit === null && t.credit === null;
           return (
-            <g key={t.i} transform={`translate(0, ${y})`}>
-              <text x={52} y={16} fontFamily={MONO} fontSize={12} fill="#767C83" textAnchor="end">
-                {String(t.i).padStart(2, "0")}
+            <g key={t.n} transform={`translate(0, ${y})`}>
+              <text x={46} y={17} fontFamily={MONO} fontSize={12} fill={MUTE} textAnchor="end">
+                {String(t.n).padStart(2, "0")}
               </text>
-              <text x={60} y={16} fontFamily={MONO} fontSize={12} fill="#0E1216">
+              <text x={56} y={17} fontFamily={MONO} fontSize={12.5} fill={INK}>
                 {t.date}
               </text>
-              <text x={120} y={16} fontFamily={SANS} fontSize={12} fill="#0E1216">
+              <text x={116} y={17} fontFamily={SANS} fontSize={13.5} fill={muted ? MUTE : INK}>
                 {t.desc}
               </text>
-              <text x={430} y={16} fontFamily={MONO} fontSize={12} fill={mutedOrInk(t.debit)} textAnchor="end">
+              <text x={424} y={17} fontFamily={MONO} fontSize={12.5} fill={t.debit ? INK : "#b9bccb"} textAnchor="end">
                 {fmt(t.debit)}
               </text>
-              <text x={520} y={16} fontFamily={MONO} fontSize={12} fill={mutedOrInk(t.credit)} textAnchor="end">
+              <text x={518} y={17} fontFamily={MONO} fontSize={12.5} fill={t.credit !== null ? INK : "#b9bccb"} textAnchor="end">
                 {fmt(t.credit)}
               </text>
-              <text x={612} y={16} fontFamily={MONO} fontSize={12} fill={balColor} fontWeight={balWeight} textAnchor="end">
+              <text x={612} y={17} fontFamily={MONO} fontSize={12.5} fill={INK} textAnchor="end">
                 {fmt(t.balance)}
               </text>
-              <line x1={32} y1={26} x2={608} y2={26} stroke="#EDEFF1" strokeWidth={1} />
+              <line x1={28} y1={ROW_H} x2={616} y2={ROW_H} stroke="#eceef5" strokeWidth={1} />
             </g>
           );
         })}
 
-        <g transform="translate(0, 570)">
-          <text x={32} y={0} fontFamily={MONO} fontSize={10} fill="#767C83" letterSpacing={1.2}>
-            CARRIED TO P5
+        <g transform={`translate(0, ${tableEnd + 30})`}>
+          <text x={32} y={0} fontFamily={MONO} fontSize={11} fill={MUTE} letterSpacing={1.2}>
+            {data.carried.label}
           </text>
-          <text x={612} y={0} fontFamily={MONO} fontSize={12} fill="#0E1216" fontWeight={500} textAnchor="end">
-            91,710.00
+          <text x={612} y={0} fontFamily={MONO} fontSize={13} fill={INK} textAnchor="end">
+            {fmt(data.carried.amount)}
           </text>
         </g>
-        <line x1={32} y1={580} x2={608} y2={580} stroke="#DDE1E4" strokeWidth={1} />
+        <line x1={32} y1={tableEnd + 42} x2={608} y2={tableEnd + 42} stroke={LINE} strokeWidth={1} />
 
-        <text x={32} y={612} fontFamily={MONO} fontSize={9} fill="#767C83" letterSpacing={1.2}>
+        <text x={32} y={752} fontFamily={MONO} fontSize={9} fill={MUTE} letterSpacing={1.2}>
           HDFC BANK LIMITED · REGD. OFFICE HDFC HOUSE, MUMBAI
         </text>
-        <text x={32} y={626} fontFamily={MONO} fontSize={9} fill="#767C83" letterSpacing={1.2}>
-          CIN L65920MH1994PLC080618 · WWW.HDFCBANK.COM
+        <text x={32} y={766} fontFamily={MONO} fontSize={9} fill={MUTE} letterSpacing={1.2}>
+          CIN L65920MH1994PLC080618 · SAMPLE FOR DEMONSTRATION
         </text>
-        <text x={608} y={640} fontFamily={MONO} fontSize={9} fill="#767C83" letterSpacing={1.2} textAnchor="end">
-          PAGE 4 / 6
+        <text x={608} y={766} fontFamily={MONO} fontSize={9} fill={MUTE} letterSpacing={1.2} textAnchor="end">
+          PAGE {page} / {SAMPLE_PAGE_COUNT}
         </text>
       </svg>
 
-      {activeFinding?.rect && (
+      {active?.rects.map((r, i) => (
         <AnnotationOverlay
-          rect={activeFinding.rect}
-          color={VERDICT[activeFinding.verdict].color}
-          fill={VERDICT[activeFinding.verdict].fill}
-          viewBoxWidth={640}
-          viewBoxHeight={800}
-          animationKey={activeFinding.id}
+          key={`${active.id}-${i}`}
+          rect={r}
+          color={TONE[active.verdict].color}
+          fill={TONE[active.verdict].wash}
+          viewBoxWidth={SAMPLE_VIEWBOX.w}
+          viewBoxHeight={SAMPLE_VIEWBOX.h}
+          animationKey={`${active.id}-${page}`}
         />
-      )}
+      ))}
     </>
   );
 }

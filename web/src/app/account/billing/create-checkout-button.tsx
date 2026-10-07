@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import RollPill from "@/components/motion/roll-pill";
 
 declare global {
   interface Window {
@@ -68,7 +69,7 @@ export default function CreateCheckoutButton() {
         description: `${order.planName} plan`,
         order_id: order.orderId,
         prefill: order.prefill,
-        theme: { color: "var(--pm-ink)" },
+        theme: { color: "#2b2e3a" },
         handler: () => setStarted(true),
       });
       rzp.open();
@@ -89,9 +90,9 @@ export default function CreateCheckoutButton() {
 
   return (
     <div className="pm-acct-checkout">
-      <button type="button" disabled={pending} data-pending={pending ? "" : undefined} onClick={startCheckout} className="pm-btn pm-btn-filled">
-        {pending ? "Opening checkout…" : "Upgrade to Pro"}
-      </button>
+      <RollPill variant="paper" dot pending={pending} pendingLabel="Opening checkout" onClick={startCheckout}>
+        Upgrade to Pro
+      </RollPill>
       {error && (
         <p role="alert" className="pm-acct-error">
           {error}

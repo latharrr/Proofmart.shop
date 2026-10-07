@@ -6,5 +6,5 @@ import { usePathname } from "next/navigation";
 export default function RequestedPath() {
   const path = usePathname();
   if (!path || path === "/") return <>this address</>;
-  return <code className="pm-mono pm-nf-path">{path.length > 64 ? `${path.slice(0, 63)}…` : path}</code>;
+  return <code className="pm-nf-path">{path.length > 64 ? `${path.slice(0, 63)}…` : path}</code>;
 }

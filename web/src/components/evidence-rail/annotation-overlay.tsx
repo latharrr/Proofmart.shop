@@ -25,7 +25,7 @@ export default function AnnotationOverlay({ rect, color, fill, viewBoxWidth, vie
     el.style.strokeDashoffset = String(p);
     // Force reflow so the transition below animates from the reset offset.
     el.getBoundingClientRect();
-    el.style.transition = "stroke-dashoffset 180ms cubic-bezier(0.2,0,0,1)";
+    el.style.transition = "stroke-dashoffset 450ms cubic-bezier(0.4,0,0.1,1)";
     el.style.strokeDashoffset = "0";
   }, [animationKey, rect]);
 

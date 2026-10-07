@@ -1,14 +1,18 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import Wordmark from "@/components/brand/wordmark";
+import LineReveal from "@/components/motion/line-reveal";
+import RollPill from "@/components/motion/roll-pill";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { SCAN_URL } from "@/components/evidence-rail/scan-intent";
 import AccountMenu from "./account-menu";
+import AppMobileMenu from "./mobile-menu";
+import RollLabel from "./roll-label";
 import { signOutAction } from "./actions";
 
 /**
  * The signed-in workspace frame: a sticky app bar (wordmark, section nav,
- * the "Verify a document" primary action, account menu) over a <main id="main">
+ * the "Verify a document" primary pill, account menu) over a <main id="main">
  * that the root layout's skip link targets.
  *
  * Usage, from any signed-in page — after the page's own auth redirect:
@@ -23,6 +27,10 @@ import { signOutAction } from "./actions";
  * `email` is optional: omitted, the shell reads it from the session itself;
  * `null` renders the account control without an address (loading skeletons).
  * The shell never redirects — auth gating stays with each page.
+ *
+ * Desktop: the nav is a haze pill track centred in the bar, the current
+ * section a paper pill with the volt dot. Below 960px the nav and the account
+ * menu fold into one MENU sheet.
  */
 
 export type AppSection = "documents" | "api-keys" | "webhooks" | "billing";
@@ -46,12 +54,20 @@ async function sessionEmail(): Promise<string | null> {
 export default async function AppShell({ active, email, children }: { active?: AppSection; email?: string | null; children: ReactNode }) {
   const address = email === undefined ? await sessionEmail() : email;
 
+  const signOut = (
+    <form action={signOutAction}>
+      <RollPill type="submit" variant="secondary" size="sm" block className="pm-app-signout">
+        Sign out
+      </RollPill>
+    </form>
+  );
+
   return (
     <div className="pm-app">
       <header className="pm-app-bar">
         <div className="pm-app-bar-inner">
           <div className="pm-app-brand">
-            <Wordmark href="/documents" />
+            <Wordmark href="/documents" size={26} fontSize={22} />
           </div>
 
           <nav className="pm-app-nav" aria-label="Workspace">
@@ -59,14 +75,8 @@ export default async function AppShell({ active, email, children }: { active?: A
               {APP_NAV.map((item) => (
                 <li key={item.id}>
                   <Link href={item.href} aria-current={item.id === active ? "page" : undefined}>
-                    {item.short ? (
-                      <>
-                        <span className="pm-app-nav-full">{item.label}</span>
-                        <span className="pm-app-nav-short">{item.short}</span>
-                      </>
-                    ) : (
-                      item.label
-                    )}
+                    <span className="pm-app-nav-dot" aria-hidden="true" />
+                    <RollLabel>{item.label}</RollLabel>
                   </Link>
                 </li>
               ))}
@@ -74,24 +84,11 @@ export default async function AppShell({ active, email, children }: { active?: A
           </nav>
 
           <div className="pm-app-actions">
-            <Link href={VERIFY_HREF} className="pm-btn pm-btn-filled pm-app-verify" aria-label="Verify a document">
-              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-              </svg>
-              <span>
-                Verify<span className="pm-app-verify-long"> a document</span>
-              </span>
-            </Link>
-            <AccountMenu
-              email={address}
-              signOut={
-                <form action={signOutAction}>
-                  <button type="submit" className="pm-btn pm-btn-ghost pm-btn-sm pm-app-signout">
-                    Sign out
-                  </button>
-                </form>
-              }
-            />
+            <RollPill href={VERIFY_HREF} dot className="pm-app-verify" aria-label="Verify a document">
+              Verify<span className="pm-app-verify-long"> a document</span>
+            </RollPill>
+            <AccountMenu email={address} signOut={signOut} />
+            <AppMobileMenu nav={APP_NAV.map(({ id, href, label }) => ({ id, href, label }))} active={active} email={address} signOut={signOut} />
           </div>
         </div>
       </header>
@@ -103,15 +100,17 @@ export default async function AppShell({ active, email, children }: { active?: A
   );
 }
 
-/** The content column every workspace page sits in — 1200px max, the page gutter, and the top/bottom rhythm. */
+/** The content column every workspace page sits in — the 1296px grid, the page gutter, and the top/bottom rhythm. */
 export function AppPage({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={className ? `pm-app-page ${className}` : "pm-app-page"}>{children}</div>;
 }
 
 /**
- * A workspace page's title block: the serif page title (heading role, 44px),
- * an optional one-paragraph description, optional actions on the right and an
- * optional back link above.
+ * A workspace page's title block: an optional label (`meta`) and back link
+ * above the title, which rises line by line from its mask (heading-lg, 88px
+ * desktop / 44px mobile; `size="md"` drops to the 48px heading role for long
+ * titles such as a filename). The description and actions sit in the right
+ * column on desktop and under the title on a phone.
  */
 export function AppPageHeader({
   title,
@@ -119,17 +118,20 @@ export function AppPageHeader({
   actions,
   back,
   meta,
+  size = "lg",
 }: {
   title: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
   back?: { href: string; label: string };
   meta?: ReactNode;
+  /** "lg" (default) = heading-lg; "md" = heading, for long titles. */
+  size?: "lg" | "md";
 }) {
   return (
-    <div className="pm-app-head">
+    <div className="pm-app-head" data-size={size}>
       {back && (
-        <Link href={back.href} className="pm-link pm-app-back">
+        <Link href={back.href} className="pm-app-back">
           <span className="pm-app-back-arrow" aria-hidden="true">
             ←
           </span>
@@ -138,11 +140,49 @@ export function AppPageHeader({
       )}
       <div className="pm-app-head-row">
         <div className="pm-app-head-text">
-          {meta}
-          <h1 className="pm-app-title">{title}</h1>
-          {description && <p className="pm-app-desc">{description}</p>}
+          {meta && <div className="pm-app-head-meta">{meta}</div>}
+          <LineReveal as="h1" className="pm-app-title">
+            {title}
+          </LineReveal>
         </div>
-        {actions && <div className="pm-app-head-actions">{actions}</div>}
+        {(description || actions) && (
+          <div className="pm-app-head-side">
+            {description && <p className="pm-app-desc">{description}</p>}
+            {actions && <div className="pm-app-head-actions">{actions}</div>}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The header's shape while a page streams in (for loading.tsx): the same
+ * boxes as <AppPageHeader>, filled with skeleton bars, so the real title can
+ * rise into exactly that space without a jump — and rises once, not twice.
+ */
+export function AppPageHeaderSkeleton({ back, size = "lg", label = "Loading" }: { back?: string; size?: "lg" | "md"; label?: string }) {
+  return (
+    <div className="pm-app-head pm-skeleton" data-size={size} role="status" aria-label={label}>
+      {back && (
+        <span className="pm-app-back" aria-hidden="true">
+          <span className="pm-app-back-arrow">←</span>
+          {back}
+        </span>
+      )}
+      <div className="pm-app-head-row" aria-hidden="true">
+        <div className="pm-app-head-text">
+          <div className="pm-app-head-meta">
+            <span className="pm-skeleton-bar pm-skeleton-label" />
+          </div>
+          <span className="pm-app-title">
+            <span className="pm-skeleton-bar pm-skeleton-title" />
+          </span>
+        </div>
+        <div className="pm-app-head-side">
+          <span className="pm-skeleton-bar pm-skeleton-line" />
+          <span className="pm-skeleton-bar pm-skeleton-line" style={{ width: "62%" }} />
+        </div>
       </div>
     </div>
   );
