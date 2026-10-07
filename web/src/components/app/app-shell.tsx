@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import Wordmark from "@/components/brand/wordmark";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { SCAN_URL } from "@/components/evidence-rail/scan-intent";
 import AccountMenu from "./account-menu";
 import { signOutAction } from "./actions";
 
@@ -33,8 +34,8 @@ export const APP_NAV: { id: AppSection; href: string; label: string; short?: str
   { id: "billing", href: "/account/billing", label: "Billing" },
 ];
 
-/** Where "Verify a document" goes: the upload rail on the home page — the one place a document can be submitted from the browser. */
-export const VERIFY_HREF = "/#access";
+/** Where "Verify a document" goes: the upload rail on the home page — the one place a document can be submitted from the browser — with its drop zone already open and "Choose a PDF" focused. */
+export const VERIFY_HREF = SCAN_URL;
 
 async function sessionEmail(): Promise<string | null> {
   if (!isSupabaseConfigured()) return null;
@@ -73,7 +74,7 @@ export default async function AppShell({ active, email, children }: { active?: A
           </nav>
 
           <div className="pm-app-actions">
-            <Link href={VERIFY_HREF} className="pm-btn pm-btn-filled pm-btn-sm pm-app-verify" aria-label="Verify a document">
+            <Link href={VERIFY_HREF} className="pm-btn pm-btn-filled pm-app-verify" aria-label="Verify a document">
               <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
                 <path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
               </svg>

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import * as s from "@/components/auth/auth-styles";
-import { MONO } from "@/lib/evidence-data";
+import SecretReveal from "@/components/account/secret-reveal";
 import { createApiKey } from "./actions";
 
 // Client component, not a plain <form action>, because the raw key has to
@@ -14,55 +13,21 @@ export default function CreateKeyForm() {
   const [name, setName] = useState("");
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
   const [pending, startTransition] = useTransition();
 
   if (revealedKey) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <div style={s.successBanner}>Copy this key now — it won&rsquo;t be shown again.</div>
-        <div
-          style={{
-            fontFamily: MONO,
-            fontSize: 13,
-            padding: "10px 12px",
-            border: "1px solid var(--pm-hairline)",
-            borderRadius: "var(--pm-r-image)",
-            background: "var(--pm-mist)",
-            wordBreak: "break-all",
-          }}
-        >
-          {revealedKey}
-        </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          <button
-            type="button"
-            className="pm-btn pm-btn-ghost"
-            style={{ ...s.secondaryButton, width: "auto" }}
-            onClick={async () => {
-              await navigator.clipboard.writeText(revealedKey);
-              setCopied(true);
-              setTimeout(() => setCopied(false), 1400);
-            }}
-          >
-            {copied ? "Copied" : "Copy"}
-          </button>
-          <button
-            type="button"
-            className="pm-btn pm-btn-filled"
-            style={{ ...s.primaryButton, width: "auto" }}
-            onClick={() => setRevealedKey(null)}
-          >
-            Done
-          </button>
-        </div>
-      </div>
+      <SecretReveal title="Copy your new key now" secret={revealedKey} secretLabel="Key" envName="PROOFMART_API_KEY" onDone={() => setRevealedKey(null)}>
+        This is the only time the full key is shown. ProofMart keeps a one-way hash, not the key, so it can&rsquo;t be recovered later. If it&rsquo;s lost,
+        revoke it and create another.
+      </SecretReveal>
     );
   }
 
   return (
     <form
-      style={{ display: "flex", gap: 10 }}
+      className="pm-acct-create"
+      aria-labelledby="pm-acct-create-title"
       onSubmit={(e) => {
         e.preventDefault();
         setError(null);
@@ -76,16 +41,35 @@ export default function CreateKeyForm() {
         });
       }}
     >
-      <input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Key name (e.g. production)"
-        style={{ ...s.input, flex: 1 }}
-      />
-      <button type="submit" disabled={pending} className="pm-btn pm-btn-filled" style={{ ...s.primaryButton, width: "auto" }}>
-        {pending ? "Creating…" : "Create key"}
-      </button>
-      {error && <div style={s.errorBanner}>{error}</div>}
+      <div className="pm-acct-create-text">
+        <h2 id="pm-acct-create-title" className="pm-acct-create-title">
+          Create a key
+        </h2>
+        <p className="pm-acct-create-hint">Name it after where it will run, so you know what stops working if you ever revoke it.</p>
+      </div>
+      <div className="pm-acct-create-row">
+        <label className="pm-acct-field">
+          <span className="pm-acct-label">Key name</span>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. production, staging, ci"
+            className="pm-acct-input"
+            autoComplete="off"
+            spellCheck={false}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? "pm-acct-create-error" : undefined}
+          />
+        </label>
+        <button type="submit" disabled={pending} data-pending={pending ? "" : undefined} className="pm-btn pm-btn-filled pm-acct-create-submit">
+          {pending ? "Creating…" : "Create key"}
+        </button>
+      </div>
+      {error && (
+        <p id="pm-acct-create-error" role="alert" className="pm-acct-error">
+          {error}
+        </p>
+      )}
     </form>
   );
 }

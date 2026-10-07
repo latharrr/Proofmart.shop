@@ -7,6 +7,7 @@ import { useLiveDocument } from "./use-live-document";
 import { railFindingsForPage, verdictCounts, formatBytes } from "@/lib/pdf/rail-adapter";
 import type { ProcessingErrorCode, ProcessingStage, RailFinding } from "@/lib/pdf/types";
 import { FINDINGS, MONO, SANS, TXNS, VERDICT, fmt } from "@/lib/evidence-data";
+import { SCAN_INTENT_EVENT } from "./scan-intent";
 
 const mutedOrInk = (v: number | null) => (v ? "#0E1216" : "#C2C7CC");
 
@@ -38,7 +39,12 @@ export default function EvidenceRail() {
   const [pinnedId, setPinnedId] = useState<string | null>("f1");
   const [copied, setCopied] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  // Set by a "Start a scan" CTA (see open-scan-button.tsx): the drop zone
+  // shows itself and its button takes focus, so the CTA visibly starts
+  // something without springing the OS file dialog on the visitor.
+  const [armed, setArmed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const chooseRef = useRef<HTMLButtonElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const live = useLiveDocument(canvasRef, {
@@ -69,10 +75,28 @@ export default function EvidenceRail() {
   }, []);
 
   useEffect(() => {
+    const onArm = () => {
+      setArmed(true);
+      // After the CTA's smooth scroll has had time to land.
+      window.setTimeout(() => chooseRef.current?.focus({ preventScroll: true }), 450);
+    };
+    window.addEventListener(SCAN_INTENT_EVENT, onArm);
+    // Arriving via SCAN_URL: arm once, then drop the param so a reload doesn't re-arm.
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("scan")) {
+      onArm();
+      url.searchParams.delete("scan");
+      window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
+    }
+    return () => window.removeEventListener(SCAN_INTENT_EVENT, onArm);
+  }, []);
+
+  useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setPinnedId(null);
         setHoveredId(null);
+        setArmed(false);
       }
     };
     window.addEventListener("keydown", onKeyDown);
@@ -305,6 +329,25 @@ export default function EvidenceRail() {
             }}
           >
             {!isLive && <SampleDocument activeFinding={activeFinding} />}
+
+            {!isLive && (armed || dragActive) && (
+              <div className="pm-dropzone" data-testid="rail-dropzone">
+                <span className="pm-dropzone-title">{dragActive ? "Drop it here" : "Drop a PDF here"}</span>
+                <span className="pm-dropzone-sub">or paste one, or</span>
+                <button
+                  ref={chooseRef}
+                  type="button"
+                  className="pm-btn pm-btn-filled pm-btn-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    fileInputRef.current?.click();
+                  }}
+                >
+                  Choose a PDF
+                </button>
+                <span className="pm-dropzone-note">Up to 20 MB. Signed-out scans are deleted after processing.</span>
+              </div>
+            )}
 
             {isLive && (live.stage === "reading" || live.stage === "inspecting" || live.stage === "extracting") && (
               <ProcessingNotice stage={live.stage} />

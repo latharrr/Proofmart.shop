@@ -206,7 +206,7 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
         <button
           id={`finding-${item.id}`}
           type="button"
-          className="pm-finding"
+          className="pm-rfind"
           data-kind={item.kind}
           data-verdict={item.verdict}
           data-active={active?.id === item.id || undefined}
@@ -217,17 +217,17 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
           onBlur={() => setHoveredId(null)}
           onClick={() => select(item)}
         >
-          <span className="pm-finding-top">
-            <span className="pm-finding-marker">{item.marker}</span>
-            {item.kind === "finding" ? <VerdictBadge verdict={item.verdict} /> : <span className="pm-finding-loc-inline">{location(item)}</span>}
+          <span className="pm-rfind-top">
+            <span className="pm-rfind-marker">{item.marker}</span>
+            {item.kind === "finding" ? <VerdictBadge verdict={item.verdict} /> : <span className="pm-rfind-loc-inline">{location(item)}</span>}
           </span>
-          {item.name && <span className="pm-finding-name">{item.name}</span>}
-          <span className="pm-finding-summary">{item.summary}</span>
-          {item.detail && <span className="pm-finding-math">{item.detail}</span>}
+          {item.name && <span className="pm-rfind-name">{item.name}</span>}
+          <span className="pm-rfind-summary">{item.summary}</span>
+          {item.detail && <span className="pm-rfind-math">{item.detail}</span>}
           {item.kind === "finding" && (
-            <span className="pm-finding-foot">
-              <span className="pm-finding-loc">{location(item)}</span>
-              <span className="pm-finding-show">{isSelected ? "Shown on page" : item.rect ? "Show on page" : `Go to page ${item.page}`}</span>
+            <span className="pm-rfind-foot">
+              <span className="pm-rfind-loc">{location(item)}</span>
+              <span className="pm-rfind-show">{isSelected ? "Shown on page" : item.rect ? "Show on page" : `Go to page ${item.page}`}</span>
             </span>
           )}
         </button>
@@ -249,6 +249,9 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
             {tone.label}
           </p>
           <p className="pm-report-verdict-line">{sentence}</p>
+          <p className="pm-report-docline">
+            {documentKindLabel(verification.documentKind)} · {plural(pageCount, "page")} · <span className="pm-mono">{doc.pdfType}</span>
+          </p>
         </div>
         <dl className="pm-report-stats">
           <div data-verdict="FAIL" data-zero={counts.fail === 0 || undefined}>
@@ -262,15 +265,6 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
           <div data-verdict="CLEAR" data-zero={counts.clear === 0 || undefined}>
             <dt>Markers clear</dt>
             <dd>{counts.clear}</dd>
-          </div>
-          <div className="pm-report-stats-doc">
-            <dt>Document</dt>
-            <dd>
-              {documentKindLabel(verification.documentKind)}
-              <span className="pm-report-stats-sub">
-                {plural(pageCount, "page")} · <span className="pm-mono">{doc.pdfType}</span>
-              </span>
-            </dd>
           </div>
         </dl>
       </section>
@@ -286,7 +280,6 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
 
           {findings.length === 0 ? (
             <div className="pm-report-clean">
-              <VerdictBadge verdict={verification.verdict === "CLEAR" ? "CLEAR" : "INCONCLUSIVE"} />
               <p>
                 No marker found anything to report. {plural(verification.markersRun.length, "marker")} ran against this document
                 {verification.markersSkipped.length > 0 ? `; ${verification.markersSkipped.length} couldn't run (listed below).` : "."}

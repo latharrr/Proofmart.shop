@@ -9,9 +9,9 @@ import { VerdictBadge } from "./verdict";
  * sample is the same bundled statement the home page's Evidence Rail opens
  * with, so the two never disagree about what a finding looks like.
  *
- * The sample artifact runs off the card's right edge through its page
- * preview — a column of placeholder lines with no text in it — so the crop
- * never touches a number, a marker id or the arithmetic.
+ * The sample floats free on the page field and runs off the viewport's right
+ * edge through its page preview — a column of placeholder lines with no text
+ * in it — so the crop never touches a number, a marker id or the arithmetic.
  */
 export default function DocumentsEmpty() {
   const fail = FINDINGS.find((f) => f.verdict === "FAIL") ?? FINDINGS[0];
@@ -29,32 +29,32 @@ export default function DocumentsEmpty() {
           Verify your first PDF and its report is saved here, private to your account.
         </h2>
 
-        <ol className="pm-steps">
+        <ol className="pm-empty-steps">
           <li>
-            <span className="pm-step-n" aria-hidden="true">
+            <span className="pm-empty-step-n" aria-hidden="true">
               1
             </span>
             <div>
-              <span className="pm-step-title">Upload a PDF</span>
-              <span className="pm-step-body">A bank statement, invoice, salary slip or payment proof. Drop it on the verifier while you&apos;re signed in.</span>
+              <span className="pm-empty-step-title">Upload a PDF</span>
+              <span className="pm-empty-step-body">A bank statement, invoice, salary slip or payment proof. Drop it on the verifier while you&apos;re signed in.</span>
             </div>
           </li>
           <li>
-            <span className="pm-step-n" aria-hidden="true">
+            <span className="pm-empty-step-n" aria-hidden="true">
               2
             </span>
             <div>
-              <span className="pm-step-title">Every marker checks the numbers</span>
-              <span className="pm-step-body">Running balances, totals carried between pages, duplicate rows — each check shows the arithmetic it did.</span>
+              <span className="pm-empty-step-title">Every marker checks the numbers</span>
+              <span className="pm-empty-step-body">Running balances, totals carried between pages, duplicate rows — each check shows the arithmetic it did.</span>
             </div>
           </li>
           <li>
-            <span className="pm-step-n" aria-hidden="true">
+            <span className="pm-empty-step-n" aria-hidden="true">
               3
             </span>
             <div>
-              <span className="pm-step-title">The report lands on this page</span>
-              <span className="pm-step-body">One verdict, every finding pinned to its spot on the page. Open, re-run or delete it whenever you like.</span>
+              <span className="pm-empty-step-title">The report lands on this page</span>
+              <span className="pm-empty-step-body">One verdict, every finding pinned to its spot on the page. Open, re-run or delete it whenever you like.</span>
             </div>
           </li>
         </ol>

@@ -193,8 +193,13 @@ export default function SecurityPage() {
               </div>
               <p>
                 If you register a webhook, each delivery&rsquo;s payload is the verification result, which includes extracted text and finding
-                summaries. That log exists so failed deliveries can be retried and debugged, and it is pruned after 90 days. Saved documents are
-                listed under <Link href="/documents">My documents</Link>.
+                summaries. That log exists so failed deliveries can be retried and debugged, and it is pruned after 90 days.
+              </p>
+              <p>
+                <Link href="/documents" className="pm-link">
+                  See and delete your saved documents
+                  <Arrow />
+                </Link>
               </p>
             </section>
 

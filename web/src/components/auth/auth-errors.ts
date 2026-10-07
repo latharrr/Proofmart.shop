@@ -94,27 +94,79 @@ export function updatePasswordError(raw: string): AuthErrorCopy {
   return { title: raw.replace(/\.?$/, "."), body: "Choose a longer or less common password.", field: "password" };
 }
 
-export type LinkErrorKind = "browser" | "expired" | "unknown";
+export type LinkErrorKind = "cancelled" | "server" | "expired" | "browser" | "missing" | "unknown";
 
-/** /auth/error — the code-exchange failed, or the link arrived without a code. */
-export function linkError(raw: string | undefined): { kind: LinkErrorKind; title: string; body: string } {
-  if (raw && has(raw, "code verifier", "code_verifier", "flow state", "pkce", "both auth code")) {
+/** The query string /auth/error can arrive with. `error` is either an OAuth
+ *  error (access_denied, server_error) forwarded from the provider, or the raw
+ *  message from a failed code exchange. */
+export interface LinkErrorParams {
+  error?: string;
+  error_code?: string;
+  error_description?: string;
+}
+
+export interface LinkErrorCopy {
+  kind: LinkErrorKind;
+  title: string;
+  body: string;
+  /** Provider code for support — shown small and secondary, never as the message. */
+  reference?: string;
+}
+
+/** /auth/error — say what actually happened, so the page can offer the one next step that fits. */
+export function linkError({ error, error_code, error_description }: LinkErrorParams): LinkErrorCopy {
+  const err = (error ?? "").trim();
+  const code = (error_code ?? "").trim();
+  const desc = (error_description ?? "").trim();
+  const all = [err, code, desc].join(" ");
+
+  if (!err && !code && !desc) {
+    return {
+      kind: "missing",
+      title: "This page opened without a sign-in link.",
+      body: "That usually means the link from your email was cut short when it was copied, or you came here directly. Go back to the email and click the link itself — or pick up below.",
+    };
+  }
+  if (has(code, "otp_expired") || has(all, "expired", "already been used")) {
+    return {
+      kind: "expired",
+      title: "That email link has expired.",
+      body: "Links from ProofMart work once, and only for a short time. Your account is fine — get a fresh link for whatever you were doing.",
+    };
+  }
+  if (has(err, "server_error", "temporarily_unavailable") || has(code, "unexpected_failure")) {
+    return {
+      kind: "server",
+      title: "Something went wrong on our side.",
+      body: "The sign-in service hit a problem while finishing your request. Nothing is wrong with your account, and nothing was changed. Try again in a moment.",
+      reference: code || err,
+    };
+  }
+  if (has(err, "access_denied")) {
+    return {
+      kind: "cancelled",
+      title: "Google sign\u2011in was cancelled.",
+      body: "Google didn’t hand your account back to us — usually because the window was closed or access wasn’t allowed. You’re not signed in, and nothing was changed.",
+    };
+  }
+  if (has(all, "code verifier", "code_verifier", "flow state", "pkce", "both auth code")) {
     return {
       kind: "browser",
       title: "Open the link in the same browser.",
       body: "For your security, a sign-in link only works in the browser that asked for it. Open it there — or just sign in again here.",
     };
   }
-  if (raw && has(raw, "expired", "invalid", "otp", "already been used", "used")) {
+  if (has(all, "invalid", "otp")) {
     return {
       kind: "expired",
-      title: "That link has expired.",
-      body: "Email links from ProofMart work once and only for a short time. Nothing is wrong with your account — get a fresh link below.",
+      title: "That email link has expired.",
+      body: "Links from ProofMart work once, and only for a short time. Your account is fine — get a fresh link for whatever you were doing.",
     };
   }
   return {
     kind: "unknown",
-    title: "That link didn’t work.",
-    body: "It may have expired, been used already, or been cut short by your email app. Pick up again from whatever you were doing below.",
+    title: "We couldn’t finish signing you in.",
+    body: "The sign-in service turned the link down. Start again from whatever you were doing — a fresh attempt usually goes through.",
+    reference: code || err,
   };
 }

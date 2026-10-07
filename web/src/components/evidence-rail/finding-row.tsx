@@ -79,6 +79,7 @@ export function FindingRow({
           <div style={{ fontFamily: SANS, fontSize: 13, lineHeight: "20px", color: "#43494F", marginTop: 6 }}>{finding.explanation}</div>
           {finding.arithmetic && (
             <div
+              className="pm-finding-arith"
               style={{
                 marginTop: 8,
                 padding: "8px 10px",

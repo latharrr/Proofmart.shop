@@ -66,3 +66,21 @@ export function formatDayTime(iso: string): string {
 export function plural(n: number, one: string, many = `${one}s`): string {
   return `${n} ${n === 1 ? one : many}`;
 }
+
+/**
+ * A filename with soft break opportunities after `_ - .` — so a long name set
+ * in the 44px serif wraps at its own separators instead of mid-word.
+ */
+export function BreakableFilename({ name }: { name: string }) {
+  const parts = name.split(/(?<=[_\-.])/);
+  return (
+    <>
+      {parts.map((part, i) => (
+        <span key={i}>
+          {part}
+          {i < parts.length - 1 && <wbr />}
+        </span>
+      ))}
+    </>
+  );
+}

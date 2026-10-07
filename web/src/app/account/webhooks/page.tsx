@@ -1,35 +1,22 @@
-import Wordmark from "@/components/brand/wordmark";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
-import { MONO, SANS } from "@/lib/evidence-data";
+import AppShell, { AppPage, AppPageHeader } from "@/components/app/app-shell";
+import CodeCard from "@/components/account/code-card";
 import CreateWebhookForm from "./create-webhook-form";
-import ConfirmSubmitButton from "@/components/confirm-submit-button";
-import { deleteWebhook, toggleWebhook } from "./actions";
+import WebhookList, { type DeliveryRow, type WebhookRow } from "@/components/account/webhook-list";
 
-interface WebhookRow {
-  id: string;
-  url: string;
-  enabled: boolean;
-  created_at: string;
-}
-
-interface DeliveryRow {
-  webhook_endpoint_id: string;
-  event_type: string;
-  status: string;
-  attempt_count: number;
-  created_at: string;
-}
-
-const STATUS_COLOR: Record<string, string> = { pending: "var(--pm-ash)", success: "var(--pm-clear)", failed: "var(--pm-fail)", exhausted: "var(--pm-fail)" };
+/** Mirrors MAX_WEBHOOKS_PER_USER in ./actions.ts (a "use server" module can only export actions). */
+const WEBHOOK_LIMIT = 10;
 
 export default async function WebhooksPage() {
   if (!isSupabaseConfigured()) redirect("/login");
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) redirect("/login");
+  const email = typeof data.claims.email === "string" ? data.claims.email : null;
 
-  const { data: webhooks } = await supabase
+  const { data: webhooks, error } = await supabase
     .from("webhook_endpoints")
     .select("id, url, enabled, created_at")
     .order("created_at", { ascending: false })
@@ -53,74 +40,148 @@ export default async function WebhooksPage() {
     deliveriesByWebhook.set(d.webhook_endpoint_id, list);
   }
 
+  const hooks = webhooks ?? [];
+  const enabledCount = hooks.filter((h) => h.enabled).length;
+
   return (
-    <div style={{ minHeight: "100vh", background: "var(--pm-paper)" }}>
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "56px 24px" }}>
-        <div style={{ marginBottom: 40 }}>
-          <Wordmark href="/" />
-        </div>
+    <AppShell active="webhooks" email={email}>
+      <AppPage>
+        <AppPageHeader
+          title="Webhooks"
+          description={
+            <>
+              When a <code className="pm-acct-code-inline">/v1/verify</code> call made with one of your keys finishes, ProofMart POSTs the result to your
+              endpoints — signed, so you can prove it came from us. No polling.
+            </>
+          }
+          meta={
+            hooks.length > 0 ? (
+              <p className="pm-app-count">
+                {hooks.length} of {WEBHOOK_LIMIT} endpoints{enabledCount < hooks.length ? ` · ${hooks.length - enabledCount} paused` : ""}
+              </p>
+            ) : undefined
+          }
+        />
 
-        <h1 style={{ fontFamily: SANS, fontWeight: 500, fontSize: 24, letterSpacing: "-0.01em", margin: "0 0 6px" }}>Webhooks</h1>
-        <p style={{ fontFamily: SANS, fontSize: 17, color: "var(--pm-ash)", margin: "0 0 32px", lineHeight: 1.5 }}>
-          Get <code style={{ fontFamily: MONO }}>verification.completed</code> and <code style={{ fontFamily: MONO }}>verification.failed</code> events pushed to
-          your server whenever an API key of yours calls <code style={{ fontFamily: MONO }}>/v1/verify</code>. Each delivery is signed — verify the{" "}
-          <code style={{ fontFamily: MONO }}>x-proofmart-signature</code> header with the secret shown at creation.
-        </p>
+        <div className="pm-acct-layout">
+          <div className="pm-acct-main">
+            <CreateWebhookForm used={hooks.length} limit={WEBHOOK_LIMIT} />
 
-        <div style={{ marginBottom: 40 }}>
-          <CreateWebhookForm />
-        </div>
+            <section className="pm-acct-section" aria-labelledby="pm-acct-hooks-title">
+              <div className="pm-acct-section-head">
+                <h2 id="pm-acct-hooks-title" className="pm-acct-h2">
+                  Endpoints
+                </h2>
+              </div>
 
-        {!webhooks || webhooks.length === 0 ? (
-          <p style={{ fontFamily: SANS, fontSize: 17, color: "var(--pm-ash)" }}>No webhooks yet.</p>
-        ) : (
-          <div style={{ border: "1px solid var(--pm-hairline)", borderRadius: "var(--pm-r-image)" }}>
-            {webhooks.map((hook, i) => {
-              const recent = deliveriesByWebhook.get(hook.id) ?? [];
-              return (
-                <div key={hook.id} style={{ padding: "14px 16px", borderTop: i === 0 ? "none" : "1px solid var(--pm-hairline)", opacity: hook.enabled ? 1 : 0.5 }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 12 }}>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontFamily: MONO, fontSize: 13, color: "var(--pm-ink)", wordBreak: "break-all" }}>{hook.url}</div>
-                      <div style={{ fontFamily: MONO, fontSize: 12, color: "var(--pm-ash)", marginTop: 4 }}>
-                        {hook.enabled ? "enabled" : "disabled"} · added {new Date(hook.created_at).toLocaleDateString()}
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <form action={toggleWebhook.bind(null, hook.id, !hook.enabled)}>
-                        <button type="submit" className="pm-hoverable" style={{ fontFamily: MONO, fontSize: 12, color: "var(--pm-ash)", background: "none", border: "1px solid var(--pm-hairline)", borderRadius: "var(--pm-r-image)", padding: "6px 10px", cursor: "pointer" }}>
-                          {hook.enabled ? "Disable" : "Enable"}
-                        </button>
-                      </form>
-                      <form action={deleteWebhook.bind(null, hook.id)}>
-                        <ConfirmSubmitButton
-                          confirmMessage={`Delete the webhook for ${hook.url}? It will stop receiving events immediately — this can't be undone.`}
-                          className="pm-hoverable"
-                          style={{ fontFamily: MONO, fontSize: 12, color: "var(--pm-ash)", background: "none", border: "1px solid var(--pm-hairline)", borderRadius: "var(--pm-r-image)", padding: "6px 10px", cursor: "pointer" }}
-                        >
-                          Delete
-                        </ConfirmSubmitButton>
-                      </form>
-                    </div>
-                  </div>
-                  {recent.length > 0 && (
-                    <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 4 }}>
-                      {recent.slice(0, 5).map((d, j) => (
-                        <div key={j} style={{ fontFamily: MONO, fontSize: 12, color: "var(--pm-ash)", display: "flex", gap: 10 }}>
-                          <span style={{ color: STATUS_COLOR[d.status] ?? "var(--pm-ash)", fontWeight: 600 }}>{d.status.toUpperCase()}</span>
-                          <span>{d.event_type}</span>
-                          <span>{d.attempt_count} attempt{d.attempt_count === 1 ? "" : "s"}</span>
-                          <span>{new Date(d.created_at).toLocaleString()}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+              {error ? (
+                <div className="pm-app-notice" role="alert">
+                  <p className="pm-app-notice-title">Your endpoints couldn&apos;t be loaded.</p>
+                  <p className="pm-app-notice-body">Deliveries are unaffected. This is a problem reaching storage; reload to try again.</p>
+                  <Link href="/account/webhooks" className="pm-btn pm-btn-ghost pm-btn-sm">
+                    Reload
+                  </Link>
                 </div>
-              );
-            })}
+              ) : hooks.length > 0 ? (
+                <WebhookList hooks={hooks} deliveriesByWebhook={deliveriesByWebhook} />
+              ) : (
+                <div className="pm-acct-empty" data-testid="webhooks-empty">
+                  <p className="pm-acct-empty-title">No endpoints yet.</p>
+                  <ol className="pm-acct-steps">
+                    <li>
+                      <span className="pm-acct-step-n" aria-hidden="true">
+                        1
+                      </span>
+                      <span>
+                        <strong>Add your URL above.</strong> Any public http(s) address on your server.
+                      </span>
+                    </li>
+                    <li>
+                      <span className="pm-acct-step-n" aria-hidden="true">
+                        2
+                      </span>
+                      <span>
+                        <strong>Save the signing secret.</strong> It&apos;s shown once, right after you add the endpoint.
+                      </span>
+                    </li>
+                    <li>
+                      <span className="pm-acct-step-n" aria-hidden="true">
+                        3
+                      </span>
+                      <span>
+                        <strong>Call <code className="pm-acct-code-inline">/v1/verify</code> with an API key.</strong> The verdict is POSTed here as soon as it&apos;s
+                        ready.
+                      </span>
+                    </li>
+                  </ol>
+                  <Link href="/account/api-keys" className="pm-link">
+                    Get an API key
+                    <span className="pm-arrow" aria-hidden="true">
+                      <span>→</span>
+                    </span>
+                  </Link>
+                </div>
+              )}
+            </section>
           </div>
-        )}
-      </div>
-    </div>
+
+          <aside className="pm-acct-aside" aria-labelledby="pm-acct-sign-title">
+            <h2 id="pm-acct-sign-title" className="pm-acct-h2">
+              Verifying a delivery
+            </h2>
+            <p className="pm-acct-aside-body">
+              Recompute the HMAC-SHA256 of the raw request body with your endpoint&apos;s secret and compare it to the header. Hash the bytes as received, before
+              any JSON parsing.
+            </p>
+            <CodeCard
+              label="verify-webhook.js"
+              note="Node"
+              lines={[
+                { text: "import { createHmac, timingSafeEqual }" },
+                { indent: 2, text: 'from "node:crypto";' },
+                { text: "" },
+                { text: "function isFromProofMart(rawBody, signature) {" },
+                { indent: 2, text: 'const expected = "sha256=" + createHmac("sha256",' },
+                { indent: 4, text: "process.env.PROOFMART_WEBHOOK_SECRET)" },
+                { indent: 4, text: '.update(rawBody).digest("hex");' },
+                { indent: 2, text: "const a = Buffer.from(expected);" },
+                { indent: 2, text: 'const b = Buffer.from(signature ?? "");' },
+                { indent: 2, text: "return a.length === b.length &&" },
+                { indent: 4, text: "timingSafeEqual(a, b);" },
+                { text: "}" },
+              ]}
+            />
+
+            <ul className="pm-acct-defs" aria-label="Headers on every delivery">
+              <li>
+                <code className="pm-acct-code-inline">x-proofmart-signature</code>
+                <span>
+                  <span className="pm-mono">sha256=</span> followed by the hex HMAC of the body.
+                </span>
+              </li>
+              <li>
+                <code className="pm-acct-code-inline">x-proofmart-event</code>
+                <span>Which event this is, completed or failed.</span>
+              </li>
+              <li>
+                <code className="pm-acct-code-inline">x-proofmart-delivery</code>
+                <span>Unique per delivery. Store it to ignore a retry you&apos;ve already handled.</span>
+              </li>
+            </ul>
+
+            <dl className="pm-acct-facts">
+              <div>
+                <dt>Where&apos;s the secret?</dt>
+                <dd>Shown once, when you add the endpoint. ProofMart can&apos;t display it again; if it&apos;s lost, delete the endpoint and add it back.</dd>
+              </div>
+              <div>
+                <dt>Retries</dt>
+                <dd>Anything but a 2xx within 10 seconds is retried 5 times over about 13 hours, then marked as given up. A paused endpoint receives nothing, and events aren&apos;t saved up for it.</dd>
+              </div>
+            </dl>
+          </aside>
+        </div>
+      </AppPage>
+    </AppShell>
   );
 }

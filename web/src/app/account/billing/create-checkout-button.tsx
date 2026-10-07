@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import * as s from "@/components/auth/auth-styles";
 
 declare global {
   interface Window {
@@ -81,15 +80,23 @@ export default function CreateCheckoutButton() {
   }
 
   if (started) {
-    return <div style={s.successBanner}>Payment received — your plan updates within a few seconds. Refresh to see it reflected.</div>;
+    return (
+      <p className="pm-acct-checkout-done" role="status">
+        Payment received. Your plan switches to Pro within a few seconds; refresh this page to see it.
+      </p>
+    );
   }
 
   return (
-    <div>
-      <button type="button" disabled={pending} onClick={startCheckout} className="pm-btn pm-btn-filled" style={{ ...s.primaryButton, width: "auto" }}>
-        {pending ? "Starting…" : "Upgrade to Pro"}
+    <div className="pm-acct-checkout">
+      <button type="button" disabled={pending} data-pending={pending ? "" : undefined} onClick={startCheckout} className="pm-btn pm-btn-filled">
+        {pending ? "Opening checkout…" : "Upgrade to Pro"}
       </button>
-      {error && <div style={{ ...s.errorBanner, marginTop: 10 }}>{error}</div>}
+      {error && (
+        <p role="alert" className="pm-acct-error">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

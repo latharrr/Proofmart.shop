@@ -6,7 +6,7 @@ import AppShell, { AppPage, AppPageHeader, VERIFY_HREF } from "@/components/app/
 import ConfirmSubmitButton from "@/components/confirm-submit-button";
 import SavedDocumentViewer from "@/components/documents/saved-document-viewer";
 import PendingSubmitButton from "@/components/documents/pending-submit-button";
-import { StatusBadge, VerdictBadge, formatDayTime } from "@/components/documents/verdict";
+import { BreakableFilename, StatusBadge, VerdictBadge, formatDayTime } from "@/components/documents/verdict";
 import { deleteDocument, rerunDocument } from "../actions";
 
 export default async function DocumentDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -75,7 +75,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
               {verdict ? <VerdictBadge verdict={verdict} /> : doc.status !== "ready" ? <StatusBadge status={doc.status} /> : null}
             </div>
           }
-          title={<span className="pm-report-title">{doc.filename}</span>}
+          title={<span className="pm-report-title"><BreakableFilename name={doc.filename} /></span>}
           description={
             <>
               Verified <time dateTime={doc.created_at}>{formatDayTime(doc.created_at)}</time>
