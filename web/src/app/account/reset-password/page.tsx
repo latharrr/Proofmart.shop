@@ -1,6 +1,7 @@
 import Link from "next/link";
-import AuthShell from "@/components/auth/auth-shell";
-import * as s from "@/components/auth/auth-styles";
+import AuthShell, { CrossLink } from "@/components/auth/auth-shell";
+import FormAlert from "@/components/auth/form-alert";
+import { EmailField, SubmitButton } from "@/components/auth/fields";
 import { requestPasswordReset } from "./actions";
 
 export default async function ResetPasswordPage({
@@ -10,31 +11,40 @@ export default async function ResetPasswordPage({
 }) {
   const { sent } = await searchParams;
 
+  if (sent) {
+    return (
+      <AuthShell
+        title="Check your inbox"
+        subtitle="If there’s a ProofMart account for that email, a reset link is on its way. Open it in this browser to choose a new password."
+        aside="return"
+        footer={<CrossLink prompt="Remembered it?" label="Back to sign in" href="/login" />}
+      >
+        <FormAlert tone="success" title="Reset link requested." body="It can take a minute to arrive. Check spam or promotions if you don’t see it." />
+        <p className="pm-caption pm-auth-note">
+          Nothing arrived, or used a different address?{" "}
+          <Link href="/account/reset-password" className="pm-link pm-auth-xlink">
+            Send another link
+            <span className="pm-arrow" aria-hidden="true">
+              <span>→</span>
+            </span>
+          </Link>
+        </p>
+      </AuthShell>
+    );
+  }
+
   return (
     <AuthShell
       title="Reset your password"
-      subtitle="Enter your email and we'll send you a reset link."
-      footer={
-        <Link href="/login" className="pm-hoverable" style={{ color: "var(--pm-ink)", textDecoration: "underline" }}>
-          Back to sign in
-        </Link>
-      }
+      subtitle="Enter the email you sign in with. We’ll send a link to choose a new password."
+      aside="return"
+      footer={<CrossLink prompt="Remembered it?" label="Back to sign in" href="/login" />}
     >
-      {sent ? (
-        <div style={s.successBanner}>If an account exists for that email, a reset link is on its way.</div>
-      ) : (
-        <form action={requestPasswordReset} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <div>
-            <label htmlFor="email" style={s.label}>
-              Email
-            </label>
-            <input id="email" name="email" type="email" autoComplete="email" required style={s.input} />
-          </div>
-          <button type="submit" className="pm-btn pm-btn-filled" style={s.primaryButton}>
-            Send reset link
-          </button>
-        </form>
-      )}
+      <form action={requestPasswordReset} className="pm-auth-form">
+        <EmailField restore autoFocus />
+        <SubmitButton pendingLabel="Sending link…">Send reset link</SubmitButton>
+        <p className="pm-caption pm-auth-note">Signed up with Google? There’s no password to reset — sign in with Continue with Google instead.</p>
+      </form>
     </AuthShell>
   );
 }

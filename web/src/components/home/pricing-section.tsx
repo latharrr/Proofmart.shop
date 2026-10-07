@@ -7,10 +7,12 @@ export default function PricingSection() {
       <div className="pm-shell pm-section">
         <Reveal className="pm-section-head">
           <div>
-            <p className="pm-eyebrow">§ 07 · Pricing</p>
-            <h2 className="pm-h2">Flat monthly. No per-document surprises.</h2>
+            <p className="pm-eyebrow">05 · Pricing</p>
+            <h2 className="pm-h2">Flat monthly. No per‑page metering.</h2>
           </div>
-          <p className="pm-lead">One plan, one price, a monthly call limit on /v1/verify. No per-finding or per-scan metering.</p>
+          <p className="pm-lead">
+            Start free with the full engine. Upgrade when your team runs ProofMart inside a review or underwriting loop.
+          </p>
         </Reveal>
 
         <div className="pm-cols-2">
@@ -52,7 +54,7 @@ export default function PricingSection() {
                 </div>
 
                 <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                  <span style={{ fontFamily: "var(--pm-serif)", fontWeight: 400, fontSize: 64, letterSpacing: "-0.025em", lineHeight: 1 }}>
+                  <span style={{ fontFamily: "var(--pm-serif)", fontWeight: 400, fontSize: 64, letterSpacing: "-1.6px", lineHeight: 1.1 }}>
                     {p.price}
                   </span>
                   <span className="pm-caption" style={{ color: accent ? "var(--pm-sienna)" : "var(--pm-slate)" }}>
@@ -60,7 +62,7 @@ export default function PricingSection() {
                   </span>
                 </div>
 
-                <p className="pm-body" style={{ color: accent ? "var(--pm-sienna)" : "var(--pm-slate)" }}>
+                <p className="pm-body" style={{ color: accent ? "var(--pm-sienna)" : "var(--pm-slate)", maxWidth: "40ch" }}>
                   {p.body}
                 </p>
 
@@ -85,13 +87,18 @@ export default function PricingSection() {
                   ))}
                 </ul>
 
-                <a href="/signup" className={accent ? "pm-btn pm-btn-filled" : "pm-btn pm-btn-ghost"} style={{ marginTop: "auto" }}>
+                <a href="/signup" className={accent ? "pm-btn pm-btn-filled" : "pm-btn pm-btn-ghost"} style={{ marginTop: "auto", alignSelf: "flex-start" }}>
                   {p.cta}
                 </a>
               </Reveal>
             );
           })}
         </div>
+
+        <p className="pm-caption pm-section-note" style={{ color: "var(--pm-slate)" }}>
+          Prices in INR, billed monthly. A call is one <span className="pm-mono">/v1/verify</span> request, whatever the page count. Every key is
+          also rate-limited to 60 requests a minute on both plans.
+        </p>
       </div>
     </section>
   );

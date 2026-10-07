@@ -40,18 +40,22 @@ export function FindingRow({
       style={{
         display: "block",
         width: "100%",
+        // A <button> centres its text by default; a finding is read, not clicked past.
+        textAlign: "left",
         background: isActive ? v.fill : "transparent",
         borderLeft: isPinned ? `2px solid ${v.color}` : "2px solid transparent",
         transition: "background-color 120ms cubic-bezier(0.2,0,0,1)",
       }}
     >
-      <div style={{ display: "grid", gridTemplateColumns: "56px 1fr", gap: 0, padding: "14px 0", borderBottom: "1px solid #DDE1E4", width: "100%", alignItems: "start" }}>
-        <div id={addrId} style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", textAlign: "center", lineHeight: "16px" }}>
-          <div>{finding.addr1}</div>
+      <div style={{ display: "grid", gridTemplateColumns: "76px minmax(0, 1fr)", gap: 0, padding: "14px 0", borderBottom: "1px solid #DDE1E4", width: "100%", alignItems: "start" }}>
+        <div id={addrId} style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", padding: "0 8px 0 14px", lineHeight: "16px", overflowWrap: "anywhere" }}>
+          {/* A zero-width space after each comma lets a multi-row address
+              (p2·r04,r07) wrap between rows rather than mid-row. */}
+          <div>{finding.addr1.replace(/,/g, ",\u200b")}</div>
           <div style={{ marginTop: 2 }}>{finding.addr2}</div>
         </div>
         <div style={{ paddingRight: 16, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "space-between", gap: "2px 12px" }}>
             <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 500, color: "#0E1216", letterSpacing: "0.02em" }}>{finding.marker}</span>
             <span
               style={{

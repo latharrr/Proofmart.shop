@@ -16,6 +16,8 @@ const VERDICT_COLOR: Record<MarkerVerdict, string> = {
 
 const VERDICT_GLYPH: Record<MarkerVerdict, string> = { FAIL: "×", REVIEW: "~", CLEAR: "=" };
 
+const countFor = (t: TabValue) => (t === "All" ? MARKERS.length : MARKERS.filter((m) => m.cat === t).length);
+
 export default function MarkersSection() {
   const [markerFilter, setMarkerFilter] = useState<TabValue>("All");
 
@@ -26,55 +28,66 @@ export default function MarkersSection() {
       <div className="pm-shell pm-section">
         <Reveal className="pm-section-head">
           <div>
-            <p className="pm-eyebrow">§ 03 · Catalog</p>
-            <h2 className="pm-h2">Every marker is a rule with a citation.</h2>
+            <p className="pm-eyebrow">02 · What it catches</p>
+            <h2 className="pm-h2">Six checks. Each one shows its work.</h2>
           </div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {MARKER_TABS.map((t) => (
-              <button key={t} type="button" onClick={() => setMarkerFilter(t)} className="pm-tab" data-active={t === markerFilter ? "true" : "false"}>
-                {t}
-              </button>
-            ))}
-          </div>
+          <p className="pm-lead">
+            Every marker is a narrow rule with a fixed verdict. When one fires, the finding carries the page, the box and the comparison it made — so a
+            reviewer can check it by eye.
+          </p>
         </Reveal>
 
         <Reveal delay={300}>
-          <div style={{ borderTop: "1px solid var(--pm-hairline)" }}>
-            {filtered.map((m) => (
-              <div
-                key={m.id}
-                className="pm-marker-row pm-marker-grid"
-                style={{ padding: "20px 16px", borderBottom: "1px solid var(--pm-hairline)" }}
+          <div className="pm-tabs" role="group" aria-label="Filter markers by category">
+            {MARKER_TABS.map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setMarkerFilter(t)}
+                className="pm-tab"
+                data-active={t === markerFilter ? "true" : "false"}
+                aria-pressed={t === markerFilter}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-                  <span aria-hidden="true" style={{ width: 3, height: 20, borderRadius: "var(--pm-r-pill)", background: VERDICT_COLOR[m.verdict], flex: "none" }} />
-                  <span className="pm-mono" style={{ color: "var(--pm-ink)", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    {m.id}
-                  </span>
-                </div>
-                <div>
-                  <p className="pm-body" style={{ color: "var(--pm-slate)" }}>
+                {t}
+                <span className="pm-tab-count">{countFor(t)}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="pm-marker-head" aria-hidden="true">
+            <span>Marker</span>
+            <span>Fires when</span>
+            <span>Category</span>
+            <span>Verdict</span>
+          </div>
+          <ul className="pm-marker-list">
+            {filtered.map((m) => (
+              <li key={m.id} className="pm-marker-row pm-marker-grid" style={{ ["--pm-v" as string]: VERDICT_COLOR[m.verdict] }}>
+                <span className="pm-mono pm-marker-id">{m.id}</span>
+                <div className="pm-marker-desc">
+                  <p className="pm-body" style={{ color: "var(--pm-ink)" }}>
                     {m.desc}
                   </p>
-                  <p className="pm-mono" style={{ color: "var(--pm-ash)", marginTop: 6 }}>
+                  <p className="pm-mono" style={{ color: "var(--pm-ash)", marginTop: 4 }}>
                     cites {m.cites}
                   </p>
                 </div>
-                <span className="pm-mono" style={{ color: "var(--pm-ash)" }}>
-                  {m.cat}
-                </span>
-                <span className="pm-mono" style={{ color: VERDICT_COLOR[m.verdict], whiteSpace: "nowrap" }}>
+                <span className="pm-caption pm-marker-cat">{m.cat}</span>
+                <span className="pm-mono pm-marker-verdict" style={{ color: VERDICT_COLOR[m.verdict] }}>
                   {VERDICT_GLYPH[m.verdict]} {m.verdict}
                 </span>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </Reveal>
 
-        <p className="pm-body" style={{ marginTop: 24, color: "var(--pm-ash)" }}>
-          These are the only six markers the verification engine runs today. No others exist yet. Every one of them cites the row, the page and the
-          coordinate box it fired on.
-        </p>
+        <div className="pm-marker-foot">
+          <p className="pm-caption" style={{ color: "var(--pm-slate)" }}>
+            <span style={{ color: "var(--pm-ink)" }}>Not checked yet:</span> producer and template mismatches, and font-metric edits. We don&rsquo;t
+            have the evidence to run them honestly, so we don&rsquo;t. A CLEAR verdict means these six checks found nothing — not that the document
+            is authentic.
+          </p>
+        </div>
       </div>
     </section>
   );

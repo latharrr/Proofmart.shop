@@ -1,30 +1,61 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AnnotationOverlay from "@/components/evidence-rail/annotation-overlay";
-import { FindingRow } from "@/components/evidence-rail/finding-row";
-import { clampPage, envelopeToRailInputs, formatBytes, railFindingsForPage, verdictCounts } from "@/lib/pdf/rail-adapter";
+import { FACT_LABEL, clampPage, envelopeToRailInputs, factToRailFinding, verdictCounts, verificationFindingToRailFinding } from "@/lib/pdf/rail-adapter";
 import { getPageDimensions, loadPdfDocument, renderPageToCanvas, type PageDimensions } from "@/lib/pdf/render";
-import { MONO, SANS, VERDICT } from "@/lib/evidence-data";
 import type { VerifyEnvelope } from "@/lib/api/envelope";
+import type { PdfRect } from "@/lib/pdf/types";
 import type { PDFDocumentProxy } from "pdfjs-dist";
+import { VERDICT_TONE, VerdictBadge, documentKindLabel, plural, type VerdictValue } from "./verdict";
 
-const CANVAS_TARGET_WIDTH = 1400;
+const CANVAS_TARGET_WIDTH = 1000;
+const NARROW = "(max-width: 960px)";
 
+/** One selectable thing in the report — a verification finding or an extracted fact — with the page it lives on. */
+interface ReportItem {
+  id: string;
+  kind: "finding" | "fact";
+  verdict: VerdictValue;
+  marker: string;
+  name: string | null;
+  summary: string;
+  detail: string | null;
+  page: number;
+  rect: PdfRect | null;
+}
+
+const SEVERITY_RANK: Record<VerdictValue, number> = { FAIL: 0, REVIEW: 1, INCONCLUSIVE: 2, CLEAR: 3 };
+
+function location(item: ReportItem): string {
+  return item.rect ? `p${item.page} · ${Math.round(item.rect.x)},${Math.round(item.rect.y)}` : `p${item.page}`;
+}
+
+function prefersReducedMotion(): boolean {
+  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/**
+ * A saved document's report. Verdict first, then every finding across every
+ * page (most severe first), each with its own arithmetic. The page preview
+ * sits beside the list on desktop and below it on a phone; selecting a
+ * finding turns to its page and outlines the region it points at.
+ */
 export default function SavedDocumentViewer({ documentId, envelope, hasStoredFile }: { documentId: string; envelope: VerifyEnvelope; hasStoredFile: boolean }) {
-  const { document: doc, verification } = envelopeToRailInputs(envelope);
+  const { document: doc, verification } = useMemo(() => envelopeToRailInputs(envelope), [envelope]);
 
   const [page, setPage] = useState(1);
-  const [pageDims, setPageDims] = useState<PageDimensions | null>(null);
+  const [renderedDims, setRenderedDims] = useState<PageDimensions | null>(null);
   const [pdfStage, setPdfStage] = useState<"idle" | "loading" | "ready" | "error">(hasStoredFile ? "loading" : "idle");
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const [pinnedId, setPinnedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const pdfRef = useRef<PDFDocumentProxy | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const previewRef = useRef<HTMLElement>(null);
+  const renderChain = useRef<Promise<void>>(Promise.resolve());
 
-  // Fetch the stored PDF once and load it into pdf.js — the findings/verdict
-  // data is already known synchronously from `envelope`; only the page
-  // image needs this async round trip.
+  // Fetch the stored PDF once — the findings and verdict are already in
+  // `envelope`; only the page image needs this round trip.
   useEffect(() => {
     if (!hasStoredFile) return;
     let cancelled = false;
@@ -39,7 +70,7 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
         pdfRef.current = pdf;
         const dims = await getPageDimensions(pdf, 1);
         if (cancelled) return;
-        setPageDims(dims);
+        setRenderedDims(dims);
         setPdfStage("ready");
       } catch {
         if (!cancelled) setPdfStage("error");
@@ -50,15 +81,20 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
     };
   }, [documentId, hasStoredFile]);
 
+  // Renders are chained, not raced: pdf.js refuses two concurrent renders
+  // into one canvas, which is what fast paging would otherwise produce.
   useEffect(() => {
     if (pdfStage !== "ready" || !pdfRef.current || !canvasRef.current) return;
     const pdf = pdfRef.current;
     const canvas = canvasRef.current;
     let cancelled = false;
-    void (async () => {
-      const dims = await renderPageToCanvas(pdf, page, canvas, CANVAS_TARGET_WIDTH);
-      if (!cancelled) setPageDims(dims);
-    })();
+    renderChain.current = renderChain.current
+      .then(async () => {
+        if (cancelled) return;
+        const dims = await renderPageToCanvas(pdf, page, canvas, CANVAS_TARGET_WIDTH);
+        if (!cancelled) setRenderedDims(dims);
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -67,7 +103,7 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setPinnedId(null);
+        setSelectedId(null);
         setHoveredId(null);
       }
     };
@@ -75,151 +111,270 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  const { findings, facts } = useMemo(() => {
+    if (!doc || !verification) return { findings: [] as ReportItem[], facts: [] as ReportItem[] };
+    const findings: ReportItem[] = verification.findings
+      .map((f) => {
+        const rail = verificationFindingToRailFinding(f);
+        return {
+          id: f.id,
+          kind: "finding" as const,
+          verdict: f.verdict,
+          marker: f.markerId,
+          name: f.markerName,
+          summary: f.evidence.summary,
+          detail: f.evidence.detail || null,
+          page: f.evidence.coordinates[0]?.page ?? 1,
+          rect: rail.rect,
+        };
+      })
+      .sort((a, b) => SEVERITY_RANK[a.verdict] - SEVERITY_RANK[b.verdict] || a.page - b.page);
+    const facts: ReportItem[] = doc.facts.map((fact) => {
+      const rail = factToRailFinding(fact);
+      return {
+        id: fact.id,
+        kind: "fact" as const,
+        verdict: "INCONCLUSIVE" as const,
+        marker: FACT_LABEL[fact.kind] ?? fact.kind.toUpperCase(),
+        name: null,
+        summary: fact.detail,
+        detail: null,
+        page: fact.page,
+        rect: rail.rect,
+      };
+    });
+    return { findings, facts };
+  }, [doc, verification]);
+
   if (!doc || !verification) {
     return (
-      <div style={{ fontFamily: SANS, fontSize: 14, color: "#767C83", padding: "24px 0" }}>
-        This document has no result to show yet.
+      <div className="pm-app-notice">
+        <p className="pm-app-notice-title">This document has no result to show yet.</p>
+        <p className="pm-app-notice-body">Re-run it to produce a report.</p>
       </div>
     );
   }
 
-  const findings = railFindingsForPage(doc, verification, page);
-  const activeId = hoveredId || pinnedId;
-  const activeFinding = findings.find((f) => f.id === activeId) ?? null;
-  const counts = verdictCounts(verification);
-  const v = VERDICT[verification.verdict];
   const pageCount = Math.max(1, doc.pageCount);
+  const counts = verdictCounts(verification);
+  const all = [...findings, ...facts];
+  const byId = (id: string | null) => (id ? (all.find((i) => i.id === id) ?? null) : null);
+  const hovered = byId(hoveredId);
+  const selected = byId(selectedId);
+  const active = hovered && hovered.page === page ? hovered : selected && selected.page === page ? selected : null;
+  const onThisPage = findings.filter((f) => f.page === page).length;
+
+  const pageMeta = doc.pages.find((p) => p.page === page);
+  const dims: PageDimensions = renderedDims && pdfStage === "ready" ? renderedDims : pageMeta ? { widthPt: pageMeta.widthPt, heightPt: pageMeta.heightPt } : { widthPt: 612, heightPt: 792 };
 
   const goToPage = (delta: number) => {
-    setPage((current) => {
-      const next = clampPage(current, pageCount, delta);
-      if (next !== current) {
-        setPinnedId(null);
-        setHoveredId(null);
+    setPage((current) => clampPage(current, pageCount, delta));
+  };
+
+  const select = (item: ReportItem) => {
+    const next = selectedId === item.id ? null : item.id;
+    setSelectedId(next);
+    if (next) {
+      setPage(item.page);
+      if (window.matchMedia(NARROW).matches) {
+        previewRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
       }
-      return next;
-    });
+    }
+  };
+
+  const backToSelected = () => {
+    if (!selectedId) return;
+    const el = document.getElementById(`finding-${selectedId}`);
+    el?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "center" });
+    el?.focus({ preventScroll: true });
+  };
+
+  const tone = VERDICT_TONE[verification.verdict];
+  const sentence =
+    verification.verdict === "FAIL"
+      ? `${plural(counts.fail, "finding")} failed a check. Read the evidence before you rely on this document.`
+      : verification.verdict === "REVIEW"
+        ? `Nothing failed, but ${plural(counts.review, "finding")} ${counts.review === 1 ? "needs" : "need"} a person to look at it.`
+        : verification.verdict === "CLEAR"
+          ? `Every marker that could run came back clean — ${plural(verification.markersRun.length, "marker")} ran.`
+          : "There wasn't enough structure in this document to reach a verdict.";
+
+  const renderItem = (item: ReportItem) => {
+    const isSelected = item.id === selectedId;
+    return (
+      <li key={item.id}>
+        <button
+          id={`finding-${item.id}`}
+          type="button"
+          className="pm-finding"
+          data-kind={item.kind}
+          data-verdict={item.verdict}
+          data-active={active?.id === item.id || undefined}
+          aria-pressed={isSelected}
+          onMouseEnter={() => setHoveredId(item.id)}
+          onMouseLeave={() => setHoveredId(null)}
+          onFocus={() => setHoveredId(item.id)}
+          onBlur={() => setHoveredId(null)}
+          onClick={() => select(item)}
+        >
+          <span className="pm-finding-top">
+            <span className="pm-finding-marker">{item.marker}</span>
+            {item.kind === "finding" ? <VerdictBadge verdict={item.verdict} /> : <span className="pm-finding-loc-inline">{location(item)}</span>}
+          </span>
+          {item.name && <span className="pm-finding-name">{item.name}</span>}
+          <span className="pm-finding-summary">{item.summary}</span>
+          {item.detail && <span className="pm-finding-math">{item.detail}</span>}
+          {item.kind === "finding" && (
+            <span className="pm-finding-foot">
+              <span className="pm-finding-loc">{location(item)}</span>
+              <span className="pm-finding-show">{isSelected ? "Shown on page" : item.rect ? "Show on page" : `Go to page ${item.page}`}</span>
+            </span>
+          )}
+        </button>
+      </li>
+    );
   };
 
   return (
-    <div
-      style={{
-        width: "100%",
-        minHeight: 560,
-        display: "flex",
-        flexDirection: "column",
-        background: "#FFFFFF",
-        border: "1px solid #DDE1E4",
-        fontFamily: SANS,
-        color: "#0E1216",
-        overflowX: "auto",
-        overflowY: "hidden",
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr auto",
-          alignItems: "center",
-          padding: "10px 14px 10px 16px",
-          borderBottom: "1px solid #DDE1E4",
-          gap: 16,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "baseline", gap: 12, minWidth: 0 }}>
-          <span style={{ fontFamily: MONO, fontSize: 12, color: "#0E1216", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{doc.filename}</span>
-          <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>
-            {doc.pageCount} pages · {formatBytes(doc.sizeBytes)}
-          </span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", color: v.color }}>
-            <span aria-hidden="true" style={{ display: "inline-block", width: 12, textAlign: "center", fontWeight: 500 }}>
-              {v.glyph}
+    <div className="pm-report" data-testid="saved-document-report">
+      <section className="pm-report-summary" aria-label="Verdict">
+        <div className="pm-report-verdict">
+          <p className="pm-eyebrow" style={{ margin: 0 }}>
+            Verdict
+          </p>
+          <p className="pm-report-verdict-word" style={{ color: tone.color }}>
+            <span aria-hidden="true" className="pm-report-verdict-glyph">
+              {tone.glyph}
             </span>
-            {verification.verdict}
-          </span>
-          <span style={{ fontFamily: MONO, fontSize: 11, color: "#43494F", letterSpacing: "0.02em" }}>{verification.findings.length} findings</span>
+            {tone.label}
+          </p>
+          <p className="pm-report-verdict-line">{sentence}</p>
         </div>
-      </div>
+        <dl className="pm-report-stats">
+          <div data-verdict="FAIL" data-zero={counts.fail === 0 || undefined}>
+            <dt>Failed</dt>
+            <dd>{counts.fail}</dd>
+          </div>
+          <div data-verdict="REVIEW" data-zero={counts.review === 0 || undefined}>
+            <dt>Need review</dt>
+            <dd>{counts.review}</dd>
+          </div>
+          <div data-verdict="CLEAR" data-zero={counts.clear === 0 || undefined}>
+            <dt>Markers clear</dt>
+            <dd>{counts.clear}</dd>
+          </div>
+          <div className="pm-report-stats-doc">
+            <dt>Document</dt>
+            <dd>
+              {documentKindLabel(verification.documentKind)}
+              <span className="pm-report-stats-sub">
+                {plural(pageCount, "page")} · <span className="pm-mono">{doc.pdfType}</span>
+              </span>
+            </dd>
+          </div>
+        </dl>
+      </section>
 
-      {/* Split body */}
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 1fr)", flex: 1, minHeight: 0, minWidth: 560, overflowX: "auto" }}>
-        {/* Document panel */}
-        <div style={{ position: "relative", background: "#EDEFF1", borderRight: "1px solid #DDE1E4", padding: 20, display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
-          <div style={{ position: "relative", flex: 1, minHeight: 0, background: "#FFFFFF", border: "1px solid #DDE1E4", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            {!hasStoredFile && (
-              <div style={{ padding: "0 32px", textAlign: "center", fontFamily: SANS, fontSize: 13, color: "#767C83", lineHeight: 1.5 }}>
-                No stored file for this document — the original PDF wasn&apos;t kept, so there&apos;s no page image to show. The findings on the right are real.
-              </div>
-            )}
-            {hasStoredFile && pdfStage === "loading" && (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-                <span aria-hidden="true" style={{ width: 8, height: 8, background: "#767C83", display: "inline-block" }} />
-                <span style={{ fontFamily: MONO, fontSize: 12, color: "#43494F", letterSpacing: "0.12em" }}>LOADING…</span>
-              </div>
-            )}
-            {hasStoredFile && pdfStage === "error" && (
-              <div style={{ padding: "0 32px", textAlign: "center", fontFamily: SANS, fontSize: 13, color: "#43494F", lineHeight: 1.5 }}>
-                Could not load the stored file.
-              </div>
-            )}
-            {hasStoredFile && pdfStage === "ready" && (
-              <>
-                <canvas ref={canvasRef} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }} />
-                {activeFinding?.rect && pageDims && (
-                  <AnnotationOverlay
-                    rect={activeFinding.rect}
-                    color={VERDICT[activeFinding.verdict].color}
-                    fill={VERDICT[activeFinding.verdict].fill}
-                    viewBoxWidth={pageDims.widthPt}
-                    viewBoxHeight={pageDims.heightPt}
-                    animationKey={activeFinding.id}
-                  />
-                )}
-              </>
-            )}
+      <div className="pm-report-body">
+        <section className="pm-report-findings" aria-labelledby="pm-findings-h">
+          <div className="pm-report-section-head">
+            <h2 id="pm-findings-h" className="pm-eyebrow" style={{ margin: 0 }}>
+              Findings
+            </h2>
+            <span className="pm-report-section-count">{findings.length === 0 ? "None" : plural(findings.length, "finding")}</span>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: MONO, fontSize: 11, color: "#767C83" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span>page</span>
-              <span style={{ display: "inline-flex", alignItems: "center", border: "1px solid #DDE1E4", borderRadius: 3, overflow: "hidden" }}>
-                <button onClick={() => goToPage(-1)} disabled={page <= 1} style={{ padding: "2px 8px", color: "#43494F", background: "#FFFFFF", opacity: page > 1 ? 1 : 0.4 }}>
+          {findings.length === 0 ? (
+            <div className="pm-report-clean">
+              <VerdictBadge verdict={verification.verdict === "CLEAR" ? "CLEAR" : "INCONCLUSIVE"} />
+              <p>
+                No marker found anything to report. {plural(verification.markersRun.length, "marker")} ran against this document
+                {verification.markersSkipped.length > 0 ? `; ${verification.markersSkipped.length} couldn't run (listed below).` : "."}
+              </p>
+            </div>
+          ) : (
+            <ol className="pm-findings">{findings.map(renderItem)}</ol>
+          )}
+
+          {verification.markersSkipped.length > 0 && (
+            <details className="pm-report-more">
+              <summary>
+                Markers that couldn&apos;t run <span className="pm-report-more-n">{verification.markersSkipped.length}</span>
+              </summary>
+              <ul className="pm-skipped">
+                {verification.markersSkipped.map((m) => (
+                  <li key={m.markerId}>
+                    <span className="pm-mono">{m.markerId}</span>
+                    <span>{m.reason}</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+
+          {facts.length > 0 && (
+            <details className="pm-report-more">
+              <summary>
+                Extracted from the document <span className="pm-report-more-n">{facts.length}</span>
+              </summary>
+              <p className="pm-report-more-note">Structure the pipeline read off the page. These are not findings and carry no verdict.</p>
+              <ol className="pm-findings pm-findings-facts">{facts.map(renderItem)}</ol>
+            </details>
+          )}
+        </section>
+
+        <aside ref={previewRef} className="pm-report-page" aria-label="Page preview">
+          <div className="pm-report-page-card pm-artifact">
+            <div className="pm-report-page-bar">
+              <span className="pm-report-page-pos" aria-live="polite">
+                Page <span className="pm-mono">{page}</span> of <span className="pm-mono">{pageCount}</span>
+                {onThisPage > 0 && <span className="pm-report-page-hits"> · {plural(onThisPage, "finding")}</span>}
+              </span>
+              <span className="pm-report-stepper">
+                <button type="button" aria-label="Previous page" onClick={() => goToPage(-1)} disabled={page <= 1}>
                   ‹
                 </button>
-                <span style={{ padding: "2px 8px", borderLeft: "1px solid #DDE1E4", borderRight: "1px solid #DDE1E4", background: "#FFFFFF", color: "#0E1216" }}>{page}</span>
-                <button onClick={() => goToPage(1)} disabled={page >= pageCount} style={{ padding: "2px 8px", color: "#43494F", background: "#FFFFFF", opacity: page < pageCount ? 1 : 0.4 }}>
+                <button type="button" aria-label="Next page" onClick={() => goToPage(1)} disabled={page >= pageCount}>
                   ›
                 </button>
               </span>
-              <span>of {pageCount}</span>
             </div>
-          </div>
-        </div>
 
-        {/* Findings panel */}
-        <div style={{ display: "flex", flexDirection: "column", minHeight: 0, background: "#FFFFFF" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "56px 1fr", alignItems: "center", padding: "10px 16px 10px 0", borderBottom: "1px solid #DDE1E4" }}>
-            <span style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", letterSpacing: "0.12em", textAlign: "center" }}>04</span>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-              <span style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", letterSpacing: "0.12em" }}>FINDINGS</span>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: MONO, fontSize: 10, letterSpacing: "0.06em" }}>
-                <span style={{ color: "#B4231F", fontWeight: 600 }}>{counts.fail} FAIL</span>
-                <span style={{ color: VERDICT.REVIEW.color, fontWeight: 600 }}>{counts.review} REVIEW</span>
-                <span style={{ color: "#767C83" }}>{counts.clear} CLEAR</span>
+            <div className="pm-report-stage-wrap">
+              <div className="pm-report-stage" style={{ ["--pm-ar" as string]: `${dims.widthPt / dims.heightPt}`, aspectRatio: `${dims.widthPt} / ${dims.heightPt}` }}>
+                {!hasStoredFile && (
+                  <p className="pm-report-stage-note">The original PDF wasn&apos;t kept, so there&apos;s no page image to show. The findings are real.</p>
+                )}
+                {hasStoredFile && pdfStage === "loading" && (
+                  <p className="pm-report-stage-note" role="status">
+                    Loading page…
+                  </p>
+                )}
+                {hasStoredFile && pdfStage === "error" && <p className="pm-report-stage-note">The stored file couldn&apos;t be loaded. Reload to try again; the findings are unaffected.</p>}
+                {hasStoredFile && pdfStage === "ready" && <canvas ref={canvasRef} aria-label={`Page ${page} of ${doc.filename}`} role="img" />}
+                {active?.rect && (pdfStage === "ready" || !hasStoredFile) && (
+                  <AnnotationOverlay
+                    rect={active.rect}
+                    color={VERDICT_TONE[active.verdict].color}
+                    fill={VERDICT_TONE[active.verdict].fill}
+                    viewBoxWidth={dims.widthPt}
+                    viewBoxHeight={dims.heightPt}
+                    animationKey={active.id}
+                  />
+                )}
               </div>
             </div>
-          </div>
 
-          <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
-            {findings.length === 0 && <div style={{ padding: "24px 16px", fontFamily: MONO, fontSize: 11, color: "#767C83" }}>No findings or facts on this page.</div>}
-            {findings.map((f) => (
-              <FindingRow key={f.id} finding={f} isActive={f.id === activeId} isPinned={f.id === pinnedId} onHover={setHoveredId} onPin={setPinnedId} />
-            ))}
+            <div className="pm-report-page-foot">
+              <span>{active ? <><span className="pm-mono">{active.marker}</span> outlined on this page</> : "Select a finding to outline it on the page."}</span>
+              {selectedId && (
+                <button type="button" className="pm-link pm-report-back" onClick={backToSelected}>
+                  Back to finding
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        </aside>
       </div>
     </div>
   );

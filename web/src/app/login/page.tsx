@@ -1,7 +1,9 @@
 import Link from "next/link";
-import AuthShell from "@/components/auth/auth-shell";
+import AuthShell, { CrossLink, OrDivider } from "@/components/auth/auth-shell";
 import GoogleMark from "@/components/auth/google-mark";
-import * as s from "@/components/auth/auth-styles";
+import FormAlert from "@/components/auth/form-alert";
+import { EmailField, PasswordField, SubmitButton } from "@/components/auth/fields";
+import { loginError } from "@/components/auth/auth-errors";
 import { login, signInWithGoogle } from "./actions";
 
 export default async function LoginPage({
@@ -10,56 +12,46 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
+  const err = error ? loginError(error) : null;
+  const atGoogle = err?.field === "google";
+  const atForm = err && !atGoogle;
 
   return (
     <AuthShell
       title="Sign in"
-      subtitle="Access your ProofMart account."
-      footer={
-        <>
-          Don&rsquo;t have an account?{" "}
-          <Link href="/signup" className="pm-hoverable" style={{ color: "var(--pm-ink)", textDecoration: "underline", textUnderlineOffset: 3 }}>
-            Sign up
-          </Link>
-        </>
-      }
+      subtitle="Get back to your documents, reports and API keys."
+      aside="return"
+      footer={<CrossLink prompt="New to ProofMart?" label="Create a free account" href="/signup" />}
     >
-      {error && <div style={s.errorBanner}>{error}</div>}
-
-      <form action={signInWithGoogle}>
-        <button type="submit" className="pm-btn pm-btn-ghost" style={s.secondaryButton}>
-          <GoogleMark />
+      <form action={signInWithGoogle} className="pm-auth-form">
+        <SubmitButton variant="ghost" icon={<GoogleMark />} pendingLabel="Opening Google…">
           Continue with Google
-        </button>
+        </SubmitButton>
+        {atGoogle && <FormAlert tone="error" title={err.title} body={err.body} action={err.action} />}
       </form>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <span style={{ flex: 1, height: 1, background: "var(--pm-hairline)" }} />
-        <span className="pm-eyebrow" style={{ margin: 0 }}>or</span>
-        <span style={{ flex: 1, height: 1, background: "var(--pm-hairline)" }} />
-      </div>
+      <OrDivider />
 
-      <form action={login} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        <div>
-          <label htmlFor="email" style={s.label}>
-            Email
-          </label>
-          <input id="email" name="email" type="email" autoComplete="email" required style={s.input} />
-        </div>
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-            <label htmlFor="password" style={s.label}>
-              Password
-            </label>
-            <Link href="/account/reset-password" className="pm-nav-link" style={{ fontSize: 15 }}>
-              Forgot?
+      <form action={login} className="pm-auth-form">
+        {atForm && <FormAlert id="login-error" tone="error" title={err.title} body={err.body} action={err.action} />}
+        <EmailField
+          restore={!!err}
+          invalid={err?.field === "email"}
+          describedBy={atForm ? "login-error" : undefined}
+          autoFocus={err?.field === "email"}
+        />
+        <PasswordField
+          autoComplete="current-password"
+          invalid={err?.field === "password"}
+          describedBy={atForm ? "login-error" : undefined}
+          autoFocus={err?.field === "password"}
+          after={
+            <Link href="/account/reset-password" className="pm-link pm-auth-forgot">
+              Forgot password?
             </Link>
-          </div>
-          <input id="password" name="password" type="password" autoComplete="current-password" required style={s.input} />
-        </div>
-        <button type="submit" className="pm-btn pm-btn-filled" style={{ ...s.primaryButton, marginTop: 4 }}>
-          Sign in
-        </button>
+          }
+        />
+        <SubmitButton pendingLabel="Signing in…">Sign in</SubmitButton>
       </form>
     </AuthShell>
   );

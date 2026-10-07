@@ -3,26 +3,33 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 /**
- * Reveals its children once, when they first scroll into view — a small
- * translate plus a fade, staggered by `delay` when several siblings enter
- * together. Transform/opacity only, so the animation never leaves the
- * compositor and never reflows the page.
+ * The site's one enter gesture: 10px of rise plus a fade, 500ms ease-out,
+ * staggered by `delay` (300ms per sibling). Transform/opacity only.
  *
- * Degradation matters here because the reveal's resting state is invisible:
- * - No IntersectionObserver (or an observer that never fires): shown immediately.
- * - No JavaScript at all: the `<noscript>` rule in layout.tsx wins.
- * - prefers-reduced-motion: the CSS drops the animation entirely, so the
- *   element is visible from first paint regardless of what this does.
- * - Never scrolled at all: the watchdog below, which covers the first screen
- *   only. An observer that somehow never fires would otherwise leave the
- *   opening screen blank, which is the one failure a visitor always sees.
- *   Below the fold the observer stays authoritative — a timer that revealed
- *   the whole document would fire every gesture off-screen for anyone who
- *   pauses before scrolling, which is most people.
+ * Three states, carried on `data-reveal`:
+ * - `pending` — server render and anything waiting to enter: opacity 0.
+ * - `shown`   — has entered; transitions to rest.
+ * - `parked`  — below the fold on a page nobody has scrolled yet: painted at
+ *   rest with no transition.
+ *
+ * Why `parked` exists: the gesture is for a reader who scrolls into a
+ * section. A visitor who never scrolls (a print, a reader view, a full-page
+ * capture, a link preview) would otherwise get a document that is blank below
+ * the first screen, because the observer that reveals it never fires. So
+ * below-fold content stays painted until the first real scroll, and only then
+ * is it set back to `pending` — off-screen, invisibly — to enter as it arrives.
+ *
+ * Degradation, because `pending` is invisible:
+ * - No IntersectionObserver: shown on the next frame.
+ * - No JavaScript: the `<noscript>` rule in layout.tsx wins.
+ * - prefers-reduced-motion: the CSS drops the gesture; everything paints at rest.
+ * - First screen, observer never fires: the watchdog shows it anyway.
  */
 
 /** Watchdog delay: past the hero's own 900ms stagger, before a reader reacts. */
 const REVEAL_DEADLINE_MS = 1500;
+
+type RevealState = "pending" | "shown" | "parked";
 
 export default function Reveal({
   children,
@@ -40,58 +47,72 @@ export default function Reveal({
   /** Anchor target, when the revealed element is also a scroll destination. */
   id?: string;
   /** Element to render as — a reveal inside an `<ol>`/`<ul>` must still be an `<li>`. */
-  as?: "div" | "li" | "article";
+  as?: "div" | "li" | "article" | "section";
 }) {
   const ref = useRef<HTMLElement>(null);
-  const [shown, setShown] = useState(false);
+  const [state, setState] = useState<RevealState>("pending");
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    let observer: IntersectionObserver | undefined;
+    let watchdog: number | undefined;
+    let frame = 0;
+
     if (typeof IntersectionObserver === "undefined") {
-      // Deferred rather than set inline: a synchronous setState in an effect
-      // body cascades an extra render pass, and the initial state can't be
-      // seeded from IntersectionObserver either — it's absent during SSR too,
-      // which would make every element mismatch on hydration.
-      const frame = requestAnimationFrame(() => setShown(true));
+      frame = requestAnimationFrame(() => setState("shown"));
       return () => cancelAnimationFrame(frame);
     }
 
-    // Already in view on mount (above the fold) — show without waiting for a
-    // scroll event that may never come. The positive bottom margin starts the
-    // gesture a quarter-viewport early, so the element has settled by the time
-    // it is actually looked at rather than animating under the reader's eye.
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setShown(true);
-            observer.disconnect();
+    const watch = () => {
+      // The positive bottom margin starts the gesture a quarter-viewport
+      // early, so it has settled by the time it is actually looked at.
+      observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              setState("shown");
+              observer?.disconnect();
+            }
           }
-        }
-      },
-      { rootMargin: "0px 0px 25% 0px", threshold: 0.01 },
-    );
+        },
+        { rootMargin: "0px 0px 25% 0px", threshold: 0.01 },
+      );
+      observer.observe(el);
+    };
 
-    observer.observe(el);
+    const rect = el.getBoundingClientRect();
+    const inFirstScreen = rect.top < window.innerHeight && rect.bottom > 0;
 
-    // Scoped to the first screen only. An element already in the viewport at
-    // mount must become visible whether or not the observer ever fires, so a
-    // page nobody scrolls still renders its opening screen. Everything below
-    // the fold keeps waiting for the observer — extending this to the whole
-    // document would fire every reveal off-screen on a timer and destroy the
-    // gesture for anyone who pauses before scrolling.
-    const inFirstScreen = el.getBoundingClientRect().top < window.innerHeight;
-    const watchdog = inFirstScreen
-      ? window.setTimeout(() => {
-          setShown(true);
-          observer.disconnect();
-        }, REVEAL_DEADLINE_MS)
-      : undefined;
+    if (inFirstScreen) {
+      watch();
+      watchdog = window.setTimeout(() => {
+        setState("shown");
+        observer?.disconnect();
+      }, REVEAL_DEADLINE_MS);
+      return () => {
+        window.clearTimeout(watchdog);
+        observer?.disconnect();
+      };
+    }
 
+    // Below the fold: paint at rest until the reader scrolls.
+    frame = requestAnimationFrame(() => setState("parked"));
+    const onFirstScroll = () => {
+      window.removeEventListener("scroll", onFirstScroll);
+      const r = el.getBoundingClientRect();
+      // Still comfortably out of sight: re-arm it to enter. Anything the
+      // scroll has already brought close stays painted — it must not blink.
+      if (r.top > window.innerHeight * 1.25 || r.bottom < 0) {
+        setState("pending");
+        watch();
+      }
+    };
+    window.addEventListener("scroll", onFirstScroll, { passive: true });
     return () => {
-      if (watchdog !== undefined) window.clearTimeout(watchdog);
-      observer.disconnect();
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onFirstScroll);
+      observer?.disconnect();
     };
   }, []);
 
@@ -100,7 +121,7 @@ export default function Reveal({
       ref={ref as React.RefObject<HTMLDivElement & HTMLLIElement>}
       id={id}
       className={className ? `pm-reveal ${className}` : "pm-reveal"}
-      data-shown={shown ? "true" : "false"}
+      data-reveal={state}
       style={{ ...style, ...({ "--pm-delay": `${delay}ms` } as CSSProperties) }}
     >
       {children}

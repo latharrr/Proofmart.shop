@@ -13,6 +13,9 @@ import { recordAuditEvent } from "@/lib/audit";
 // (env vars not yet set, e.g. on a fresh Vercel deploy) must degrade to
 // the signed-out state, not crash every page on the site — createClient()
 // itself would throw synchronously if it ran.
+//
+// `layout="menu"` is the same controls stacked for the phone menu sheet,
+// where the account links are shown rather than hidden for lack of width.
 const ACCOUNT_LINKS = [
   { href: "/documents", label: "Documents" },
   { href: "/account/api-keys", label: "API keys" },
@@ -20,8 +23,9 @@ const ACCOUNT_LINKS = [
   { href: "/account/billing", label: "Billing" },
 ];
 
-export default async function AuthControls() {
+export default async function AuthControls({ layout = "bar" }: { layout?: "bar" | "menu" }) {
   const claims = isSupabaseConfigured() ? (await (await createClient()).auth.getClaims()).data?.claims : null;
+  const menu = layout === "menu";
 
   if (!claims) {
     return (
@@ -35,11 +39,17 @@ export default async function AuthControls() {
   const userId = typeof claims.sub === "string" ? claims.sub : null;
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 16, minWidth: 0 }}>
-      <div className="pm-account-links">
+    <div
+      style={
+        menu
+          ? { display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 16 }
+          : { display: "flex", alignItems: "center", gap: 16, minWidth: 0 }
+      }
+    >
+      <div className={menu ? "pm-account-links-menu" : "pm-account-links"}>
         <span
           className="pm-mono"
-          style={{ color: "var(--pm-ash)", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+          style={{ color: "var(--pm-ash)", maxWidth: menu ? "100%" : 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
         >
           {email}
         </span>

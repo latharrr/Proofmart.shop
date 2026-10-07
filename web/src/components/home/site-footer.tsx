@@ -13,7 +13,7 @@ export default function SiteFooter() {
               <Wordmark href="/" />
             </div>
             <p className="pm-body" style={{ color: "var(--pm-slate)", maxWidth: "36ch" }}>
-              Document forensics as a structured evidence graph. Built in Bengaluru.
+              Re-checks the arithmetic in PDF statements and shows its work. Built in Bengaluru.
             </p>
           </div>
           {FOOTER.map((c) => (
@@ -23,9 +23,10 @@ export default function SiteFooter() {
               </p>
               <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
                 {c.links.map((l) =>
-                  // In-page anchors stay plain <a>: next/link would prefetch a
-                  // route that doesn't exist for a "#pipeline" href.
-                  l.href.startsWith("#") ? (
+                  // Home-page anchors stay plain <a>: they are written "/#pipeline"
+                  // so they work from /security too, and a plain link lets the
+                  // browser do an ordinary same-document jump on the home page.
+                  l.href.startsWith("/#") ? (
                     <li key={l.href}>
                       <a href={l.href} className="pm-nav-link">
                         {l.label}

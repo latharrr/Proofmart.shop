@@ -12,7 +12,7 @@ Where this file and `bar.md` disagree, `bar.md` wins — it describes the bar, t
 |---|---|---|---|---|---|
 | display | Instrument Serif | 90px | 400 | −2.25px | 1.05 |
 | heading-lg | Instrument Serif | 64px | 400 | −1.6px | 1.1 |
-| heading | Instrument Serif | 44px | 400 | −0.66px | 1.15 |
+| heading | Instrument Serif | 44px | 400 | −0.88px (−0.02em, per bar.md §1) | 1.15 |
 | heading-sm | Instrument Sans | 26px | 450 | −0.23px | 1.18 |
 | body-lg | Instrument Sans | 20px | 450 | normal | 1.35 |
 | body | Instrument Sans | 17px | 400 | normal | 1.5 |
@@ -161,6 +161,10 @@ Only floating product artifacts use `--shadow-artifact`. At most two shadow styl
 
 1. No sans headline above 44px, no serif at any weight but 400.
 2. No chromatic hue outside peach/sienna and the three verdict colours.
+   *Exception:* a third-party sign-in mark whose owner forbids recolouring
+   (the Google "G" on "Continue with Google") renders in its official colours.
+   It is the only one, it sits inside a ghost button, and nothing else takes
+   its hues.
 3. No verdict colour used decoratively.
 4. No shadow on a content card.
 5. No radius below 12px.

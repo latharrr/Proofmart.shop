@@ -371,14 +371,14 @@ export default function EvidenceRail() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "56px 1fr",
+              gridTemplateColumns: "76px minmax(0, 1fr)",
               alignItems: "center",
               padding: "10px 16px 10px 0",
               borderBottom: "1px solid #DDE1E4",
               background: "#FFFFFF",
             }}
           >
-            <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.12em", textAlign: "center" }}>04</span>
+            <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.12em", paddingLeft: 14 }}>04</span>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
               <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.12em" }}>FINDINGS</span>
               <div style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: MONO, fontSize: 11, letterSpacing: "0.06em" }}>
@@ -409,15 +409,15 @@ export default function EvidenceRail() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "56px 1fr",
+              gridTemplateColumns: "76px minmax(0, 1fr)",
               alignItems: "center",
               padding: "10px 16px 10px 0",
               borderTop: "1px solid #DDE1E4",
               background: "#FFFFFF",
             }}
           >
-            <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.12em", textAlign: "center" }}>↵</span>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: MONO, fontSize: 11, color: "#767C83" }}>
+            <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.12em", paddingLeft: 14 }}>↵</span>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "2px 12px", fontFamily: MONO, fontSize: 11, color: "#767C83" }}>
               <span>Tab · Enter to pin · Esc to clear</span>
               <span>{isLive ? "local · not persisted" : "proofmart.shop/d/req_8fk2"}</span>
             </div>
