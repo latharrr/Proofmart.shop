@@ -1,25 +1,69 @@
-# CODING AGENTS: READ THIS FIRST
+# ProofMart
 
-This is a **handoff bundle** from Claude Design (claude.ai/design).
+Document forensics as a structured evidence graph. Upload a PDF and get extracted facts plus deterministic verification findings, each pinned to its coordinates on the page.
 
-A user mocked up designs in HTML/CSS/JS using an AI design tool, then exported this bundle so a coding agent can implement the designs for real.
+Live: https://proofmart-shop.vercel.app
 
-## What you should do — IMPORTANT
+## What it does
 
-**Read the chat transcripts first.** There are 1 chat transcript(s) in `chats/`. The transcripts show the full back-and-forth between the user and the design assistant — they tell you **what the user actually wants** and **where they landed** after iterating. Don't skip them. The final HTML files are the output, but the chat is where the intent lives.
+Upload, classify, extract, OCR (only when a page needs it), verify, then show the result in an Evidence Rail. Signed-in users get their results saved and retrievable. There is also a public API and signed verification dossiers.
 
-**Read `project/Home.dc.html` in full.** The user had this file open when they triggered the handoff, so it's almost certainly the primary design they want built. Read it top to bottom — don't skim. Then **follow its imports**: open every file it pulls in (shared components, CSS, scripts) so you understand how the pieces fit together before you start implementing.
+```
+Uploaded PDF
+  -> classify         (@firecrawl/pdf-inspector)
+  -> extract          (positioned text, markdown)
+  -> OCR              (Tesseract.js, only on pages that need it)
+  -> normalize        (ProcessedDocument + ExtractedFact[])
+  -> verify           (marker registry -> findings -> verdict)
+  -> Evidence Rail    (real coordinates, real verdict, real evidence)
+```
 
-**If anything is ambiguous, ask the user to confirm before you start implementing.** It's much cheaper to clarify scope up front than to build the wrong thing.
+### Verification markers
 
-## About the design files
+Six markers are registered and run:
 
-The design medium is **HTML/CSS/JS** — these are prototypes, not production code. Your job is to **recreate them pixel-perfectly** in whatever technology makes sense for the target codebase (React, Vue, native, whatever fits). Match the visual output; don't copy the prototype's internal structure unless it happens to fit.
+| Marker | Category | Verdict on hit |
+|---|---|---|
+| `BALANCE_BREAK` | Arithmetic | FAIL |
+| `CROSS_PAGE_TOTAL_MISMATCH` | Arithmetic | FAIL |
+| `DATE_SEQUENCE_ANOMALY` | Semantic | REVIEW |
+| `DUPLICATE_TRANSACTION` | Semantic | REVIEW |
+| `OCR_LOW_CONFIDENCE` | Extraction | REVIEW |
+| `ENCODING_ANOMALY` | Extraction | REVIEW |
 
-**Don't render these files in a browser or take screenshots unless the user asks you to.** Everything you need — dimensions, colors, layout rules — is spelled out in the source. Read the HTML and CSS directly; a screenshot won't tell you anything they don't.
+Verdicts follow a fixed order, with no scoring model: `INCONCLUSIVE` if no marker had enough evidence to run, `FAIL` if any finding is FAIL, else `REVIEW` if any finding is REVIEW, else `CLEAR`.
 
-## Bundle contents
+### Public API
 
-- `README.md` — this file
-- `chats/` — conversation transcripts (read these!)
-- `project/` — the `Home page structure with EvidenceRail` project files (HTML prototypes, assets, components)
+`POST /v1/inspect`, `POST /v1/extract` and `POST /v1/verify` take `multipart/form-data` with a `file` field. They are three depths of one engine. Keys are created at `/account/api-keys`. Only a hash of each key is stored.
+
+## Stack
+
+Next.js 16, React 19, TypeScript, Tailwind 4, Supabase (auth, database, row-level security), Vercel Blob, pdf-lib, pdfjs-dist, Tesseract.js, Razorpay (billing scaffold), Vitest and Playwright.
+
+## Repo layout
+
+The app lives in [`web/`](web/). Start with [`web/README.md`](web/README.md) for setup, environment variables, auth, the API, Vercel deployment and known limits. `chats/` and `project/` hold the original design handoff files.
+
+## Run locally
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+Open http://localhost:3000. Uploading a PDF works locally with no environment variables. Sign-in needs the Supabase variables listed in `web/.env.example`.
+
+```bash
+npm run test:unit   # Vitest
+npm run test:e2e    # Playwright
+```
+
+## Status
+
+Live payments have not been tested against a real Razorpay account. See "What's not built yet" in `web/README.md`.
+
+## Author
+
+Deepanshu Lathar - https://deepanshulathar.com - [@latharrr](https://github.com/latharrr)
