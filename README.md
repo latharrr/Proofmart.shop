@@ -64,6 +64,8 @@ npm run test:e2e    # Playwright
 
 ## Status
 
+What's left before real customers can sign up and pay is tracked in [`LAUNCH.md`](LAUNCH.md): a prioritised checklist with steps and verification for each item.
+
 Live payments have not been tested against a real Razorpay account. See "What's not built yet" in `web/README.md`.
 
 ## Author
