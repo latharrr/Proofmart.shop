@@ -8,6 +8,10 @@ const BASE_URL = "https://proofmart.shop";
 const ROUTES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
   { path: "/", changeFrequency: "weekly", priority: 1 },
   { path: "/security", changeFrequency: "monthly", priority: 0.5 },
+  { path: "/privacy", changeFrequency: "yearly", priority: 0.2 },
+  { path: "/terms", changeFrequency: "yearly", priority: 0.2 },
+  { path: "/refunds", changeFrequency: "yearly", priority: 0.2 },
+  { path: "/contact", changeFrequency: "yearly", priority: 0.2 },
   { path: "/login", changeFrequency: "yearly", priority: 0.3 },
   { path: "/signup", changeFrequency: "yearly", priority: 0.3 },
 ];

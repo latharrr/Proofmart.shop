@@ -63,10 +63,10 @@ const P1 = ledger(48000, "OPENING BALANCE", "01 Apr", [
 const P2 = ledger(34000, "BALANCE B/F FROM PAGE 1", "04 Apr", [
   ["05 Apr", "POS/BIGBASKET GROCERY", -1940],
   ["05 Apr", "UPI/bescom@ybl/ELEC-APR", -1300],
-  ["06 Apr", "UPI/kumar@okhdfc/RENT-SHARE", -2500],
+  ["06 Apr", "UPI/kumar@okmtb/RENT-SHARE", -2500],
   ["06 Apr", "POS/APOLLO PHARMACY", -640],
   ["06 Apr", "IMPS IN/JOE-K PAYMENT", 6140],
-  ["06 Apr", "UPI/kumar@okhdfc/RENT-SHARE", -2500],
+  ["06 Apr", "UPI/kumar@okmtb/RENT-SHARE", -2500],
   ["06 Apr", "ATM WDL BLR-KRMR-011", -2000],
   ["07 Apr", "POS/UBER 5T4A3", -500],
 ]);
@@ -74,10 +74,10 @@ const P2 = ledger(34000, "BALANCE B/F FROM PAGE 1", "04 Apr", [
 const P3 = ledger(28760, "BALANCE B/F FROM PAGE 2", "07 Apr", [
   ["07 Apr", "POS/DMART HSR LAYOUT", -2315],
   ["07 Apr", "UPI/mom@sbi/PERSONAL", -5000],
-  ["07 Apr", "IMPS IN/CASHBACK-HDFC", 185],
+  ["07 Apr", "IMPS IN/CASHBACK-MTB", 185],
   ["07 Apr", "POS/STARBUCKS KORAMANGALA", -590],
   ["08 Apr", "NEFT IN/CLIENT-INV-1087", 6500],
-  ["08 Apr", "UPI/zomato@hdfc/8812", -780],
+  ["08 Apr", "UPI/zomato@mtb/8812", -780],
   ["08 Apr", "ATM WDL BLR-KRMR-012", -3000],
 ]);
 
@@ -91,11 +91,11 @@ const P4_HEAD = ledger(25000, "BALANCE B/F FROM PAGE 3", "08 Apr", [
 P4_HEAD[0].flagged = true;
 
 const P4_TAIL: SampleRow[] = [
-  { n: 6, date: "12 Apr", desc: "SALARY CREDIT HDFCEMP", debit: null, credit: 84120, balance: 109120 },
+  { n: 6, date: "12 Apr", desc: "SALARY CREDIT MERIDIANEMP", debit: null, credit: 84120, balance: 109120 },
   { n: 7, date: "12 Apr", desc: "UPI/rahul@ybl/456102", debit: 250, credit: null, balance: 108870 },
   { n: 8, date: "13 Apr", desc: "ATM WDL BLR-KRMR-013", debit: 5000, credit: null, balance: 103870 },
   { n: 9, date: "14 Apr", desc: "POS/AMAZON RETAIL IN", debit: 3499, credit: null, balance: 100371 },
-  { n: 10, date: "15 Apr", desc: "EMI/HDFC-HOME LOAN 88112", debit: 32180, credit: null, balance: 68191 },
+  { n: 10, date: "15 Apr", desc: "EMI/MTB-HOME LOAN 88112", debit: 32180, credit: null, balance: 68191 },
   { n: 11, date: "16 Apr", desc: "RTGS IN/CLIENT-INV-1092", debit: null, credit: 45000, balance: 113191 },
   { n: 12, date: "17 Apr", desc: "POS/BIGBASKET GROCERY", debit: 2140, credit: null, balance: 111051 },
   { n: 13, date: "18 Apr", desc: "UPI/mom@sbi/PERSONAL", debit: 10000, credit: null, balance: 101051 },

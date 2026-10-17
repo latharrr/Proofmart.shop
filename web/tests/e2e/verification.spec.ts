@@ -81,7 +81,7 @@ test.describe("verification engine — real findings on real documents", () => {
 
     await rail(page).getByRole("button", { name: "Clear document" }).click();
 
-    await expect(rail(page).getByText("hdfc_apr25_statement.pdf")).toBeVisible();
+    await expect(rail(page).getByText("meridian_apr25_statement.pdf")).toBeVisible();
     await expect(rail(page)).toContainText("FAIL");
     await expect(rail(page).getByText("BALANCE_BREAK")).toBeVisible();
     await expect(rail(page).getByText("CROSS_PAGE_TOTAL_MISMATCH")).toBeVisible();

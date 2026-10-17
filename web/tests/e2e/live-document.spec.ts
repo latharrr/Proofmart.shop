@@ -167,7 +167,7 @@ test.describe("live document upload", () => {
     await waitUntilReady(page);
 
     await rail(page).getByRole("button", { name: "Clear document" }).click();
-    await expect(rail(page).getByText("hdfc_apr25_statement.pdf")).toBeVisible();
+    await expect(rail(page).getByText("meridian_apr25_statement.pdf")).toBeVisible();
     await expect(rail(page).getByText("BALANCE_BREAK")).toBeVisible();
   });
 
@@ -178,7 +178,7 @@ test.describe("live document upload", () => {
     await upload(page, buf, "quarterly-report.pdf");
     await waitUntilReady(page);
     await rail(page).getByRole("button", { name: "Clear document" }).click();
-    await expect(rail(page).getByText("hdfc_apr25_statement.pdf")).toBeVisible();
+    await expect(rail(page).getByText("meridian_apr25_statement.pdf")).toBeVisible();
     expect(errors).toEqual([]);
   });
 });

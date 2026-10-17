@@ -18,11 +18,11 @@ export interface Transaction {
 }
 
 export const TXNS: Transaction[] = [
-  { i: 6, date: "12 Apr", desc: "SALARY CREDIT HDFCEMP", debit: null, credit: 84120.0, balance: 109120.0 },
+  { i: 6, date: "12 Apr", desc: "SALARY CREDIT MERIDIANEMP", debit: null, credit: 84120.0, balance: 109120.0 },
   { i: 7, date: "12 Apr", desc: "UPI/rahul@ybl/456102", debit: 250.0, credit: null, balance: 108870.0 },
   { i: 8, date: "13 Apr", desc: "ATM WDL BLR-KRMR-013", debit: 5000.0, credit: null, balance: 103870.0 },
   { i: 9, date: "14 Apr", desc: "POS/AMAZON RETAIL IN", debit: 3499.0, credit: null, balance: 100371.0 },
-  { i: 10, date: "15 Apr", desc: "EMI/HDFC-HOME LOAN 88112", debit: 32180.0, credit: null, balance: 68191.0 },
+  { i: 10, date: "15 Apr", desc: "EMI/MTB-HOME LOAN 88112", debit: 32180.0, credit: null, balance: 68191.0 },
   { i: 11, date: "16 Apr", desc: "RTGS IN/CLIENT-INV-1092", debit: null, credit: 45000.0, balance: 113191.0 },
   { i: 12, date: "17 Apr", desc: "POS/BIGBASKET GROCERY", debit: 2140.0, credit: null, balance: 111051.0 },
   { i: 13, date: "18 Apr", desc: "UPI/mom@sbi/PERSONAL", debit: 10000.0, credit: null, balance: 101051.0 },

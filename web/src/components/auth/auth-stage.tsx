@@ -22,7 +22,7 @@ export interface AuthStageProps {
   file?: string;
 }
 
-export default function AuthStage({ variant, band, label, file = "hdfc_apr25_statement.pdf" }: AuthStageProps) {
+export default function AuthStage({ variant, band, label, file = "meridian_apr25_statement.pdf" }: AuthStageProps) {
   return (
     <Frame as="aside" tone="sheet" label={label} className="pm-auth-stage" stageClassName="pm-auth-stage-box">
       <div className="pm-auth-stage-head" aria-hidden="true">

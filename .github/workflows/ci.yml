@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    env:
+      # Build-time placeholders only — Vercel production injects the real
+      # values. The app degrades gracefully without configured services, so
+      # dummies are enough for tsc/lint/unit/build in CI.
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+
+      - run: npx tsc --noEmit
+
+      - run: npm run lint
+
+      # The two OCR tests that render a fixture through a real browser hardcode
+      # the sandbox-only Chromium path /opt/pw-browsers/chromium (see
+      # web/README.md "Running Playwright locally") — they cannot launch on a
+      # GitHub runner, so they are excluded here and covered locally instead.
+      - run: npm run test:unit -- --exclude tests/unit/ocr.test.ts --exclude tests/unit/ocr-tesseract-js.test.ts
+
+      - run: npm run build
+      # No Playwright e2e in CI: the e2e suite needs the sandbox Chromium
+      # path above plus live Supabase credentials (see web/README.md).

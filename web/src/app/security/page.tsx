@@ -322,8 +322,9 @@ export default function SecurityPage() {
 
             <Section id="report" n="11" title="Reporting an issue">
               <p>
-                ProofMart is early-stage and does not yet have a dedicated security contact address or a bug-bounty program. That is a real gap, stated
-                plainly rather than covered with an inbox nobody monitors.
+                To report a security issue, write to <span className="pm-mono">security@proofmart.shop</span> — the address is also published at{" "}
+                <span className="pm-mono">/.well-known/security.txt</span>. Include what you found, how to reproduce it, and how to reach you.
+                There is no bug-bounty program; urgent reports go first.
               </p>
               <p>
                 <a href="#main" className="pm-link">

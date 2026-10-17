@@ -160,4 +160,13 @@ export const FOOTER: FooterColumn[] = [
       { label: "Create account", href: "/signup" },
     ],
   },
+  {
+    h: "Legal",
+    links: [
+      { label: "Privacy", href: "/privacy" },
+      { label: "Terms", href: "/terms" },
+      { label: "Refunds", href: "/refunds" },
+      { label: "Contact", href: "/contact" },
+    ],
+  },
 ];

@@ -203,7 +203,7 @@ export default function EvidenceRail() {
     }
   }
 
-  const headerFilename = isLive ? live.fileMeta?.name ?? "" : "hdfc_apr25_statement.pdf";
+  const headerFilename = isLive ? live.fileMeta?.name ?? "" : "meridian_apr25_statement.pdf";
   const headerMeta = isLive
     ? live.stage === "ready" && live.document
       ? `${live.document.pageCount} pages · ${formatBytes(live.document.sizeBytes)} · ${(live.document.processingTimeMs / 1000).toFixed(1)}s`
@@ -434,9 +434,9 @@ function SampleDocument({ page, active }: { page: number; active: SampleFinding 
         <g transform="translate(32, 62)">
           <rect x={0} y={-2} width={18} height={18} rx={5} fill={INK} />
           <text x={28} y={13} fontFamily={SANS} fontSize={18} fill={INK} letterSpacing="-0.01em">
-            HDFC BANK
+            MERIDIAN TRUST BANK
           </text>
-          <text x={136} y={13} fontFamily={SANS} fontSize={13} fill={MUTE}>
+          <text x={252} y={13} fontFamily={SANS} fontSize={13} fill={MUTE}>
             Statement of Account
           </text>
         </g>
@@ -519,10 +519,10 @@ function SampleDocument({ page, active }: { page: number; active: SampleFinding 
         <line x1={32} y1={tableEnd + 42} x2={608} y2={tableEnd + 42} stroke={LINE} strokeWidth={1} />
 
         <text x={32} y={752} fontFamily={MONO} fontSize={9} fill={MUTE} letterSpacing={1.2}>
-          HDFC BANK LIMITED · REGD. OFFICE HDFC HOUSE, MUMBAI
+          MERIDIAN TRUST BANK LIMITED · REGD. OFFICE MERIDIAN HOUSE, MUMBAI
         </text>
         <text x={32} y={766} fontFamily={MONO} fontSize={9} fill={MUTE} letterSpacing={1.2}>
-          CIN L65920MH1994PLC080618 · SAMPLE FOR DEMONSTRATION
+          CIN U65999MH2020PLC000000 · SAMPLE FOR DEMONSTRATION
         </text>
         <text x={608} y={766} fontFamily={MONO} fontSize={9} fill={MUTE} letterSpacing={1.2} textAnchor="end">
           PAGE {page} / {SAMPLE_PAGE_COUNT}

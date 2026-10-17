@@ -1,0 +1,5 @@
+# https://securitytxt.org/
+Contact: mailto:security@proofmart.shop
+Expires: 2027-10-17T15:03:06Z
+Preferred-Languages: en
+Canonical: https://proofmart.shop/.well-known/security.txt

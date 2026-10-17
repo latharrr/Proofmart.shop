@@ -9,7 +9,7 @@ import { INTEGRATIONS } from "@/lib/home-data";
 const TERMINAL: { indent?: number; parts: ReactNode[] }[] = [
   { parts: [<span key="p" className="pm-j-punct">$</span>, " curl https://proofmart.shop/v1/verify \\"] },
   { indent: 4, parts: ["-H ", <span key="h" className="pm-j-key">&quot;Authorization: Bearer $PROOFMART_API_KEY&quot;</span>, " \\"] },
-  { indent: 4, parts: ["-F ", <span key="f" className="pm-j-key">&quot;file=@hdfc_apr25.pdf&quot;</span>] },
+  { indent: 4, parts: ["-F ", <span key="f" className="pm-j-key">&quot;file=@meridian_apr25.pdf&quot;</span>] },
   { parts: [] },
   { parts: [<span key="c" className="pm-j-punct"># 200 OK, summarised</span>] },
   { parts: [<span key="v" className="pm-j-fail">FAIL</span>, "  4 findings"] },

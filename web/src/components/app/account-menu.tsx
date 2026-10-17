@@ -2,7 +2,7 @@
 
 import { Arrow } from "@/components/paper/tickmark";
 import Link from "next/link";
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 /** Account links shared by the desktop menu and the mobile sheet. */
 export const ACCOUNT_LINKS = [
@@ -51,7 +51,7 @@ export default function AccountMenu({ email, signOut }: { email: string | null; 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuId = useId();
   const initial = (email?.trim()[0] ?? "").toUpperCase();
-  const close = useRef(() => setOpen(false)).current;
+  const close = useCallback(() => setOpen(false), []);
 
   useDismiss(open, close, rootRef, triggerRef);
 

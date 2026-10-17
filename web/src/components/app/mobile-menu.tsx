@@ -2,7 +2,7 @@
 
 import { Arrow } from "@/components/paper/tickmark";
 import Link from "next/link";
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { ACCOUNT_LINKS, useDismiss } from "./account-menu";
 
 type NavItem = { id: string; href: string; label: string };
@@ -18,7 +18,7 @@ export default function AppMobileMenu({ nav, active, email, signOut }: { nav: Na
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const sheetId = useId();
-  const close = useRef(() => setOpen(false)).current;
+  const close = useCallback(() => setOpen(false), []);
 
   useDismiss(open, close, rootRef, triggerRef);
 

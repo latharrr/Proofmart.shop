@@ -24,7 +24,7 @@ Checked against production on **17 Oct 2026** (live site, Vercel project
 | Signup / reset emails | ⚠️ Testing-grade | Supabase built-in sender; rate-limited to a couple of emails per hour |
 | Google sign-in | ❓ Unverified | Needs Google provider in Supabase dashboard |
 | Payments | ❌ Not configured | No `RAZORPAY_*` env vars; never tested with a real account |
-| Legal pages | ❌ Missing | No privacy policy, terms, refund policy or contact page |
+| Legal pages | ⚠️ Code-built, pending your details | `/privacy` `/terms` `/refunds` `/contact` built with `[BUSINESS NAME]` placeholders, linked from footer + signup form, in sitemap — needs real business details + legal review (2026-10-17) |
 | Real usage so far | None | `documents` and `profiles` tables have 0 rows |
 
 ---
@@ -149,6 +149,12 @@ third-party AI processing; the privacy policy should match it exactly.
 **Verify.** All four pages are reachable from the footer and listed in
 `/sitemap.xml`.
 
+**Status 2026-10-17:** code done (pages, footer links, sitemap, signup-form
+consent line). Remaining: you supply the real business name, address and
+contact email, and review the wording (ideally with a lawyer) — the pages
+carry `DRAFT` markers until then. This unblocks Razorpay's website check and
+Google's OAuth consent screen once the placeholders are filled.
+
 ### 6. ProofMart shares its database with another app
 
 **What's wrong.** The Supabase project `proofmart` also contains tables from
@@ -225,6 +231,12 @@ routes, and add unit tests alongside the existing ones in `web/tests/unit/`.
 **Verify.** On a Free key, the 51st call to `/v1/extract` in a month returns
 `402 quota_exceeded`.
 
+**Status 2026-10-17:** code + tests done. Both routes already called
+`checkUsageQuota` + `recordUsageEvent`; added `tests/unit/quota.test.ts` which
+drives the real route handlers (mocked usage store) and asserts the 51st
+`/v1/extract` and `/v1/inspect` calls on a Free key return `402
+quota_exceeded`. Pricing untouched — item 8 is still your call.
+
 ---
 
 ## P2: before a public launch
@@ -237,11 +249,23 @@ Although it's labelled SAMPLE, showing a real bank's identity on a document
 the product marks as FAIL invites a complaint. Swap it for a fictional bank
 name and ID. The findings and arithmetic stay identical.
 
+**Status 2026-10-17:** done. Sample bank is now **Meridian Trust Bank**
+(fictional CIN `U65999MH2020PLC000000`); transaction descriptions
+fictionalized (`okmtb`, `zomato@mtb`, `MTB-HOME LOAN` …); all amounts, rows,
+findings and geometry unchanged; sample filename renamed to
+`meridian_apr25_statement.pdf` everywhere including the e2e specs.
+
 ### 11. A security contact
 
 `/security` says plainly that there is no security contact yet. Set up
 `security@proofmart.shop` (a forwarding alias is enough), publish
 `/.well-known/security.txt`, and update the "Reporting an issue" section.
+
+**Status 2026-10-17:** code done — `public/.well-known/security.txt`
+published (`Contact: mailto:security@proofmart.shop`, expires 2027-10-17)
+and the `/security` reporting section points at it. Remaining: you create
+the `security@proofmart.shop` alias (a forwarder is enough); until then the
+page points at an unmonitored inbox.
 
 ### 12. Supabase hardening (from the Supabase advisor)
 
@@ -263,6 +287,12 @@ trailing backslash). Harmless, but it's a 500 where a 404 belongs. Add a
 rewrite or redirect in `next.config.ts` that strips a trailing backslash on
 `/v1/*`, or return a JSON 404 for unknown `/v1` paths.
 
+**Status 2026-10-17:** done. `src/app/v1/[...path]/route.ts` returns JSON
+`{"error": "not_found"}` with 404 for GET/POST/PUT/PATCH/DELETE on any
+unknown `/v1/*` path (concrete routes take precedence — verified in the
+build's route table); malformed paths like `/v1/verify\` land here too.
+Covered by `tests/unit/v1-catchall.test.ts`.
+
 ### 14. Tests and CI
 
 - There is no CI. Add a GitHub Actions workflow running `npm ci`, `tsc
@@ -277,6 +307,15 @@ rewrite or redirect in `next.config.ts` that strips a trailing backslash on
   the security page's access-control claims.
 - The live-upload e2e tests need the Supabase env. Run `npm run test:e2e`
   locally with `.env.local` filled in.
+
+**Status 2026-10-17:** CI added (`.github/workflows/ci.yml`, PR + push to
+main: `npm ci`, `tsc --noEmit`, `lint`, unit tests, `build` in `web/`), and
+all 4 lint errors fixed (`account-menu.tsx`, `mobile-menu.tsx` ref
+read-during-render; `key-list.tsx` `Date.now()` during render — now a client
+component; plus a pre-existing `LayoutProps` type error in
+`src/app/layout.tsx`). The two OCR unit tests that need the sandbox-only
+Chromium path are excluded in CI per `web/README.md`. Still manual: the RLS
+cross-tenant test run against the real project, and the live e2e run.
 
 ### 15. Monitoring
 

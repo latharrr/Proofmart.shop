@@ -111,6 +111,17 @@ export default async function SignupPage({
         />
         <SubmitButton pendingLabel="Creating your account">Create account</SubmitButton>
       </form>
+      <p className="pm-t-body pm-auth-note">
+        By creating an account you agree to the{" "}
+        <Link href="/terms" className="pm-inline-link">
+          Terms of service
+        </Link>{" "}
+        and{" "}
+        <Link href="/privacy" className="pm-inline-link">
+          Privacy policy
+        </Link>
+        .
+      </p>
     </AuthShell>
   );
 }
