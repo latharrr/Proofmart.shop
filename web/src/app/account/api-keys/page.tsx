@@ -21,6 +21,11 @@ function likePattern(q: string): string {
   return `%${q.replace(/[\\%_]/g, (m) => `\\${m}`)}%`;
 }
 
+/** Read outside the component body: render must stay pure, and a server render happens once per request anyway. */
+function requestTime(): number {
+  return Date.now();
+}
+
 function keysHref(params: { page?: number; q?: string }): string {
   const sp = new URLSearchParams();
   if (params.q) sp.set("q", params.q);
@@ -142,7 +147,7 @@ export default async function ApiKeysPage({ searchParams }: { searchParams: Prom
                 </RollPill>
               </div>
             ) : keys.length > 0 ? (
-              <KeyList keys={keys} offset={from} revoke={revokeApiKey} />
+              <KeyList keys={keys} offset={from} revoke={revokeApiKey} now={requestTime()} />
             ) : q ? (
               <div className="pm-acct-notice">
                 <p className="pm-acct-notice-title">No active key is named like &ldquo;{q}&rdquo;.</p>

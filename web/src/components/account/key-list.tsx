@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import ConfirmSubmitButton from "@/components/confirm-submit-button";
 import { formatAgo, formatDay } from "./format";
 import PillLabel from "./pill-label";
@@ -32,16 +29,14 @@ export function KeyList({
   keys,
   offset = 0,
   revoke,
-  now: nowProp,
+  now,
 }: {
   keys: ApiKeyRow[];
   offset?: number;
   revoke: (id: string) => Promise<void>;
-  now?: number;
+  /** The page's request time, so every "last used" on the page is measured from the same instant. */
+  now: number;
 }) {
-  // "now" is impure, so it can't be read during render — capture it once per
-  // mount instead. A caller (tests, SSR) can still pin the clock via the prop.
-  const [now] = useState(() => nowProp ?? Date.now());
   return (
     <div className="pm-acct-table" data-testid="api-key-list">
       <div className="pm-acct-thead pm-acct-keyrow pm-t-label" aria-hidden="true">

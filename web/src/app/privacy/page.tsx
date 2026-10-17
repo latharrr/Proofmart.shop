@@ -72,6 +72,10 @@ export default function PrivacyPage() {
                   <strong>Operational records:</strong> API usage events (which key, which event type), audit events (sign-ins, uploads, key and webhook
                   changes), and rate-limit counters.
                 </li>
+                <li>
+                  <strong>Billing records:</strong> your plan and its status, and the Razorpay order ID for any upgrade. ProofMart never
+                  sees or stores card, UPI or bank details.
+                </li>
               </ul>
             </Section>
 
@@ -138,7 +142,7 @@ export default function PrivacyPage() {
             </Section>
 
             <Section id="who-sees" n="05" title="Who else sees your data">
-              <p>Two infrastructure providers handle data. No other third party receives document content.</p>
+              <p>Two infrastructure providers handle data, and a payment processor handles Pro checkout. No other third party receives document content.</p>
               <div className="pm-ledger-wrap">
                 <table className="pm-ledger pm-sec-table">
                   <thead>
@@ -158,6 +162,11 @@ export default function PrivacyPage() {
                       <th scope="row">Supabase</th>
                       <td data-label="Used for">Postgres database, authentication</td>
                       <td data-label="Holds">Account data and saved scan results</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Razorpay</th>
+                      <td data-label="Used for">Payments for the Pro plan, once billing is enabled</td>
+                      <td data-label="Holds">Your email, user ID and the order; card, UPI or bank details you enter at checkout stay with Razorpay</td>
                     </tr>
                   </tbody>
                 </table>

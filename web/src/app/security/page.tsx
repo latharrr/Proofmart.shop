@@ -66,6 +66,7 @@ const RETENTION = [
 const PROVIDERS = [
   { name: "Vercel", role: "Hosting, serverless compute, private Blob storage", holds: "Uploaded files, while they are kept" },
   { name: "Supabase", role: "Postgres database, authentication", holds: "Account data and saved scan results" },
+  { name: "Razorpay", role: "Payments for the Pro plan, once billing is enabled", holds: "Your email, user ID and the order; card, UPI or bank details you enter at checkout stay with Razorpay" },
 ];
 
 const TOC = [
@@ -283,7 +284,7 @@ export default function SecurityPage() {
             </Section>
 
             <Section id="providers" n="09" title="Providers">
-              <p>Two infrastructure providers handle data. No other third party receives document content.</p>
+              <p>Two infrastructure providers handle data, and a payment processor handles Pro checkout. No other third party receives document content.</p>
               <div className="pm-ledger-wrap">
                 <table className="pm-ledger pm-sec-table">
                   <thead>

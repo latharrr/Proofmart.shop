@@ -49,13 +49,13 @@ export default function TermsPage() {
               <ul>
                 <li>You must provide a working email address. Sign-in is handled by Supabase Auth; ProofMart never stores your password.</li>
                 <li>You are responsible for keeping your credentials and API keys safe. An API key is shown once, at creation; only its SHA-256 hash is stored.</li>
-                <li>You may revoke an API key or delete your account at any time; revocation takes effect immediately.</li>
+                <li>You may revoke an API key at any time; revocation takes effect immediately. You may ask for your account to be deleted at any time by writing to [CONTACT EMAIL].</li>
               </ul>
             </Section>
 
             <Section id="api" n="03" title="Using the API">
               <ul>
-                <li>Each API key carries a monthly plan quota and a per-minute rate limit. The 51st call on a free plan in a month is refused with <code>402 quota_exceeded</code>.</li>
+                <li>Your account carries a monthly plan quota, shared by all of its API keys and counted across verify, inspect and extract calls; each key also has a per-minute rate limit. The 51st call on a free plan in a calendar month (UTC) is refused with <code>402 quota_exceeded</code>.</li>
                 <li>Do not share keys, embed them in client-side code, or use the service to harm, overload or probe it.</li>
                 <li>We may revoke a key or suspend an account that is being abused, after telling you why where it is practical to do so.</li>
               </ul>

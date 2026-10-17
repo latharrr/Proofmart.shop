@@ -44,15 +44,18 @@ export default function RefundsPage() {
 
             <Section id="cancel" n="02" title="Cancelling a plan">
               <ul>
-                <li>You can cancel a paid plan at any time from <Link href="/account/billing" className="pm-link">the billing page</Link>.</li>
-                <li>Cancellation takes effect at the end of the current billing period; your quota stays at the paid level until then, and the plan is not renewed.</li>
+                <li>
+                  The Pro upgrade on <Link href="/account/billing" className="pm-link">the billing page</Link> is a single payment, not a subscription:
+                  nothing renews and nothing is charged again automatically.
+                </li>
+                <li>There is no in-app cancel button yet. To move back to the free plan, write to [CONTACT EMAIL] from the email address on the account.</li>
                 <li>Downgrading to the free plan keeps your account and saved documents; only the quota changes.</li>
               </ul>
             </Section>
 
             <Section id="refunds" n="03" title="Refunds">
               <ul>
-                <li>Failed or duplicate charges are refunded in full, automatically where possible.</li>
+                <li>Failed or duplicate charges are refunded in full. Write to [CONTACT EMAIL] with the charge details; refunds are issued by hand, not automatically.</li>
                 <li>Other refund requests are handled case by case. Write to [CONTACT EMAIL] with your account email and the charge details; we will answer with a decision, not a template.</li>
                 <li>Approved refunds go back to the original payment method via Razorpay and can take 5–10 business days to appear, depending on the bank.</li>
               </ul>
