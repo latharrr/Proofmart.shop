@@ -23,3 +23,8 @@ coverage/
 *.swp
 .idea/
 .vscode/
+
+# impeccable working files: screenshots, caches and served questions
+.impeccable/review/
+.impeccable/hook.cache.json
+.impeccable/questions/

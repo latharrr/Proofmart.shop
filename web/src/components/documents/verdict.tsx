@@ -1,36 +1,37 @@
 import type { DocumentStatus } from "@/lib/documents";
+import Tickmark, { VERDICT_TICK } from "@/components/paper/tickmark";
 
 /**
- * Verdict display for the workspace. Colours are the three verdict tokens and
- * nothing else; INCONCLUSIVE is not a verdict colour, so it stays achromatic.
- * Glyphs match the Evidence Rail's, so the same state reads the same way on
- * the home page and in a saved report.
+ * Verdict display for the workspace, in the working-paper pencils: red for a
+ * break, blue for a query, graphite for a tick; INCONCLUSIVE stays grey.
+ * Every verdict carries its tickmark too, matching the Evidence Rail, so the
+ * same state reads the same way on the home page and in a saved report.
  */
 export type VerdictValue = "FAIL" | "REVIEW" | "CLEAR" | "INCONCLUSIVE";
 
-/** Hex, not CSS variables: these also feed SVG presentation attributes (the page overlay), which don't resolve var(). Kept identical to --fail / --review / --clear / --mute (design-system.md §2). */
-export const VERDICT_TONE: Record<VerdictValue, { color: string; fill: string; glyph: string; label: string }> = {
-  FAIL: { color: "#e5342b", fill: "rgba(229, 52, 43, 0.12)", glyph: "×", label: "Fail" },
-  REVIEW: { color: "#c98a12", fill: "rgba(201, 138, 18, 0.14)", glyph: "~", label: "Review" },
-  CLEAR: { color: "#1d9a63", fill: "rgba(29, 154, 99, 0.12)", glyph: "=", label: "Clear" },
-  INCONCLUSIVE: { color: "#6b6f80", fill: "rgba(107, 111, 128, 0.12)", glyph: "?", label: "Inconclusive" },
+/** Hex, not CSS variables: these also feed SVG presentation attributes (the page overlay), which don't resolve var(). Kept identical to --red / --blue / --ink / --ink-3 in globals.css. */
+export const VERDICT_TONE: Record<VerdictValue, { color: string; fill: string; label: string }> = {
+  FAIL: { color: "#bf3020", fill: "rgba(191, 48, 32, 0.10)", label: "Fail" },
+  REVIEW: { color: "#1f4f9a", fill: "rgba(31, 79, 154, 0.10)", label: "Review" },
+  CLEAR: { color: "#222527", fill: "rgba(34, 37, 39, 0.06)", label: "Clear" },
+  INCONCLUSIVE: { color: "#5d635c", fill: "rgba(93, 99, 92, 0.08)", label: "Inconclusive" },
 };
 
-/** The verdict as a pill: wash fill, verdict-coloured dot and uppercase label. */
+/** The verdict as written on the sheet: its tickmark and the word, in its pencil. */
 export function VerdictBadge({ verdict, className }: { verdict: VerdictValue; className?: string }) {
   return (
     <span className={className ? `pm-verdict ${className}` : "pm-verdict"} data-verdict={verdict}>
-      <span aria-hidden="true" className="pm-verdict-dot" />
+      <Tickmark kind={VERDICT_TICK[verdict]} size={15} />
       {verdict}
     </span>
   );
 }
 
-/** Non-verdict row states. Achromatic on purpose — a processing failure is not a FAIL verdict and must not borrow its red. */
+/** Non-verdict row states. Graphite on purpose: a processing failure is not a FAIL verdict and must not borrow its red. */
 export function StatusBadge({ status }: { status: Exclude<DocumentStatus, "ready"> }) {
   return (
     <span className="pm-status" data-status={status}>
-      <span aria-hidden="true" className="pm-verdict-dot" />
+      <Tickmark kind="none" size={15} />
       {status === "processing" ? "PROCESSING" : "ERROR"}
     </span>
   );
@@ -82,9 +83,4 @@ export function BreakableFilename({ name }: { name: string }) {
       ))}
     </>
   );
-}
-
-/** A filename cut after each `_ - .`, for <LineReveal>: every piece becomes its own masked word, so a long name wraps at its separators and each line still rises on its own. */
-export function filenameParts(name: string): string[] {
-  return name.split(/(?<=[_\-.])/);
 }

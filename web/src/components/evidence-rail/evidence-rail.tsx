@@ -11,6 +11,8 @@ import type { ProcessingErrorCode, ProcessingStage, RailFinding } from "@/lib/pd
 import { fmt } from "@/lib/evidence-data";
 import { SCAN_INTENT_EVENT } from "./scan-intent";
 import RollPill from "@/components/motion/roll-pill";
+import Tickmark, { Arrow, type TickKind } from "@/components/paper/tickmark";
+import { usePageTurn } from "@/components/paper/use-page-turn";
 
 const STAGE_LABEL: Record<ProcessingStage, string> = {
   idle: "",
@@ -53,6 +55,7 @@ export default function EvidenceRail() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chooseRef = useRef<HTMLButtonElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const leafRef = useRef<HTMLDivElement>(null);
 
   const live = useLiveDocument(canvasRef, {
     onPageSettled: (firstId) => {
@@ -181,20 +184,20 @@ export default function EvidenceRail() {
   };
 
   // ---- Header badge: verdict for sample, stage/error/real-verdict for live ----
-  let badgeGlyph = TONE.FAIL.glyph;
+  let badgeTick: TickKind = TONE.FAIL.tick;
   let badgeTone = "FAIL";
   let badgeLabel = "FAIL";
   if (isLive) {
     if (live.stage === "ready" && live.verification) {
-      badgeGlyph = TONE[live.verification.verdict].glyph;
+      badgeTick = TONE[live.verification.verdict].tick;
       badgeTone = live.verification.verdict;
       badgeLabel = live.verification.verdict;
     } else if (live.stage === "error") {
-      badgeGlyph = "×";
+      badgeTick = "break";
       badgeTone = "FAIL";
       badgeLabel = live.error ? errorLabel(live.error.code) : "ERROR";
     } else {
-      badgeGlyph = "·";
+      badgeTick = "none";
       badgeTone = "PENDING";
       badgeLabel = STAGE_LABEL[live.stage];
     }
@@ -213,6 +216,8 @@ export default function EvidenceRail() {
 
   const pageCount = isLive ? Math.max(1, live.document?.pageCount ?? 1) : SAMPLE_PAGE_COUNT;
   const currentPage = isLive ? live.page : samplePage;
+  usePageTurn(leafRef, currentPage);
+
   const goPage = (delta: number) => {
     if (isLive) live.goToPage(delta);
     else setSamplePage((p) => Math.min(SAMPLE_PAGE_COUNT, Math.max(1, p + delta)));
@@ -241,13 +246,21 @@ export default function EvidenceRail() {
           <span className="pm-mk-rail-meta">{headerMeta}</span>
         </div>
         <div className="pm-mk-rail-tools">
-          <span className="pm-mk-verdict" data-tone={badgeTone}>
-            <span aria-hidden="true">{badgeGlyph}</span>
+          {/* Keyed on the label so each new verdict lands as a fresh stamp. */}
+          <span key={badgeLabel} className="pm-mk-verdict pm-stamp-in" data-tone={badgeTone}>
+            <Tickmark kind={badgeTick} size={14} />
             {badgeLabel}
           </span>
           <span className="pm-mk-rail-count">{findingsCountLabel}</span>
           <button type="button" aria-label="Copy JSON" onClick={handleCopyJson} className="pm-mk-chip">
-            {copied ? "Copied" : "Copy JSON"}
+            {copied ? (
+              <>
+                <Tickmark kind="agreed" size={13} className="pm-draw" />
+                Copied
+              </>
+            ) : (
+              "Copy JSON"
+            )}
           </button>
           <button
             type="button"
@@ -258,7 +271,7 @@ export default function EvidenceRail() {
             }}
             className="pm-mk-iconbtn"
           >
-            ×
+            <Tickmark kind="break" size={14} />
           </button>
         </div>
       </div>
@@ -273,13 +286,11 @@ export default function EvidenceRail() {
             onClick={() => fileInputRef.current?.click()}
             style={{ cursor: isLive && live.stage === "ready" ? "default" : "pointer" }}
           >
+            <div ref={leafRef} className="pm-leaf" aria-hidden="true" />
             {!isLive && <SampleDocument page={samplePage} active={sampleActive && sampleActive.page === samplePage ? sampleActive : null} />}
 
             {!isLive && (armed || dragActive) && (
               <div className="pm-mk-dropzone" data-testid="rail-dropzone" onClick={(e) => e.stopPropagation()}>
-                <span className="pm-mk-dropzone-ring" aria-hidden="true">
-                  <span />
-                </span>
                 <span className="pm-mk-dropzone-title">{dragActive ? "Drop it here" : "Drop a PDF here"}</span>
                 <span className="pm-mk-dropzone-sub">or paste one, or</span>
                 <RollPill
@@ -322,12 +333,12 @@ export default function EvidenceRail() {
             <div className="pm-mk-rail-pager">
               <span>page</span>
               <span className="pm-mk-rail-stepper">
-                <button type="button" onClick={() => goPage(-1)} disabled={currentPage <= 1}>
-                  ‹
+                <button type="button" aria-label="Previous page" onClick={() => goPage(-1)} disabled={currentPage <= 1}>
+                  <Arrow dir="left" />
                 </button>
                 <span>{currentPage}</span>
-                <button type="button" onClick={() => goPage(1)} disabled={currentPage >= pageCount}>
-                  ›
+                <button type="button" aria-label="Next page" onClick={() => goPage(1)} disabled={currentPage >= pageCount}>
+                  <Arrow />
                 </button>
               </span>
               <span>of {pageCount}</span>
@@ -385,8 +396,8 @@ function ProcessingNotice({ stage }: { stage: ProcessingStage }) {
 function ErrorNotice({ message }: { message: string }) {
   return (
     <div className="pm-mk-rail-notice" data-error="">
-      <span aria-hidden="true" className="pm-mk-rail-errmark">
-        ×
+      <span className="pm-mk-rail-errmark">
+        <Tickmark kind="break" size={16} />
       </span>
       <span className="pm-mk-rail-notice-msg">{message}</span>
     </div>
@@ -395,9 +406,11 @@ function ErrorNotice({ message }: { message: string }) {
 
 const MONO = "var(--font-mono), ui-monospace, monospace";
 const SANS = "var(--font-sans), system-ui, sans-serif";
-const INK = "#0b0c10";
-const MUTE = "#6b6f80";
-const LINE = "#d9dbe6";
+// The bank's PDF is a white printout lying on the green working paper, so it
+// keeps a printer's neutral greys rather than the pad's palette.
+const INK = "#1d1f22";
+const MUTE = "#666a6e";
+const LINE = "#dcddd8";
 
 function SampleDocument({ page, active }: { page: number; active: SampleFinding | null }) {
   const data = SAMPLE_PAGES[page - 1];
@@ -465,7 +478,7 @@ function SampleDocument({ page, active }: { page: number; active: SampleFinding 
             </text>
           ))}
         </g>
-        <line x1={28} y1={229} x2={616} y2={229} stroke="#b9bccb" strokeWidth={1.25} />
+        <line x1={28} y1={229} x2={616} y2={229} stroke="#b9bbb5" strokeWidth={1.25} />
 
         {data.rows.map((t) => {
           const y = ROW_TOP + (t.n - 1) * ROW_H;
@@ -481,16 +494,16 @@ function SampleDocument({ page, active }: { page: number; active: SampleFinding 
               <text x={116} y={17} fontFamily={SANS} fontSize={13.5} fill={muted ? MUTE : INK}>
                 {t.desc}
               </text>
-              <text x={424} y={17} fontFamily={MONO} fontSize={12.5} fill={t.debit ? INK : "#b9bccb"} textAnchor="end">
+              <text x={424} y={17} fontFamily={MONO} fontSize={12.5} fill={t.debit ? INK : "#b9bbb5"} textAnchor="end">
                 {fmt(t.debit)}
               </text>
-              <text x={518} y={17} fontFamily={MONO} fontSize={12.5} fill={t.credit !== null ? INK : "#b9bccb"} textAnchor="end">
+              <text x={518} y={17} fontFamily={MONO} fontSize={12.5} fill={t.credit !== null ? INK : "#b9bbb5"} textAnchor="end">
                 {fmt(t.credit)}
               </text>
               <text x={612} y={17} fontFamily={MONO} fontSize={12.5} fill={INK} textAnchor="end">
                 {fmt(t.balance)}
               </text>
-              <line x1={28} y1={ROW_H} x2={616} y2={ROW_H} stroke="#eceef5" strokeWidth={1} />
+              <line x1={28} y1={ROW_H} x2={616} y2={ROW_H} stroke="#ecece8" strokeWidth={1} />
             </g>
           );
         })}

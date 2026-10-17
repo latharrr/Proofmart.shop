@@ -6,11 +6,11 @@ import { useEffect, useState } from "react";
 
 /** In-page sections of the home page, in scroll order. */
 export const SECTION_LINKS = [
-  { id: "pipeline", label: "How it works" },
-  { id: "markers", label: "Markers" },
-  { id: "outputs", label: "Response" },
-  { id: "integrate", label: "Integrate" },
-  { id: "pricing", label: "Pricing" },
+  { id: "pipeline", label: "How it works", wp: "B" },
+  { id: "markers", label: "Markers", wp: "C" },
+  { id: "outputs", label: "Response", wp: "D" },
+  { id: "integrate", label: "Integrate", wp: "E" },
+  { id: "pricing", label: "Pricing", wp: "F" },
 ];
 
 /**
@@ -52,7 +52,7 @@ export function useActiveSection(): string | null {
   return active;
 }
 
-/** Desktop primary nav. The active link carries the volt dot (design-system §2). */
+/** Desktop primary nav. The active link is underlined in red pencil. */
 export default function NavLinks() {
   const active = useActiveSection();
   const pathname = usePathname();

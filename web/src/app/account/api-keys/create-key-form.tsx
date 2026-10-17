@@ -43,7 +43,6 @@ export default function CreateKeyForm({ initialSecret }: { initialSecret?: strin
       }}
     >
       <div className="pm-acct-create-text">
-        <p className="pm-t-label pm-acct-kicker">New key</p>
         <h2 id="pm-acct-create-title" className="pm-t-heading-sm pm-acct-create-title">
           Create a key
         </h2>

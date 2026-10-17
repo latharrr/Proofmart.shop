@@ -2,13 +2,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import Topbar from "@/components/home/topbar";
 import SiteFooter from "@/components/home/site-footer";
-import DepthStage from "@/components/home/depth-stage";
-import SectionKicker from "@/components/home/section-kicker";
 import SecurityToc from "@/components/home/security-toc";
-import LineReveal from "@/components/motion/line-reveal";
-import Reveal from "@/components/motion/reveal";
-import RollPill from "@/components/motion/roll-pill";
-import { ScrollVar } from "@/components/motion/scroll-progress";
+import Tickmark from "@/components/paper/tickmark";
 
 export const metadata = {
   title: "Security · ProofMart",
@@ -89,89 +84,93 @@ const TOC = [
 
 function Section({ id, n, title, children }: { id: string; n: string; title: string; children: ReactNode }) {
   return (
-    <section id={id} className="pm-mk-sec-section" aria-labelledby={`${id}-h`}>
-      <div className="pm-mk-sec-section-head">
-        <span className="pm-t-label pm-mk-mute">{n}</span>
-        <LineReveal as="h2" id={`${id}-h`} className="pm-t-heading">
-          {title}
-        </LineReveal>
-      </div>
-      <div className="pm-mk-prose">{children}</div>
+    <section id={id} className="pm-sec-section" aria-labelledby={`${id}-h`}>
+      <h2 id={`${id}-h`} className="pm-sec-h">
+        <span className="pm-mono pm-sec-n">{n}</span>
+        {title}
+      </h2>
+      <div className="pm-prose">{children}</div>
     </section>
   );
 }
 
 export default function SecurityPage() {
   return (
-    <div className="pm-page pm-mk">
+    <div className="pm-page">
       <Topbar />
       <main id="main">
-        <header className="pm-wrap pm-mk-sec-hero">
-          <SectionKicker n="—">Trust &amp; security</SectionKicker>
-          <LineReveal as="h1" className="pm-t-display pm-mk-sec-title">
-            What happens <br />
-            to your documents.
-          </LineReveal>
-          <div className="pm-mk-sec-hero-row">
-            <Reveal as="p" delay={240} className="pm-t-body-lg pm-mk-lead">
-              Where files are stored, who can see them, how long anything is kept, how it is deleted and how results are signed, as the system is built
-              today, including the parts that aren&rsquo;t done yet.
-            </Reveal>
-            <Reveal delay={320} as="nav" aria-label="Jump to" className="pm-mk-sec-jump">
-              {JUMP.map((j) => (
-                <RollPill key={j.id} href={`#${j.id}`} native variant="secondary" size="sm">
-                  {j.label}
-                </RollPill>
-              ))}
-            </Reveal>
-          </div>
+        <header className="pm-wrap pm-sec-hero">
+          <h1 className="pm-sec-title">What happens to your documents.</h1>
+          <p className="pm-h-lead">
+            Where files are stored, who can see them, how long anything is kept, how it is deleted and how results are signed, as the system is built
+            today, including the parts that aren&rsquo;t done yet.
+          </p>
+          <nav aria-label="Jump to" className="pm-sec-jump">
+            {JUMP.map((j) => (
+              <a key={j.id} href={`#${j.id}`} className="pm-xref">
+                {j.label}
+              </a>
+            ))}
+          </nav>
         </header>
 
-        <section aria-labelledby="glance" className="pm-wrap pm-mk-sec-glance-wrap">
-          <h2 id="glance" className="pm-t-label pm-mk-mute pm-mk-sec-glance-h">
+        <section aria-labelledby="glance" className="pm-wrap pm-sec-block">
+          <h2 id="glance" className="pm-sec-block-h">
             At a glance
           </h2>
-          <ScrollVar as="dl" range="enter" className="pm-mk-sec-glance">
-            {GLANCE.map((g, i) => (
-              <div key={g.q} className="pm-mk-sec-card" style={{ ["--i" as string]: i % 4, ["--row" as string]: Math.floor(i / 4) }}>
-                <dt>
-                  <span className="pm-t-label pm-mk-mute">{g.topic}</span>
-                  <span className="pm-t-heading-sm">{g.q}</span>
-                </dt>
-                <dd className="pm-t-body pm-mk-mute">{g.a}</dd>
-                <dd className="pm-mk-sec-card-more">
-                  <a href={g.href} className="pm-inline-link">
-                    Details
-                  </a>
-                </dd>
-              </div>
+          <div className="pm-ledger-wrap">
+            <table className="pm-ledger pm-sec-glance">
+              <caption className="pm-sr">Security at a glance</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Topic</th>
+                  <th scope="col">Answer</th>
+                  <th scope="col">Detail</th>
+                  <th scope="col">
+                    <span className="pm-sr">Section</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {GLANCE.map((g) => (
+                  <tr key={g.q}>
+                    <td className="pm-sec-topic">{g.topic}</td>
+                    <th scope="row">{g.q}</th>
+                    <td>{g.a}</td>
+                    <td className="pm-sec-more">
+                      <a href={g.href} className="pm-xref">
+                        Details
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="pm-wrap pm-sec-block" aria-labelledby="life-h">
+          <h2 id="life-h" className="pm-sec-block-h">
+            A document&rsquo;s path, by how it arrived
+          </h2>
+          <ol className="pm-sec-life">
+            {LIFECYCLE.map((s) => (
+              <li key={s.k}>
+                <span className="pm-sec-life-k">{s.k}</span>
+                <span className="pm-mono pm-sec-life-path">{s.path}</span>
+                <span className="pm-sec-life-note">
+                  <Tickmark kind="agreed" size={15} />
+                  {s.note}
+                </span>
+              </li>
             ))}
-          </ScrollVar>
+          </ol>
         </section>
 
-        <section className="pm-wrap pm-mk-sec-life" aria-labelledby="life-h">
-          <DepthStage variant="hero" verdict="CLEAR" label="Three ways in, three outcomes" sceneLabel="Statement pages passing through ProofMart, the examined page marked CLEAR." className="pm-mk-sec-life-stage">
-            <div className="pm-mk-sec-life-copy">
-              <h2 id="life-h" className="pm-t-heading">
-                A document&rsquo;s path, by how it arrived.
-              </h2>
-            </div>
-            <ol className="pm-mk-sec-life-steps">
-              {LIFECYCLE.map((s) => (
-                <li key={s.k}>
-                  <span className="pm-t-label">{s.k}</span>
-                  <span className="pm-t-mono">{s.path}</span>
-                  <span className="pm-mk-sec-life-note">{s.note}</span>
-                </li>
-              ))}
-            </ol>
-          </DepthStage>
-        </section>
-
-        <div className="pm-wrap pm-mk-sec-layout">
+        <div className="pm-wrap pm-sec-layout">
           <SecurityToc items={TOC} />
 
-          <div className="pm-mk-sec-body">
+          <div className="pm-sec-body">
             <Section id="storage" n="01" title="Storage">
               <p>
                 Uploaded PDFs are written to a <strong>private</strong> Vercel Blob store, not a public one. The browser uploads directly to that store
@@ -207,8 +206,8 @@ export default function SecurityPage() {
 
             <Section id="retention" n="04" title="Retention">
               <p>What is kept depends on how a document arrived.</p>
-              <div className="pm-mk-table-wrap">
-                <table className="pm-mk-table">
+              <div className="pm-ledger-wrap">
+                <table className="pm-ledger pm-sec-table">
                   <thead>
                     <tr>
                       <th scope="col">Data</th>
@@ -220,7 +219,7 @@ export default function SecurityPage() {
                     {RETENTION.map((r) => (
                       <tr key={r.data}>
                         <th scope="row">{r.data}</th>
-                        <td data-label="Kept for" className="pm-mk-table-kept">
+                        <td data-label="Kept for" className="pm-sec-kept">
                           {r.kept}
                         </td>
                         <td data-label="Removed by">{r.how}</td>
@@ -245,7 +244,7 @@ export default function SecurityPage() {
                 <li>Revoking an API key takes effect immediately; the stored hash can no longer authenticate a request.</li>
               </ul>
               <p>
-                <Link href="/documents" className="pm-inline-link">
+                <Link href="/documents" className="pm-link">
                   See and delete your saved documents
                 </Link>
               </p>
@@ -285,8 +284,8 @@ export default function SecurityPage() {
 
             <Section id="providers" n="09" title="Providers">
               <p>Two infrastructure providers handle data. No other third party receives document content.</p>
-              <div className="pm-mk-table-wrap">
-                <table className="pm-mk-table">
+              <div className="pm-ledger-wrap">
+                <table className="pm-ledger pm-sec-table">
                   <thead>
                     <tr>
                       <th scope="col">Provider</th>
@@ -308,7 +307,7 @@ export default function SecurityPage() {
             </Section>
 
             <Section id="limits" n="10" title="What a verdict does not mean">
-              <div className="pm-mk-callout">
+              <div className="pm-callout">
                 <p>
                   A <strong>CLEAR</strong> verdict means every check that could run found no inconsistency. It is not a legal, forensic or accounting
                   certification, and it does not confirm who issued a document or that it is authentic in a broader sense. Treat a ProofMart result as
@@ -327,7 +326,7 @@ export default function SecurityPage() {
                 plainly rather than covered with an inbox nobody monitors.
               </p>
               <p>
-                <a href="#main" className="pm-inline-link">
+                <a href="#main" className="pm-link">
                   Back to the top
                 </a>
               </p>

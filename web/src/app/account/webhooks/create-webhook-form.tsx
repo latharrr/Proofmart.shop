@@ -44,16 +44,13 @@ export default function CreateWebhookForm({ used, limit, initialSecret }: { used
       }}
     >
       <div className="pm-acct-create-text">
-        <p className="pm-t-label pm-acct-kicker">
-          New endpoint
+        <h2 id="pm-acct-create-title" className="pm-t-heading-sm pm-acct-create-title">
+          Add an endpoint
           {typeof used === "number" && typeof limit === "number" && (
             <span className="pm-t-mono pm-acct-kicker-count">
               {String(used).padStart(2, "0")} / {limit}
             </span>
           )}
-        </p>
-        <h2 id="pm-acct-create-title" className="pm-t-heading-sm pm-acct-create-title">
-          Add an endpoint
         </h2>
         <p className="pm-acct-hint">
           A public URL on your server that accepts a JSON <code className="pm-acct-code-inline">POST</code> and answers with any 2xx within 10 seconds.

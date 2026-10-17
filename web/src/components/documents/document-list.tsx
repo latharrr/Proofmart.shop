@@ -3,6 +3,7 @@ import type { DocumentRow } from "@/lib/documents";
 import { formatBytes } from "@/lib/pdf/rail-adapter";
 import ConfirmSubmitButton from "@/components/confirm-submit-button";
 import RollLabel from "@/components/app/roll-label";
+import Tickmark, { VERDICT_TICK } from "@/components/paper/tickmark";
 import { deleteDocument, rerunDocument } from "@/app/documents/actions";
 import PendingSubmitButton from "./pending-submit-button";
 import { StatusBadge, VerdictBadge, documentKindLabel, formatDay } from "./verdict";
@@ -13,9 +14,9 @@ export type DocumentListRow = Pick<
 >;
 
 /**
- * My documents as a ruled table on the field: one row per document, newest
+ * My documents as a ruled schedule on the pad: one row per document, newest
  * first. Each row leads with a small page glyph whose flagged line carries the
- * verdict colour, so the verdicts read down the column before any text does.
+ * verdict's pencil, so the verdicts read down the column before any text does.
  * The filename is the row's link (its hit area stretches across the row);
  * Re-run, Delete and the open arrow sit above that layer so they stay
  * separately clickable. On a phone each row folds into a three-line card.
@@ -31,7 +32,7 @@ export default function DocumentList({ docs }: { docs: DocumentListRow[] }) {
           <span key={v} className="pm-docs-tally-item" data-verdict={v} data-zero={tally[v] === 0 || undefined}>
             <span className="pm-docs-tally-n">{tally[v]}</span>
             <span className="pm-docs-tally-l">
-              <span className="pm-verdict-dot" aria-hidden="true" />
+              <Tickmark kind={VERDICT_TICK[v]} size={15} />
               {v}
             </span>
           </span>
@@ -123,10 +124,9 @@ function DocumentListItem({ doc }: { doc: DocumentListRow }) {
           </ConfirmSubmitButton>
         </form>
         <Link href={href} className="pm-docs-open" aria-label={`Open ${doc.filename}`}>
-          <span className="pm-pill-roll" aria-hidden="true">
-            <span>→</span>
-            <span>→</span>
-          </span>
+          <svg width="16" height="16" viewBox="0 0 14 14" aria-hidden="true">
+            <path d="M2 7.2h9.2M7.6 3.4 11.4 7.2 7.6 11" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" />
+          </svg>
         </Link>
       </div>
     </li>

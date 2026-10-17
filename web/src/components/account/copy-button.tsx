@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import Tickmark from "@/components/paper/tickmark";
 import PillLabel from "./pill-label";
 
 /**
@@ -65,7 +66,18 @@ export default function CopyButton({
         aria-label={ariaLabel}
         data-copied={state === "copied" ? "" : undefined}
       >
-        <PillLabel dot={dot}>{state === "idle" ? children : state === "copied" ? copiedLabel : "Copy blocked"}</PillLabel>
+        <PillLabel dot={dot && state === "idle"}>
+          {state === "idle" ? (
+            children
+          ) : state === "copied" ? (
+            <span className="pm-copied">
+              <Tickmark kind="agreed" size={14} className="pm-draw" />
+              {copiedLabel}
+            </span>
+          ) : (
+            "Copy blocked"
+          )}
+        </PillLabel>
       </button>
       <span className="pm-acct-sr" aria-live="polite">
         {state === "copied" ? "Copied to clipboard." : state === "failed" ? "Couldn't reach the clipboard. Select the text and copy it by hand." : ""}

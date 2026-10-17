@@ -42,15 +42,11 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
           title="My documents"
           description="Every PDF you verify while signed in is saved here with its report. Only you can see them."
           meta={
-            <p className="pm-app-count">
-              {hasDocs ? (
-                <>
-                  {total} {total === 1 ? "document" : "documents"}
-                </>
-              ) : (
-                "Workspace"
-              )}
-            </p>
+            hasDocs ? (
+              <p className="pm-app-count">
+                {total} {total === 1 ? "document" : "documents"}
+              </p>
+            ) : undefined
           }
         />
 
@@ -80,7 +76,7 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
           <nav className="pm-pager" aria-label="Pages">
             {page > 1 ? (
               <RollPill href={`/documents?page=${page - 1}`} variant="secondary" size="sm" rel="prev">
-                ← Newer
+                Newer
               </RollPill>
             ) : (
               <span />
@@ -89,8 +85,8 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
               Page {page} of {totalPages}
             </span>
             {hasMore ? (
-              <RollPill href={`/documents?page=${page + 1}`} variant="secondary" size="sm" rel="next">
-                Older →
+              <RollPill href={`/documents?page=${page + 1}`} variant="secondary" size="sm" dot rel="next">
+                Older
               </RollPill>
             ) : (
               <span />

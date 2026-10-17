@@ -1,56 +1,76 @@
-import LineReveal from "@/components/motion/line-reveal";
-import Reveal from "@/components/motion/reveal";
-import { ScrollVar } from "@/components/motion/scroll-progress";
-import Ribbon from "@/components/home/ribbon";
-import SectionKicker from "@/components/home/section-kicker";
+import SheetHead from "@/components/home/sheet-head";
+import Tickmark from "@/components/paper/tickmark";
 import { PIPELINE } from "@/lib/home-data";
 
-// A ribbon that enters low-left, loops up behind the heading and exits right.
-const RIBBON = "M -60 430 C 180 470, 300 300, 470 250 S 760 330, 880 210 S 1040 30, 1180 120 S 1360 360, 1520 250";
+/** "210 ms" / "1.4 s" → milliseconds, so the footing below is a real sum. */
+function ms(t: string): number {
+  const n = parseFloat(t);
+  return t.trim().endsWith("ms") ? n : n * 1000;
+}
 
+const TOTAL = PIPELINE.reduce((s, p) => s + ms(p.ms), 0);
+
+/**
+ * The four passes as a schedule: one row per pass, what it writes, and the
+ * time it took on the sample scan. The time column is footed, and the
+ * footing is the sample's real total.
+ */
 export default function PipelineSection() {
   return (
-    <section id="pipeline" className="pm-mk-section pm-mk-pipeline" aria-labelledby="pipeline-title">
-      <Ribbon d={RIBBON} className="pm-mk-pipeline-ribbon" />
+    <section id="pipeline" className="pm-h-section" aria-labelledby="pipeline-title">
       <div className="pm-wrap">
-        <div className="pm-mk-head pm-mk-head-split">
-          <div>
-            <SectionKicker n="02">How it works</SectionKicker>
-            <LineReveal as="h2" id="pipeline-title" className="pm-t-heading-lg">
-              Four passes, <br />
-              bytes to verdict.
-            </LineReveal>
-          </div>
-          <div className="pm-mk-head-aside">
-            <Reveal as="p" className="pm-t-body-lg pm-mk-lead">
+        <SheetHead
+          id="pipeline-title"
+          wp="B"
+          title="Four passes, bytes to verdict."
+          aside={
+            <p>
               Every pass writes to the same address space (page, x, y), so each finding points at the exact glyphs that produced it. Same bytes in,
               same result out, every time.
-            </Reveal>
-          </div>
+            </p>
+          }
+        />
+        <div className="pm-ledger-wrap">
+          <table className="pm-ledger pm-h-passes">
+            <caption className="pm-sr">The four passes of a verification, with sample timings</caption>
+            <thead>
+              <tr>
+                <th scope="col" className="pm-ledger-n">
+                  Pass
+                </th>
+                <th scope="col">What it does</th>
+                <th scope="col">Writes</th>
+                <th scope="col" className="pm-num">
+                  Sample time
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {PIPELINE.map((p) => (
+                <tr key={p.i}>
+                  <th scope="row" className="pm-ledger-n">
+                    <span className="pm-mono">{p.i}</span>
+                    <span className="pm-h-pass-name">{p.name}</span>
+                  </th>
+                  <td className="pm-h-pass-body">{p.body}</td>
+                  <td className="pm-mono pm-h-pass-writes">{p.signal}</td>
+                  <td className="pm-num">{p.ms}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <th scope="row" colSpan={3}>
+                  Sample scan <span className="pm-mono">req_8fk2</span>, 6 pages. Real documents vary with length and how many pages need OCR.
+                </th>
+                <td className="pm-num pm-footed">
+                  {(TOTAL / 1000).toFixed(2)} s
+                  <Tickmark kind="footed" size={15} title="Footed" />
+                </td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
-
-        <ScrollVar as="ol" range="enter" className="pm-mk-steps">
-          {PIPELINE.map((p, i) => (
-            <li key={p.i} className="pm-mk-step" style={{ ["--i" as string]: i }}>
-              <div className="pm-mk-step-top">
-                <span className="pm-t-label">{p.i}</span>
-                <span className="pm-t-mono pm-mk-step-ms">{p.ms}</span>
-              </div>
-              <h3 className="pm-t-heading pm-mk-step-name">{p.name}</h3>
-              <p className="pm-t-body pm-mk-step-body">{p.body}</p>
-              <ul className="pm-mk-step-signal" aria-label="Writes">
-                {p.signal.split(" · ").map((s) => (
-                  <li key={s}>{s}</li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ScrollVar>
-
-        <Reveal as="p" className="pm-mk-note">
-          Timings are from the sample scan (<span className="pm-t-mono">req_8fk2</span>, 6 pages, 4.8 s). Real documents vary with length and how many
-          pages need OCR.
-        </Reveal>
       </div>
     </section>
   );

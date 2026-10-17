@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import CopyButton from "./copy-button";
 
-/** One token of a line. `dim` = flags, punctuation, comments; `accent` = the one value to notice (volt). */
+/** One token of a line. `dim` = flags, punctuation, comments; `accent` = the one value to notice (blue pencil). */
 export type CodePart = { text: string; tone?: "dim" | "accent" | "str" };
 export type CodeLine = { indent?: number; text?: string; parts?: CodePart[]; dim?: boolean };
 
@@ -10,10 +10,10 @@ function lineText(l: CodeLine): string {
 }
 
 /**
- * A ready-to-paste snippet on a graphite terminal: a filename-style label,
- * a copy pill that copies exactly the text shown, numbered lines. Tokens are
- * achromatic except one `accent` (the env var a reader has to set), which
- * takes the volt highlight.
+ * A ready-to-paste snippet as a printout: a filename-style label, a copy
+ * button that copies exactly the text shown, numbered lines in the margin.
+ * Tokens are graphite except one `accent` (the env var a reader has to set),
+ * marked in blue pencil.
  */
 export default function CodeCard({
   label,

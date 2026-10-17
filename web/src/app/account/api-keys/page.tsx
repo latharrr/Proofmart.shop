@@ -174,7 +174,7 @@ export default async function ApiKeysPage({ searchParams }: { searchParams: Prom
               <nav className="pm-acct-pager" aria-label="Pages">
                 {page > 1 ? (
                   <RollPill href={keysHref({ page: page - 1, q })} variant="secondary" size="sm" rel="prev">
-                    ← Newer
+                    Newer
                   </RollPill>
                 ) : (
                   <span />
@@ -183,8 +183,8 @@ export default async function ApiKeysPage({ searchParams }: { searchParams: Prom
                   {String(page).padStart(2, "0")} / {String(totalPages).padStart(2, "0")}
                 </span>
                 {hasMore ? (
-                  <RollPill href={keysHref({ page: page + 1, q })} variant="secondary" size="sm" rel="next">
-                    Older →
+                  <RollPill href={keysHref({ page: page + 1, q })} variant="secondary" size="sm" dot rel="next">
+                    Older
                   </RollPill>
                 ) : (
                   <span />

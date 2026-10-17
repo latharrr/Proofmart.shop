@@ -1,65 +1,103 @@
 import Link from "next/link";
-import LineReveal from "@/components/motion/line-reveal";
-import Reveal from "@/components/motion/reveal";
 import RollPill from "@/components/motion/roll-pill";
-import DepthStage from "@/components/home/depth-stage";
 import OpenScanButton from "@/components/home/open-scan-button";
-import SectionKicker from "@/components/home/section-kicker";
+import { APP_VERSION } from "@/lib/evidence-data";
+import { MARKERS } from "@/lib/home-data";
 
 // The four answers a buyer's security reviewer asks for first, each one a
 // claim /security backs in detail.
 const SECURITY_POINTS = [
-  { k: "Storage", v: "Private blob store. No public URLs; reads need a server-held credential.", href: "/security#storage" },
-  { k: "Access", v: "Row Level Security on every table. You only ever see your own rows.", href: "/security#access" },
-  { k: "Retention", v: "Signed-out uploads are deleted after the scan. Saved ones stay until you delete them.", href: "/security#retention" },
-  { k: "Processing", v: "Parsing and OCR run inside ProofMart. No document goes to a third-party AI.", href: "/security#processing" },
+  {
+    k: "Storage",
+    v: "Private blob store. No public URLs; reads need a server-held credential.",
+    href: "/security#storage",
+  },
+  {
+    k: "Access",
+    v: "Row Level Security on every table. You only ever see your own rows.",
+    href: "/security#access",
+  },
+  {
+    k: "Retention",
+    v: "Signed-out uploads are deleted after the scan. Saved ones stay until you delete them.",
+    href: "/security#retention",
+  },
+  {
+    k: "Processing",
+    v: "Parsing and OCR run inside ProofMart. No document goes to a third-party AI.",
+    href: "/security#processing",
+  },
 ];
 
+/**
+ * The close: the invitation to bring a real statement, the sheet's sign-off
+ * block, and the security answers set out as a short schedule for whoever
+ * has to approve the purchase.
+ */
 export default function ClosingSection() {
   return (
-    <section id="start" className="pm-mk-section pm-mk-closing" aria-labelledby="closing-title">
+    <section
+      id="start"
+      className="pm-h-section pm-h-closing"
+      aria-labelledby="closing-title"
+    >
       <div className="pm-wrap">
-        <DepthStage
-          variant="hero"
-          className="pm-mk-closing-stage"
-          label="Your statement next"
-          sceneLabel="Three statement pages fanned out, the examined one boxed and tagged FAIL."
-        >
-          <div className="pm-mk-closing-copy">
-            <SectionKicker n="07" tone="dark">
-              Start
-            </SectionKicker>
-            <LineReveal as="h2" id="closing-title" className="pm-t-heading-lg">
-              Run it on a statement <br />
-              you already doubt.
-            </LineReveal>
-            <Reveal as="p" delay={120} className="pm-t-body-lg pm-mk-closing-lead">
-              The live scan takes a real PDF. No account, and the file is deleted when the scan finishes.
-            </Reveal>
-            <Reveal delay={200} className="pm-mk-hero-actions">
-              <OpenScanButton variant="paper">Scan a document</OpenScanButton>
-              <RollPill href="/signup" variant="secondary" className="pm-mk-pill-glass">
+        <div className="pm-h-closing-grid">
+          <div className="pm-h-closing-copy">
+            <h2 id="closing-title" className="pm-h-closing-title">
+              Run it on a statement you already doubt.
+            </h2>
+            <p className="pm-h-lead">
+              The live scan takes a real PDF. No account, and the file is
+              deleted when the scan finishes.
+            </p>
+            <div className="pm-h-actions">
+              <OpenScanButton>Scan a document</OpenScanButton>
+              <RollPill href="/signup" variant="secondary">
                 Create an account
               </RollPill>
-            </Reveal>
+            </div>
           </div>
-        </DepthStage>
+          {/* The foot of every working paper: who prepared it, and a line for
+            the person who reviews it. ProofMart prepares; the reader signs. */}
+          <div className="pm-signoff" aria-label="Sign-off">
+            <div>
+              <span className="pm-label">Prepared by</span>
+              <span>
+                ProofMart engine <span className="pm-mono">v{APP_VERSION}</span>
+              </span>
+            </div>
+            <div>
+              <span className="pm-label">Checks run</span>
+              <span>
+                <span className="pm-mono">{MARKERS.length}</span> markers, every
+                balance re-added
+              </span>
+            </div>
+            <div className="pm-signoff-line">
+              <span className="pm-label">Reviewed by</span>
+              <span className="pm-signoff-blank">you</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <div className="pm-mk-sec-strip">
-          <div className="pm-mk-sec-strip-head">
-            <p className="pm-t-label pm-mk-mute">For your security review</p>
-            <Link href="/security" className="pm-inline-link">
+      <div className="pm-wrap">
+        <div className="pm-h-sec">
+          <div className="pm-h-sec-head">
+            <h3>For your security review</h3>
+            <Link href="/security" className="pm-link">
               Read how documents are handled
             </Link>
           </div>
-          <dl className="pm-mk-sec-points">
-            {SECURITY_POINTS.map((p, i) => (
-              <Reveal key={p.k} delay={i * 80} className="pm-mk-sec-point">
-                <dt className="pm-t-heading-sm">
+          <dl>
+            {SECURITY_POINTS.map((p) => (
+              <div key={p.k}>
+                <dt>
                   <Link href={p.href}>{p.k}</Link>
                 </dt>
-                <dd className="pm-t-body pm-mk-mute">{p.v}</dd>
-              </Reveal>
+                <dd>{p.v}</dd>
+              </div>
             ))}
           </dl>
         </div>

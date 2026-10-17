@@ -1,0 +1,496 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-17T10:24:33+00:00",
+  "title": "Design System: ProofMart",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Analysis Pad Green",
+        "canonical": "oklch(93.6% 0.018 124.0)",
+        "tonalRamp": [
+          "#0a0c05",
+          "#22261c",
+          "#3e4137",
+          "#5b5f54",
+          "#7e8277",
+          "#a2a79a",
+          "#c8cdc0",
+          "#ecf1e4"
+        ]
+      },
+      "paper-2": {
+        "role": "neutral",
+        "displayName": "Deep Pad Green",
+        "canonical": "oklch(90.9% 0.024 125.2)",
+        "tonalRamp": [
+          "#090d03",
+          "#212619",
+          "#3d4234",
+          "#5a6052",
+          "#7d8374",
+          "#a1a797",
+          "#c7cebd",
+          "#ebf2e0"
+        ]
+      },
+      "sheet": {
+        "role": "neutral",
+        "displayName": "Working Sheet",
+        "canonical": "oklch(95.5% 0.014 124.6)",
+        "tonalRamp": [
+          "#0a0c06",
+          "#22251e",
+          "#3e4139",
+          "#5c5f57",
+          "#7e8279",
+          "#a2a69d",
+          "#c8ccc2",
+          "#ecf0e6"
+        ]
+      },
+      "print": {
+        "role": "neutral",
+        "displayName": "Printout White",
+        "canonical": "oklch(98.7% 0.005 106.5)",
+        "tonalRamp": [
+          "#0b0b09",
+          "#242421",
+          "#40403d",
+          "#5e5e5a",
+          "#80807d",
+          "#a5a5a1",
+          "#cbcbc7",
+          "#efefeb"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Row Rule",
+        "canonical": "oklch(84.9% 0.031 131.6)",
+        "tonalRamp": [
+          "#070e02",
+          "#1e2717",
+          "#3a4332",
+          "#57624f",
+          "#798471",
+          "#9ea995",
+          "#c3cfba",
+          "#e7f3de"
+        ]
+      },
+      "rule-col": {
+        "role": "neutral",
+        "displayName": "Column Rule",
+        "canonical": "oklch(78.4% 0.041 136.0)",
+        "tonalRamp": [
+          "#040f01",
+          "#1b2914",
+          "#36452f",
+          "#53634c",
+          "#75866e",
+          "#99ab91",
+          "#bfd1b7",
+          "#e2f5da"
+        ]
+      },
+      "rule-strong": {
+        "role": "neutral",
+        "displayName": "Closing Rule",
+        "canonical": "oklch(60.4% 0.055 140.6)",
+        "tonalRamp": [
+          "#011000",
+          "#142a10",
+          "#2f472b",
+          "#4d6648",
+          "#6f896a",
+          "#93ae8d",
+          "#b8d4b2",
+          "#dbf8d6"
+        ]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Graphite",
+        "canonical": "oklch(26.2% 0.006 236.8)",
+        "tonalRamp": [
+          "#090c0d",
+          "#212426",
+          "#3d4042",
+          "#5b5e60",
+          "#7d8183",
+          "#a1a5a8",
+          "#c7cbce",
+          "#ebeff2"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Graphite 2",
+        "canonical": "oklch(41.0% 0.009 241.9)",
+        "tonalRamp": [
+          "#080c0f",
+          "#202528",
+          "#3c4044",
+          "#595e63",
+          "#7b8185",
+          "#a0a5aa",
+          "#c5cbd0",
+          "#e9eff4"
+        ]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Graphite 3",
+        "canonical": "oklch(49.2% 0.013 141.2)",
+        "tonalRamp": [
+          "#080d08",
+          "#212620",
+          "#3c423b",
+          "#5a6059",
+          "#7c827b",
+          "#a0a79f",
+          "#c6cdc5",
+          "#eaf1e9"
+        ]
+      },
+      "red": {
+        "role": "secondary",
+        "displayName": "Red Pencil",
+        "canonical": "oklch(53.2% 0.182 30.3)",
+        "tonalRamp": [
+          "#1f0000",
+          "#4a0200",
+          "#790e05",
+          "#ad1a0b",
+          "#d74836",
+          "#fe745f",
+          "#fdb6aa",
+          "#ffe9e5"
+        ]
+      },
+      "blue": {
+        "role": "tertiary",
+        "displayName": "Blue Pencil",
+        "canonical": "oklch(43.9% 0.133 259.3)",
+        "tonalRamp": [
+          "#000923",
+          "#022052",
+          "#093b84",
+          "#2b5ba7",
+          "#4d7fcf",
+          "#71a5f7",
+          "#adccfd",
+          "#e5efff"
+        ]
+      },
+      "red-wash": {
+        "role": "secondary",
+        "displayName": "Red Wash",
+        "canonical": "rgb(191 48 32 / 0.1)",
+        "tonalRamp": [
+          "#1f0000",
+          "#4a0200",
+          "#790e05",
+          "#ad1a0b",
+          "#d74836",
+          "#fe745f",
+          "#fdb6aa",
+          "#ffe9e5"
+        ]
+      },
+      "blue-wash": {
+        "role": "tertiary",
+        "displayName": "Blue Wash",
+        "canonical": "rgb(31 79 154 / 0.09)",
+        "tonalRamp": [
+          "#000923",
+          "#022052",
+          "#093b84",
+          "#2b5ba7",
+          "#4d7fcf",
+          "#71a5f7",
+          "#adccfd",
+          "#e5efff"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The home hero sheet title only; one word may be written in red pencil."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Home and security section heads, on a double rule with a W/P reference."
+      },
+      "headline-page": {
+        "displayName": "Headline, page",
+        "purpose": "The title of an app, auth or 404 page; a smaller clamp(1.7rem, 3vw, 2.6rem) step for long titles such as filenames."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card and panel heads inside a sheet."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Prose and UI, lining tabular figures on globally; notes cap at 82ch."
+      },
+      "body-sm": {
+        "displayName": "Body small",
+        "purpose": "Hints, definitions, notes."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Uppercase column heads, field labels and panel captions, in Graphite 3."
+      },
+      "verdict": {
+        "displayName": "Verdict",
+        "purpose": "A verdict word beside its tickmark, uppercase; 22px step heads the report."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Statement rows, JSON, code, amounts and IDs; ligatures off, tabular numerals."
+      },
+      "figure-sm": {
+        "displayName": "Figure small",
+        "purpose": "Mono meta lines, sheet captions, counts and margin notes."
+      }
+    },
+    "shadows": [
+      {
+        "name": "desk",
+        "value": "0 1px 0 rgb(34 37 39 / 0.05), 0 22px 44px -28px rgb(38 52 34 / 0.45)",
+        "purpose": "A separate sheet lying on the pad: statement sheet, Evidence Rail and its PDF page, printouts, dossier, secret sheet. The only shadow in the system."
+      },
+      {
+        "name": "focus-ring-input",
+        "value": "0 0 0 3px rgb(31 79 154 / 0.25)",
+        "purpose": "Blue-pencil focus ring on text inputs, paired with a graphite stroke. A focus treatment, not elevation."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Expo ease-out for pencil strokes and every state transition."
+      },
+      {
+        "name": "ease-ring",
+        "value": "cubic-bezier(0.55, 0.1, 0.25, 1)",
+        "purpose": "The hand-drawn pace of the red ring round row 17 on the hero sheet."
+      },
+      {
+        "name": "tick-draw",
+        "value": "360ms, staggered 70ms per row from 450ms",
+        "purpose": "The tick cascade down the statement sheet on first view (stroke-dashoffset 1 to 0)."
+      },
+      {
+        "name": "ring-draw",
+        "value": "760ms at 1.85s",
+        "purpose": "The red ring drawn last on the hero sheet."
+      },
+      {
+        "name": "note-write",
+        "value": "520ms clip-path reveal, after its mark",
+        "purpose": "Margin notes written in after their tick or ring."
+      },
+      {
+        "name": "pinned-ring",
+        "value": "520ms stroke-dashoffset, ease",
+        "purpose": "The ring drawn round a finding region when it is pinned in the Evidence Rail."
+      },
+      {
+        "name": "state-transition",
+        "value": "160 to 200ms, ease",
+        "purpose": "Colour, border and underline-thickness changes on buttons, links, tabs and inputs."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: reduce",
+        "purpose": "Marks render already drawn; transitions clamp to 0.01ms."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "header-fold",
+        "value": "1100px"
+      },
+      {
+        "name": "split-stack",
+        "value": "1080px"
+      },
+      {
+        "name": "lg",
+        "value": "960px"
+      },
+      {
+        "name": "md",
+        "value": "860px"
+      },
+      {
+        "name": "ledger-stack",
+        "value": "760px"
+      },
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "xs",
+        "value": "560px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Graphite block for the one forward action on a view; optional pencil arrow nudges right on hover.",
+      "html": "<button class=\"ds-btn-primary\">Start a scan <svg class=\"ds-btn-arrow\" width=\"14\" height=\"14\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M2 7.2h9.2M7.6 3.4 11.4 7.2 7.6 11\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"square\"/></svg></button>",
+      "css": ":host{--paper:#e7ecdf;--paper-2:#dde4d3;--sheet:#eef2e8;--print:#fbfbf7;--rule:#c6d2bd;--rule-col:#adbfa5;--rule-strong:#708a6b;--ink:#222527;--ink-2:#464b4f;--ink-3:#5d635c;--red:#bf3020;--blue:#1f4f9a;--ease:cubic-bezier(0.16,1,0.3,1);} .ds-btn-primary{--b:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:46px;padding:0 20px;border:1.5px solid var(--b);border-radius:0;font:600 15px/1.1 \"Libre Franklin\", ui-sans-serif, system-ui, sans-serif;letter-spacing:0.005em;text-decoration:none;white-space:nowrap;cursor:pointer;transition:background-color 180ms var(--ease),border-color 180ms var(--ease),color 180ms var(--ease);background:var(--ink);color:var(--print);} .ds-btn-primary:hover{background:#0f1112;} .ds-btn-primary:active{translate:0 1px;} .ds-btn-primary:focus-visible{outline:2px solid var(--blue);outline-offset:3px;} .ds-btn-arrow{flex:none;transition:translate 200ms var(--ease);} .ds-btn-primary:hover .ds-btn-arrow{translate:3px 0;}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Ruled graphite outline for the second action; hover fills with deep pad green.",
+      "html": "<button class=\"ds-btn-secondary\">Read the API response</button>",
+      "css": ":host{--paper:#e7ecdf;--paper-2:#dde4d3;--sheet:#eef2e8;--print:#fbfbf7;--rule:#c6d2bd;--rule-col:#adbfa5;--rule-strong:#708a6b;--ink:#222527;--ink-2:#464b4f;--ink-3:#5d635c;--red:#bf3020;--blue:#1f4f9a;--ease:cubic-bezier(0.16,1,0.3,1);} .ds-btn-secondary{--b:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:46px;padding:0 20px;border:1.5px solid var(--b);border-radius:0;font:600 15px/1.1 \"Libre Franklin\", ui-sans-serif, system-ui, sans-serif;letter-spacing:0.005em;text-decoration:none;white-space:nowrap;cursor:pointer;transition:background-color 180ms var(--ease),border-color 180ms var(--ease),color 180ms var(--ease);background:transparent;color:var(--ink);} .ds-btn-secondary:hover{background:var(--paper-2);} .ds-btn-secondary:active{translate:0 1px;} .ds-btn-secondary:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}"
+    },
+    {
+      "name": "Paper Button",
+      "kind": "button",
+      "refersTo": "button-paper",
+      "description": "Printout-white button with a closing-rule border, for low-stakes actions beside a primary (Re-run, Delete, Copy as export).",
+      "html": "<button class=\"ds-btn-paper\">Re-run</button>",
+      "css": ":host{--paper:#e7ecdf;--paper-2:#dde4d3;--sheet:#eef2e8;--print:#fbfbf7;--rule:#c6d2bd;--rule-col:#adbfa5;--rule-strong:#708a6b;--ink:#222527;--ink-2:#464b4f;--ink-3:#5d635c;--red:#bf3020;--blue:#1f4f9a;--ease:cubic-bezier(0.16,1,0.3,1);} .ds-btn-paper{--b:var(--rule-strong);display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:46px;padding:0 20px;border:1.5px solid var(--b);border-radius:0;font:600 15px/1.1 \"Libre Franklin\", ui-sans-serif, system-ui, sans-serif;letter-spacing:0.005em;text-decoration:none;white-space:nowrap;cursor:pointer;transition:background-color 180ms var(--ease),border-color 180ms var(--ease),color 180ms var(--ease);background:var(--print);color:var(--ink);} .ds-btn-paper:hover{--b:var(--ink);} .ds-btn-paper:active{translate:0 1px;} .ds-btn-paper:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Square printout field with a ruled stroke; focus turns the stroke graphite and adds a blue-pencil ring, error turns it red.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Key name</span><input class=\"ds-input\" placeholder=\"production-server\"></label>",
+      "css": ":host{--paper:#e7ecdf;--paper-2:#dde4d3;--sheet:#eef2e8;--print:#fbfbf7;--rule:#c6d2bd;--rule-col:#adbfa5;--rule-strong:#708a6b;--ink:#222527;--ink-2:#464b4f;--ink-3:#5d635c;--red:#bf3020;--blue:#1f4f9a;--ease:cubic-bezier(0.16,1,0.3,1);} .ds-field{display:grid;gap:8px;max-width:360px;} .ds-field-label{font:600 12px/1.3 \"Libre Franklin\", ui-sans-serif, system-ui, sans-serif;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-3);} .ds-input{width:100%;height:46px;padding:0 14px;border:1.5px solid var(--rule-strong);border-radius:0;background:var(--print);color:var(--ink);font:500 15px/1 \"Libre Franklin\", ui-sans-serif, system-ui, sans-serif;caret-color:var(--blue);transition:border-color 160ms var(--ease),box-shadow 160ms var(--ease);} .ds-input::placeholder{color:#6a7069;opacity:1;} .ds-input:hover{border-color:var(--ink-2);} .ds-input:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgb(31 79 154 / 0.25);} .ds-input[aria-invalid=\"true\"]{border-color:var(--red);}"
+    },
+    {
+      "name": "Header Strip",
+      "kind": "nav",
+      "refersTo": "header-bar",
+      "description": "Sticky 68px pad-green strip closed by a double rule: wordmark, graphite-2 links that underline when current, primary action right.",
+      "html": "<header class=\"ds-head\"><a class=\"ds-brand\" href=\"#\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3.5 1.75h12.6l4.4 4.4V22.25H3.5Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/><path d=\"M7 8.5h9.5M7 12.25h9.5M7 16h4.5\" stroke=\"currentColor\" stroke-width=\"1.5\"/><path d=\"M11.6 16.4 14.6 19.4 22.4 9.8\" fill=\"none\" stroke=\"#bf3020\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>ProofMart</a><nav class=\"ds-nav\"><a href=\"#\" aria-current=\"page\">My documents</a><a href=\"#\">API keys</a><a href=\"#\">Webhooks</a><a href=\"#\">Billing</a></nav></header>",
+      "css": ":host{--paper:#e7ecdf;--paper-2:#dde4d3;--sheet:#eef2e8;--print:#fbfbf7;--rule:#c6d2bd;--rule-col:#adbfa5;--rule-strong:#708a6b;--ink:#222527;--ink-2:#464b4f;--ink-3:#5d635c;--red:#bf3020;--blue:#1f4f9a;--ease:cubic-bezier(0.16,1,0.3,1);} .ds-head{display:flex;align-items:center;gap:28px;height:68px;padding:0 24px;background:var(--paper);border-bottom:3px double var(--rule-strong);font-family:\"Libre Franklin\", ui-sans-serif, system-ui, sans-serif;} .ds-brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);font-size:21px;font-weight:700;letter-spacing:-0.02em;text-decoration:none;} .ds-nav{display:flex;gap:24px;} .ds-nav a{font-size:15px;font-weight:500;color:var(--ink-2);text-decoration:none;text-underline-offset:7px;text-decoration-thickness:2px;transition:color 160ms var(--ease);} .ds-nav a:hover,.ds-nav a[aria-current=\"page\"]{color:var(--ink);text-decoration-line:underline;text-decoration-color:var(--ink);} .ds-nav a[aria-current=\"page\"]{font-weight:600;} .ds-nav a:focus-visible,.ds-brand:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}"
+    },
+    {
+      "name": "Index Tabs",
+      "kind": "nav",
+      "refersTo": "tab",
+      "description": "Ledger index tabs: deep-pad backs with ruled edges; the active tab is the working sheet and joins the table below it.",
+      "html": "<div class=\"ds-tabs\"><button class=\"ds-tab\" aria-pressed=\"true\">Balance <span class=\"ds-tab-n\">3</span></button><button class=\"ds-tab\" aria-pressed=\"false\">Layout <span class=\"ds-tab-n\">2</span></button><button class=\"ds-tab\" aria-pressed=\"false\">Metadata <span class=\"ds-tab-n\">1</span></button></div><div class=\"ds-tab-sheet\"></div>",
+      "css": ":host{--paper:#e7ecdf;--paper-2:#dde4d3;--sheet:#eef2e8;--print:#fbfbf7;--rule:#c6d2bd;--rule-col:#adbfa5;--rule-strong:#708a6b;--ink:#222527;--ink-2:#464b4f;--ink-3:#5d635c;--red:#bf3020;--blue:#1f4f9a;--ease:cubic-bezier(0.16,1,0.3,1);} .ds-tabs{display:flex;gap:4px;} .ds-tab{position:relative;top:1px;display:inline-flex;align-items:center;gap:10px;padding:10px 16px 9px;border:1px solid var(--rule-strong);border-bottom:0;border-radius:0;background:var(--paper-2);color:var(--ink-2);font:600 14px/1.2 \"Libre Franklin\", ui-sans-serif, system-ui, sans-serif;cursor:pointer;transition:background-color 160ms var(--ease);} .ds-tab:hover{background:#d4dcc8;} .ds-tab[aria-pressed=\"true\"]{z-index:1;background:var(--sheet);color:var(--ink);padding-bottom:10px;} .ds-tab:focus-visible{outline:2px solid var(--blue);outline-offset:3px;} .ds-tab-n{font:500 12px/1 \"JetBrains Mono\", ui-monospace, monospace;color:var(--ink-3);} .ds-tab-sheet{height:48px;background:var(--sheet);border:1px solid var(--rule-strong);}"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "32px printout control in the Evidence Rail toolbar; presets use a dashed stroke that turns solid when chosen.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\">Load sample</button><button class=\"ds-chip ds-chip-preset\" aria-pressed=\"true\">document.verified</button><button class=\"ds-chip ds-chip-preset\" aria-pressed=\"false\">document.failed</button></div>",
+      "css": ":host{--paper:#e7ecdf;--paper-2:#dde4d3;--sheet:#eef2e8;--print:#fbfbf7;--rule:#c6d2bd;--rule-col:#adbfa5;--rule-strong:#708a6b;--ink:#222527;--ink-2:#464b4f;--ink-3:#5d635c;--red:#bf3020;--blue:#1f4f9a;--ease:cubic-bezier(0.16,1,0.3,1);} .ds-chips{display:flex;flex-wrap:wrap;gap:8px;} .ds-chip{min-height:32px;padding:0 12px;border:1.5px solid var(--rule-strong);border-radius:0;background:var(--print);color:var(--ink);font:600 13px/1 \"Libre Franklin\", ui-sans-serif, system-ui, sans-serif;cursor:pointer;} .ds-chip:hover{border-color:var(--ink);} .ds-chip:focus-visible{outline:2px solid var(--blue);outline-offset:3px;} .ds-chip-preset{border:1.25px dashed var(--rule-strong);background:transparent;color:var(--ink-2);font-weight:400;} .ds-chip-preset:hover,.ds-chip-preset[aria-pressed=\"true\"]{border-style:solid;border-color:var(--ink);color:var(--ink);}"
+    },
+    {
+      "name": "Verdict Marks",
+      "kind": "custom",
+      "refersTo": "verdict-fail",
+      "description": "A verdict as written: its tickmark and the word, in its pencil. Break/FAIL red, query/REVIEW blue, tick/CLEAR graphite, dash/INCONCLUSIVE graphite 3.",
+      "html": "<div class=\"ds-verdicts\"><span class=\"ds-vtag\" data-tone=\"FAIL\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M3.4 3.4 12.6 12.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M12.6 3.4 3.4 12.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>Fail</span><span class=\"ds-vtag\" data-tone=\"REVIEW\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M5.2 5.6c0-1.9 1.3-3.1 3-3.1s3 1.1 3 2.7c0 1.4-.8 2.1-1.9 2.7-.9.5-1.3 1.1-1.3 2.1v.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M8 13.2v.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>Review</span><span class=\"ds-vtag\" data-tone=\"CLEAR\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M2.6 8.7 6.1 12.1 13.6 3.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>Clear</span><span class=\"ds-vtag\" data-tone=\"INCONCLUSIVE\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M3.5 8h9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>Inconclusive</span></div>",
+      "css": ":host{--paper:#e7ecdf;--paper-2:#dde4d3;--sheet:#eef2e8;--print:#fbfbf7;--rule:#c6d2bd;--rule-col:#adbfa5;--rule-strong:#708a6b;--ink:#222527;--ink-2:#464b4f;--ink-3:#5d635c;--red:#bf3020;--blue:#1f4f9a;--ease:cubic-bezier(0.16,1,0.3,1);} .ds-verdicts{display:flex;flex-wrap:wrap;gap:12px 24px;padding:16px;background:var(--paper);} .ds-vtag{display:inline-flex;align-items:center;gap:6px;font:700 12.5px/1 \"Libre Franklin\", ui-sans-serif, system-ui, sans-serif;letter-spacing:0.06em;text-transform:uppercase;white-space:nowrap;color:var(--ink);} .ds-vtag svg{flex:none;} .ds-vtag[data-tone=\"FAIL\"]{color:var(--red);} .ds-vtag[data-tone=\"REVIEW\"]{color:var(--blue);} .ds-vtag[data-tone=\"INCONCLUSIVE\"]{color:var(--ink-3);}"
+    },
+    {
+      "name": "Reference Marks",
+      "kind": "chip",
+      "refersTo": "wp-ref",
+      "description": "The red-pencil W/P reference boxed beside a section head, and the blue-pencil SAMPLE label on illustrative data.",
+      "html": "<div class=\"ds-refs\"><span class=\"ds-wp\">W/P C</span><span class=\"ds-sample\">Sample</span><span class=\"ds-stamp\">Shown once · not stored</span></div>",
+      "css": ":host{--paper:#e7ecdf;--paper-2:#dde4d3;--sheet:#eef2e8;--print:#fbfbf7;--rule:#c6d2bd;--rule-col:#adbfa5;--rule-strong:#708a6b;--ink:#222527;--ink-2:#464b4f;--ink-3:#5d635c;--red:#bf3020;--blue:#1f4f9a;--ease:cubic-bezier(0.16,1,0.3,1);} .ds-refs{display:flex;flex-wrap:wrap;align-items:center;gap:16px;padding:16px;background:var(--paper);} .ds-wp{display:inline-block;padding:3px 8px;border:1.5px solid var(--red);background:var(--paper);color:var(--red);font:600 13px/1.2 \"JetBrains Mono\", ui-monospace, monospace;white-space:nowrap;} .ds-sample{display:inline-block;padding:2px 6px;border:1.5px solid var(--blue);color:var(--blue);font:700 10.5px/1.2 \"JetBrains Mono\", ui-monospace, monospace;letter-spacing:0.1em;text-transform:uppercase;} .ds-stamp{display:inline-block;padding:5px 10px;border:1.5px solid currentColor;color:var(--ink-2);font:700 12px/1.2 \"Libre Franklin\", ui-sans-serif, system-ui, sans-serif;letter-spacing:0.08em;text-transform:uppercase;rotate:-1.5deg;}"
+    },
+    {
+      "name": "Statement Sheet",
+      "kind": "card",
+      "refersTo": "sheet",
+      "description": "A statement page re-footed as a working paper: double-ruled head, mono rows with column rules, ticks, a break struck and ringed in red pencil with its arithmetic, a double-ruled total. The only shadow is the desk.",
+      "html": "<figure class=\"ds-sheet\"><div class=\"ds-sheet-head\"><span class=\"ds-sheet-title\">Statement of account · XXXX-XX-4821</span><span class=\"ds-sheet-ref\">B-4</span></div><table class=\"ds-sheet-table\"><thead><tr><th>Row</th><th>Description</th><th class=\"n\">Balance</th><th></th><th>Note</th></tr></thead><tbody><tr><td class=\"r\">15</td><td>POS/APOLLO PHARMACY</td><td class=\"n\">99,161.00</td><td class=\"t\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M2.6 8.7 6.1 12.1 13.6 3.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></td><td></td></tr><tr><td class=\"r\">16</td><td>POS/UBER 5T4A9</td><td class=\"n\">84,210.00</td><td class=\"t\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M2.6 8.7 6.1 12.1 13.6 3.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></td><td></td></tr><tr data-tone=\"fail\"><td class=\"r\">17</td><td>IMPS IN/JOE-K PAYMENT</td><td class=\"n\"><span class=\"flag\"><s>91,710.00</s><svg class=\"ring\" viewBox=\"0 0 120 40\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><path d=\"M14 22C11 9 64 3.5 104 8.5c13 1.6 15 12.6 3 18.2C88 35.5 30 37 13 28 4.5 23.5 10 12.5 34 9\" pathLength=\"1\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" vector-effect=\"non-scaling-stroke\"/></svg></span></td><td class=\"t\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M3.4 3.4 12.6 12.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M12.6 3.4 3.4 12.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></td><td class=\"note\">84,210 + 12,500 = 96,710</td></tr></tbody><tfoot><tr><td colspan=\"2\">Carried to page 5, as printed</td><td class=\"n\"><s>91,710.00</s></td><td></td><td>should read 96,710.00</td></tr></tfoot></table></figure>",
+      "css": ":host{--paper:#e7ecdf;--paper-2:#dde4d3;--sheet:#eef2e8;--print:#fbfbf7;--rule:#c6d2bd;--rule-col:#adbfa5;--rule-strong:#708a6b;--ink:#222527;--ink-2:#464b4f;--ink-3:#5d635c;--red:#bf3020;--blue:#1f4f9a;--ease:cubic-bezier(0.16,1,0.3,1);} .ds-sheet{margin:0;background:var(--sheet);border:1px solid var(--rule-strong);box-shadow:0 1px 0 rgb(34 37 39 / 0.05),0 22px 44px -28px rgb(38 52 34 / 0.45);color:var(--ink);font-family:\"Libre Franklin\", ui-sans-serif, system-ui, sans-serif;} .ds-sheet-head{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 18px 12px;border-bottom:3px double var(--rule-strong);} .ds-sheet-title{font-size:15px;font-weight:600;} .ds-sheet-ref{padding:2px 7px;border:1.5px solid var(--red);color:var(--red);font:600 12.5px/1.2 \"JetBrains Mono\", ui-monospace, monospace;} .ds-sheet-table{width:100%;border-collapse:collapse;font:13px/1.2 \"JetBrains Mono\", ui-monospace, monospace;font-variant-ligatures:none;} .ds-sheet-table th{padding:9px 10px 7px;text-align:left;font:600 11px/1.2 \"Libre Franklin\", ui-sans-serif, system-ui, sans-serif;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--rule-strong);} .ds-sheet-table td{height:28px;padding:0 10px;border-bottom:1px solid var(--rule);white-space:nowrap;} .ds-sheet-table :is(th,td)+:is(th,td){border-left:1px solid var(--rule-col);} .ds-sheet-table .n{text-align:right;font-variant-numeric:tabular-nums;} .ds-sheet-table .r{color:var(--ink-3);} .ds-sheet-table .t{text-align:center;} .ds-sheet-table .t svg{vertical-align:middle;} tr[data-tone=\"fail\"] .t,tr[data-tone=\"fail\"] .note{color:var(--red);} .note{font:600 11px/1 \"JetBrains Mono\", ui-monospace, monospace;} .flag{position:relative;display:inline-block;color:var(--red);} s{text-decoration-thickness:1.5px;text-decoration-color:var(--red);} .ring{position:absolute;inset:-8px -12px -8px -14px;width:calc(100% + 26px);height:calc(100% + 16px);overflow:visible;color:var(--red);stroke-dasharray:1;stroke-dashoffset:0;} .ds-sheet:hover .ring path{animation:ds-draw 760ms cubic-bezier(0.55,0.1,0.25,1);} @keyframes ds-draw{from{stroke-dashoffset:1;}to{stroke-dashoffset:0;}} @media (prefers-reduced-motion: reduce){.ds-sheet:hover .ring path{animation:none;}} .ds-sheet-table tfoot td{height:38px;border-top:3px double var(--rule-strong);border-bottom:0;font:600 12px/1 \"JetBrains Mono\", ui-monospace, monospace;text-align:right;} .ds-sheet-table tfoot .n{color:var(--red);}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Audit Working Paper",
+    "overview": "Every ProofMart surface is a chartered accountant's working paper lying on a pad of pale green columnar analysis paper. Figures are written in graphite, footed and cross-footed, and each one that agrees gets a small pencil tick. When a figure does not agree, the reviewer strikes it through and rings it in red pencil, then writes the sum that disproves it in the margin. A figure that can't be settled yet gets a blue query. The product's verdicts (FAIL, REVIEW, CLEAR) are those same three marks, so the whole interface reads as a checked document rather than a dashboard about one.\n\nThe density is the density of a schedule: ruled rows, column rules, tabular figures, labels set like column heads, and double rules where a sheet or section closes. Colour is almost entirely paper and graphite. The two pencils are instruments, not decoration: red appears where something broke, blue where something is queried or still to be set. Depth is literal and single. A sheet, a printout or the dossier lies on the pad and casts one soft shadow onto the desk; nothing else floats. Motion is the hand at work: pencil marks draw themselves and nothing else moves.\n\nThe world rejects the dark developer-tool landing page (a headline, two buttons and a code block on black) and the AI-trust gradient. One world covers every surface: home and security at full intensity, then auth, documents, the report, account (API keys, webhooks, billing) and the 404 in the same paper at a quieter pitch.",
+    "keyCharacteristics": [
+      "Pale green analysis paper, faint row rules, stronger column rules, double rules that close a sheet.",
+      "Graphite for type and figures; red pencil for breaks; blue pencil for queries; graphite ticks for clear.",
+      "An authored SVG tickmark set is the icon system, and every verdict carries its mark as well as its colour.",
+      "Libre Franklin for headings, UI and prose; JetBrains Mono with ligatures off for every figure, identifier and line of code.",
+      "Square corners everywhere; the only rounded form is a hand-drawn pencil ring.",
+      "One shadow: a sheet lying on the desk.",
+      "Only pencil marks move, and under reduced motion they are already drawn."
+    ],
+    "rules": [
+      {
+        "name": "The Two Pencils Rule",
+        "body": "Red pencil means \"this broke\" (or is the reviewer's own reference mark); blue pencil means \"this is queried or still to be set\". Neither is ever used for emphasis, hover, branding colour fields or decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The Mark Before Colour Rule",
+        "body": "Every verdict is written with its tickmark and its word: break with FAIL, query with REVIEW, agreed tick with CLEAR, dash with INCONCLUSIVE. A verdict must read correctly in greyscale.",
+        "section": "colors"
+      },
+      {
+        "name": "The Paper Is Green Rule",
+        "body": "The greens are paper and rules only. No green is ever a status colour: CLEAR is graphite, not green.",
+        "section": "colors"
+      },
+      {
+        "name": "The Figures Are Mono Rule",
+        "body": "Every amount, balance, page and row address, finding code, key, ID and line of code is JetBrains Mono, right-aligned in columns, with tabular numerals.",
+        "section": "typography"
+      },
+      {
+        "name": "The Literal Glyph Rule",
+        "body": "JetBrains Mono's coding ligatures are switched off (\"liga\" 0, \"calt\" 0) wherever it is used, so \"->\" and \"===\" show exactly the characters the API or the statement contains.",
+        "section": "typography"
+      },
+      {
+        "name": "The Desk Rule",
+        "body": "If a surface is not a separate piece of paper lying on the pad, it has no shadow. Stacking is shown with stock and rules, never with lift.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Double Rule Closes Rule",
+        "body": "A sheet, a section head, a header and a table total are closed by a 3px double rule in Closing Rule. A single rule only separates rows.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do write every verdict with its tickmark and its word, in its pencil: break and FAIL in red, query and REVIEW in blue, agreed tick and CLEAR in graphite.",
+      "Do set every figure, address, code and identifier in JetBrains Mono with ligatures off and tabular numerals, right-aligned in its column.",
+      "Do close sheets, header strips, section heads and totals with a 3px double rule in Closing Rule.",
+      "Do give the desk shadow only to a separate sheet on the pad: statement sheet, rail, PDF page, printouts, dossier, secret sheet.",
+      "Do label illustrative data with the blue SAMPLE box.",
+      "Do animate only pencil marks (stroke-dashoffset with cubic-bezier(0.16, 1, 0.3, 1)), and show them already drawn under reduced motion.",
+      "Do use the pad's own ruling (repeating-linear-gradient rules) where the paper itself should show."
+    ],
+    "donts": [
+      "Don't use red or blue for emphasis, hover, links or decoration; red marks a break or a reviewer's reference, blue marks a query or a value to set.",
+      "Don't make CLEAR green or introduce any status colour beyond graphite and the two pencils.",
+      "Don't round a corner. The pencil ring is a mark, not a shape to borrow for containers or buttons.",
+      "Don't add shadows to buttons, menus, tabs or hover states, and don't stack lifted cards.",
+      "Don't use a gradient for anything except ruling the pad.",
+      "Don't use icon fonts or stock icon sets; new icons are drawn in the tickmark idiom (16-unit grid, currentColor, round-capped strokes).",
+      "Don't fall back to the dark developer-tool landing or an AI-trust gradient; graphite fills are for primary buttons and the shown-once secret only.",
+      "Don't put an uppercase label above a headline as a kicker; labels are column heads and field labels."
+    ]
+  }
+}

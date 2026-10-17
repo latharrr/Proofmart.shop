@@ -1,14 +1,18 @@
 import type { Verdict } from "@/lib/evidence-data";
+import { VERDICT_TICK } from "@/components/paper/tickmark";
+import type { TickKind } from "@/components/paper/tickmark";
 
 /**
- * Verdict signal for the rail and its finding rows, in the design system's
- * verdict tokens (design-system.md §2). Hex rather than var() because these
- * also feed SVG presentation attributes (the pin box). Functional only: a
- * verdict colour marks what a finding *is*, never what the pointer is doing.
+ * Verdict signal for the rail and its finding rows, in the working-paper
+ * pencils (DESIGN.md, Colour): red pencil for a break, blue pencil for a
+ * query, graphite for a tick. Hex rather than var() because these also feed
+ * SVG presentation attributes (the pencil ring). Functional only: a verdict
+ * colour marks what a finding *is*, never what the pointer is doing, and
+ * every verdict also carries its tickmark so it reads without colour.
  */
-export const TONE: Record<Verdict, { color: string; wash: string; glyph: string }> = {
-  FAIL: { color: "#e5342b", wash: "rgba(229,52,43,0.10)", glyph: "×" },
-  REVIEW: { color: "#c98a12", wash: "rgba(201,138,18,0.12)", glyph: "~" },
-  CLEAR: { color: "#1d9a63", wash: "rgba(29,154,99,0.10)", glyph: "=" },
-  INCONCLUSIVE: { color: "#6b6f80", wash: "rgba(107,111,128,0.10)", glyph: "?" },
+export const TONE: Record<Verdict, { color: string; wash: string; tick: TickKind }> = {
+  FAIL: { color: "#bf3020", wash: "rgba(191,48,32,0.10)", tick: VERDICT_TICK.FAIL },
+  REVIEW: { color: "#1f4f9a", wash: "rgba(31,79,154,0.10)", tick: VERDICT_TICK.REVIEW },
+  CLEAR: { color: "#2a2d30", wash: "rgba(42,45,48,0.06)", tick: VERDICT_TICK.CLEAR },
+  INCONCLUSIVE: { color: "#5d635c", wash: "rgba(93,99,92,0.08)", tick: VERDICT_TICK.INCONCLUSIVE },
 };

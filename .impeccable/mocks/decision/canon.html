@@ -1,0 +1,18 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Category standard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1440px;height:900px;overflow:hidden}
+body{background:#0a0a0a;color:#ededed;font-family:"Helvetica Neue",Arial,sans-serif}
+.nav{display:flex;gap:28px;padding:22px 64px;font-size:15px;color:#a1a1a1}.nav b{color:#ededed;font-size:19px;margin-right:auto}
+.l{position:absolute;left:64px;top:190px;width:600px}
+h1{font-size:72px;line-height:1.02;letter-spacing:-.035em;font-weight:600}
+p{margin-top:24px;font-size:20px;line-height:1.5;color:#a1a1a1}
+.b{margin-top:36px;display:flex;gap:12px}.b span{background:#ededed;color:#0a0a0a;padding:14px 22px;border-radius:8px;font-weight:600}.b span+span{background:#1a1a1a;color:#ededed;border:1px solid #333}
+.code{position:absolute;right:64px;top:150px;width:640px;height:600px;background:#111;border:1px solid #262626;border-radius:12px;padding:28px;font-family:Menlo,monospace;font-size:16px;line-height:1.7;color:#a1a1a1}
+.code .k{color:#3b82f6}.code .s{color:#ededed}.code .r{color:#f87171}
+</style></head><body>
+<div class="nav"><b>ProofMart</b><span>Docs</span><span>Markers</span><span>Pricing</span><span>Sign in</span></div>
+<div class="l"><h1>Document forensics, as an API.</h1><p>Upload a PDF. Get every finding pinned to a coordinate box, the arithmetic it used, and one verdict.</p><div class="b"><span>Start free</span><span>Read the docs</span></div></div>
+<div class="code"><span class="k">curl</span> https://proofmart.shop/v1/verify \<br>&nbsp; -H <span class="s">"Authorization: Bearer pm_live_…"</span> \<br>&nbsp; -F file=@statement.pdf<br><br>{<br>&nbsp; "verdict": <span class="r">"FAIL"</span>,<br>&nbsp; "findings": [{<br>&nbsp;&nbsp;&nbsp; "marker": <span class="s">"BALANCE_BREAK"</span>,<br>&nbsp;&nbsp;&nbsp; "page": 4, "row": 17,<br>&nbsp;&nbsp;&nbsp; "box": [412, 518, 96, 18]<br>&nbsp; }]<br>}</div>
+</body></html>

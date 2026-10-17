@@ -1,16 +1,11 @@
 import type { ReactNode } from "react";
 import Frame from "@/components/motion/frame";
-import Tilt from "@/components/motion/tilt";
-import Reveal from "@/components/motion/reveal";
 
 /**
- * The account pages' one depth moment (bar.md, "App pages are tools"): a
- * graphite stage on the crosshair frame holding the request, with the
- * response floating on its own plane 56px in front of it. Pointer tilt
- * (≤ 6°, damped, flat on leave) makes the two planes part in real
- * perspective, so what you send and what comes back read as two layers of
- * one exchange. Off for touch and reduced motion: then it's a still,
- * composed frame.
+ * A request and its answer, as two sheets clipped together: the request on
+ * the lighter sheet with its label ruled along the foot, and the answer set
+ * on the pad directly beneath it, offset to the right the way a reply is
+ * stapled under the letter it answers.
  */
 export default function DepthStage({
   label,
@@ -21,27 +16,23 @@ export default function DepthStage({
 }: {
   label: ReactNode;
   children: ReactNode;
-  /** The plane in front: the response, the check. */
+  /** The answer: the response, the check. */
   float?: ReactNode;
-  /** A mono caption above the reserved float area, e.g. "response". */
+  /** A mono caption above the answer, e.g. "response". */
   floatLabel?: ReactNode;
   className?: string;
 }) {
   return (
-    <Tilt max={6} damping={8} className={className ? `pm-acct-depth ${className}` : "pm-acct-depth"} innerClassName="pm-acct-depth-inner">
-      <Frame tone="graphite" columns={4} label={label} className="pm-acct-depth-frame" stageClassName="pm-acct-depth-stage">
+    <div className={className ? `pm-acct-depth ${className}` : "pm-acct-depth"}>
+      <Frame tone="sheet" label={label} className="pm-acct-depth-frame" stageClassName="pm-acct-depth-stage">
         {children}
-        {float ? (
-          <div className="pm-acct-depth-slot" aria-hidden="true">
-            {floatLabel ? <span className="pm-t-mono pm-acct-depth-slot-label">{floatLabel}</span> : null}
-          </div>
-        ) : null}
       </Frame>
       {float ? (
         <div className="pm-acct-depth-float">
-          <Reveal delay={420}>{float}</Reveal>
+          {floatLabel ? <span className="pm-mono pm-acct-depth-slot-label">{floatLabel}</span> : null}
+          {float}
         </div>
       ) : null}
-    </Tilt>
+    </div>
   );
 }

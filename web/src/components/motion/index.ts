@@ -3,5 +3,4 @@ export { default as Reveal } from "./reveal";
 export { default as RollPill, type RollPillProps } from "./roll-pill";
 export { default as Frame, Crosshair } from "./frame";
 export { default as Tilt } from "./tilt";
-export { useScrollProgress, ScrollVar, type ScrollRange } from "./scroll-progress";
-export { useReveal, type RevealState } from "./use-reveal";
+export { ScrollVar, type ScrollRange } from "./scroll-progress";

@@ -1,0 +1,35 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-10-17T10:19:45.247Z",
+        "reason": "Claude: unchosen decision-round sketch (Reservation Chart), rendered as a skeleton thumbnail only; never shipped"
+      },
+      {
+        "rule": "overused-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-10-17T10:19:45.272Z",
+        "reason": "Claude: unchosen decision-round sketch (Reservation Chart), rendered as a skeleton thumbnail only; never shipped"
+      },
+      {
+        "rule": "kicker-above-heading",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-10-17T10:19:45.296Z",
+        "reason": "Claude: unchosen decision-round sketch (Reservation Chart), rendered as a skeleton thumbnail only; never shipped"
+      }
+    ]
+  }
+}

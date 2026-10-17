@@ -1,13 +1,11 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import Wordmark from "@/components/brand/wordmark";
-import LineReveal from "@/components/motion/line-reveal";
 import RollPill from "@/components/motion/roll-pill";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { SCAN_URL } from "@/components/evidence-rail/scan-intent";
 import AccountMenu from "./account-menu";
 import AppMobileMenu from "./mobile-menu";
-import RollLabel from "./roll-label";
 import { signOutAction } from "./actions";
 
 /**
@@ -28,9 +26,9 @@ import { signOutAction } from "./actions";
  * `null` renders the account control without an address (loading skeletons).
  * The shell never redirects — auth gating stays with each page.
  *
- * Desktop: the nav is a haze pill track centred in the bar, the current
- * section a paper pill with the volt dot. Below 960px the nav and the account
- * menu fold into one MENU sheet.
+ * Desktop: the sections are index tabs along the bottom edge of the pad's
+ * head; the current one is cut open into the sheet below it. Below 960px the
+ * nav and the account menu fold into one Menu sheet.
  */
 
 export type AppSection = "documents" | "api-keys" | "webhooks" | "billing";
@@ -75,8 +73,7 @@ export default async function AppShell({ active, email, children }: { active?: A
               {APP_NAV.map((item) => (
                 <li key={item.id}>
                   <Link href={item.href} aria-current={item.id === active ? "page" : undefined}>
-                    <span className="pm-app-nav-dot" aria-hidden="true" />
-                    <RollLabel>{item.label}</RollLabel>
+                    {item.label}
                   </Link>
                 </li>
               ))}
@@ -100,17 +97,17 @@ export default async function AppShell({ active, email, children }: { active?: A
   );
 }
 
-/** The content column every workspace page sits in — the 1296px grid, the page gutter, and the top/bottom rhythm. */
+/** The content column every workspace page sits in: the page width, the gutter, and the top/bottom rhythm. */
 export function AppPage({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={className ? `pm-app-page ${className}` : "pm-app-page"}>{children}</div>;
 }
 
 /**
- * A workspace page's title block: an optional label (`meta`) and back link
- * above the title, which rises line by line from its mask (heading-lg, 88px
- * desktop / 44px mobile; `size="md"` drops to the 48px heading role for long
- * titles such as a filename). The description and actions sit in the right
- * column on desktop and under the title on a phone.
+ * A workspace page's title block, ruled like the head of a working paper: a
+ * back link above, the title, and its `meta` (counts, the verdict) on the
+ * line beneath it. `size="md"` is for long titles such as a filename. The
+ * description and actions sit in the right column on desktop and under the
+ * title on a phone.
  */
 export function AppPageHeader({
   title,
@@ -132,18 +129,14 @@ export function AppPageHeader({
     <div className="pm-app-head" data-size={size}>
       {back && (
         <Link href={back.href} className="pm-app-back">
-          <span className="pm-app-back-arrow" aria-hidden="true">
-            ←
-          </span>
+          <BackArrow />
           {back.label}
         </Link>
       )}
       <div className="pm-app-head-row">
         <div className="pm-app-head-text">
+          <h1 className="pm-app-title">{title}</h1>
           {meta && <div className="pm-app-head-meta">{meta}</div>}
-          <LineReveal as="h1" className="pm-app-title">
-            {title}
-          </LineReveal>
         </div>
         {(description || actions) && (
           <div className="pm-app-head-side">
@@ -166,18 +159,18 @@ export function AppPageHeaderSkeleton({ back, size = "lg", label = "Loading" }: 
     <div className="pm-app-head pm-skeleton" data-size={size} role="status" aria-label={label}>
       {back && (
         <span className="pm-app-back" aria-hidden="true">
-          <span className="pm-app-back-arrow">←</span>
+          <BackArrow />
           {back}
         </span>
       )}
       <div className="pm-app-head-row" aria-hidden="true">
         <div className="pm-app-head-text">
-          <div className="pm-app-head-meta">
-            <span className="pm-skeleton-bar pm-skeleton-label" />
-          </div>
           <span className="pm-app-title">
             <span className="pm-skeleton-bar pm-skeleton-title" />
           </span>
+          <div className="pm-app-head-meta">
+            <span className="pm-skeleton-bar pm-skeleton-label" />
+          </div>
         </div>
         <div className="pm-app-head-side">
           <span className="pm-skeleton-bar pm-skeleton-line" />
@@ -185,5 +178,13 @@ export function AppPageHeaderSkeleton({ back, size = "lg", label = "Loading" }: 
         </div>
       </div>
     </div>
+  );
+}
+
+function BackArrow() {
+  return (
+    <svg className="pm-app-back-arrow" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+      <path d="M12 7.2H2.8M6.4 3.4 2.6 7.2 6.4 11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="square" />
+    </svg>
   );
 }

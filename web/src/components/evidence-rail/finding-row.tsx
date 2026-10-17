@@ -2,12 +2,14 @@
 
 import type { CSSProperties } from "react";
 import type { RailFinding } from "@/lib/pdf/types";
+import Tickmark, { Ident } from "@/components/paper/tickmark";
 import { TONE } from "./verdict-tone";
 
 /**
- * One row in the Evidence Rail's findings panel (design-system.md §5
- * "Finding row"): paper, a 3px left edge in the verdict colour, mono
- * identifier, body description, mono arithmetic on haze.
+ * One row in the Evidence Rail's findings panel: a ruled entry on the
+ * working paper, its address in the left margin, the marker in mono, the
+ * verdict as a pencil tickmark and word, the description, and the
+ * arithmetic set as a footing.
  *
  * The verdict colour is fixed to what the finding *is*. Hover, focus and the
  * pinned state are carried by achromatic fills and the ink address only:
@@ -56,9 +58,11 @@ export function FindingRow({
       </span>
       <span className="pm-mk-frow-main">
         <span className="pm-mk-frow-top">
-          <span className="pm-mk-frow-id">{finding.marker}</span>
-          <span className="pm-mk-verdict" data-size="sm">
-            <span aria-hidden="true">{v.glyph}</span>
+          <span className="pm-mk-frow-id">
+            <Ident>{finding.marker}</Ident>
+          </span>
+          <span className="pm-mk-verdict" data-size="sm" data-tone={finding.origin === "extracted-fact" ? "INCONCLUSIVE" : finding.verdict}>
+            <Tickmark kind={v.tick} size={14} />
             {verdictLabel}
           </span>
         </span>

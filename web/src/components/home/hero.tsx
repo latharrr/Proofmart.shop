@@ -1,58 +1,77 @@
-import HeroStage from "@/components/home/hero-stage";
 import OpenScanButton from "@/components/home/open-scan-button";
-import LineReveal from "@/components/motion/line-reveal";
-import Reveal from "@/components/motion/reveal";
 import RollPill from "@/components/motion/roll-pill";
-import { SAMPLE_FINDINGS } from "@/components/evidence-rail/sample-statement";
+import StatementSheet from "@/components/paper/statement-sheet";
+import Tickmark from "@/components/paper/tickmark";
 
-// The finding on the proof card is the sample scan's first finding — the same
-// row the 3D page has boxed, and the one the live rail below opens pinned —
-// so the scene, the card and the rail are three views of one document.
-const LEAD = SAMPLE_FINDINGS[0];
+const ASSURANCES = [
+  { k: "No model in the path", v: "Deterministic rules over the page's own arithmetic. No LLM, no score." },
+  { k: "Same bytes, same verdict", v: "Every result records the engine version that produced it." },
+  { k: "Nothing kept signed out", v: "A signed-out upload is deleted as soon as its scan finishes." },
+];
 
+const LEGEND = [
+  { kind: "agreed" as const, tone: "ink", label: "Agrees with prior balance ± the row" },
+  { kind: "break" as const, tone: "fail", label: "Break: verdict FAIL" },
+  { kind: "query" as const, tone: "review", label: "Query: verdict REVIEW" },
+  { kind: "footed" as const, tone: "ink", label: "Footed: the column re-added" },
+];
+
+/**
+ * The first sheet on the pad. Left: what ProofMart is, in one sentence, and
+ * the two ways in. Right: page 4 of the sample statement, re-footed, with
+ * its breaks ringed. Along the foot, the tickmark legend that every other
+ * sheet on the site is written in.
+ */
 export default function Hero() {
   return (
     // `id="run"`: older in-app links send people to /#run to verify a document.
-    <section id="run" className="pm-mk-hero" aria-labelledby="hero-title">
-      <div className="pm-wrap">
-        <HeroStage
-          overlay={
-            <Reveal delay={700} className="pm-mk-proof" aria-label="The finding behind the verdict">
-              <div className="pm-mk-proof-head">
-                <span className="pm-mk-verdict" data-tone="FAIL">
-                  <span aria-hidden="true">×</span>FAIL
-                </span>
-                <span className="pm-mk-proof-id">{LEAD.marker}</span>
-                <span className="pm-mk-proof-addr">p4 · r17</span>
-              </div>
-              <p className="pm-mk-proof-body">{LEAD.explanation}</p>
-              <pre className="pm-mk-proof-math">{LEAD.arithmetic}</pre>
-              <a href="#access" className="pm-inline-link pm-mk-proof-link">
-                See it pinned in the live scan
-              </a>
-            </Reveal>
-          }
-        >
-          <p className="pm-t-label pm-mk-hero-kicker">
-            <span className="pm-mk-kdot" aria-hidden="true" />
-            Document forensics API
+    <section id="run" className="pm-h-hero" aria-labelledby="hero-title">
+      <div className="pm-wrap pm-h-hero-grid">
+        <div className="pm-h-hero-copy">
+          <h1 id="hero-title" className="pm-h-title">
+            Footed, cross&#8209;footed, <span className="pm-red">ticked.</span>
+          </h1>
+          <p className="pm-h-lead">
+            ProofMart re-adds every row of a PDF bank statement, ticks each balance that agrees and rings each one that doesn&rsquo;t, with the sum that
+            proves it. Then one verdict: FAIL, REVIEW or CLEAR.
           </p>
-          <LineReveal as="h1" id="hero-title" className="pm-t-display pm-mk-hero-title" delay={120}>
-            Find the <br />
-            row that <br />
-            lies.
-          </LineReveal>
-          <Reveal as="p" delay={360} className="pm-t-body-lg pm-mk-hero-lead">
-            ProofMart re-adds every row of a PDF bank statement, pins each break to its box on the page with the sums that prove it, and returns
-            one verdict: FAIL, REVIEW or CLEAR.
-          </Reveal>
-          <Reveal delay={480} className="pm-mk-hero-actions">
-            <OpenScanButton variant="paper">Start a scan</OpenScanButton>
-            <RollPill href="#outputs" native variant="secondary" className="pm-mk-pill-glass">
-              Read the response
+          <div className="pm-h-actions">
+            <OpenScanButton>Start a scan</OpenScanButton>
+            <RollPill href="#outputs" native variant="secondary">
+              Read the API response
             </RollPill>
-          </Reveal>
-        </HeroStage>
+          </div>
+          <dl className="pm-h-assure">
+            {ASSURANCES.map((a) => (
+              <div key={a.k}>
+                <dt>
+                  <Tickmark kind="agreed" size={15} />
+                  {a.k}
+                </dt>
+                <dd>{a.v}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        <StatementSheet animate className="pm-h-sheet" />
+      </div>
+
+      <div className="pm-wrap">
+        <div className="pm-h-legend">
+          <p className="pm-h-legend-title">Tickmarks used on this site</p>
+          <ul>
+            {LEGEND.map((l) => (
+              <li key={l.kind} data-tone={l.tone}>
+                <Tickmark kind={l.kind} />
+                {l.label}
+              </li>
+            ))}
+          </ul>
+          <a href="#access" className="pm-xref">
+            Whole statement, live: W/P A
+          </a>
+        </div>
       </div>
     </section>
   );

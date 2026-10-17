@@ -1,5 +1,6 @@
 "use client";
 
+import { Arrow } from "@/components/paper/tickmark";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
@@ -87,9 +88,7 @@ export default function AccountMenu({ email, signOut }: { email: string | null; 
             <li key={l.href}>
               <Link href={l.href} onClick={() => setOpen(false)}>
                 {l.label}
-                <span className="pm-app-menu-arrow" aria-hidden="true">
-                  →
-                </span>
+                <Arrow className="pm-app-menu-arrow" />
               </Link>
             </li>
           ))}

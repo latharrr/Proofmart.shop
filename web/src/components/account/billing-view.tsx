@@ -27,8 +27,7 @@ function Check() {
 /**
  * Billing, as one reading: what you've used against what you have (a
  * 50-segment meter, one segment per call on Free), the plan you're on, and
- * what the next plan buys. The Pro card is the page's depth moment: a
- * graphite stage on the crosshair frame that tilts toward the pointer.
+ * what the next plan buys, as two columns side by side.
  */
 export default function BillingView({ usage, reset, daysLeft, checkout }: { usage: Usage; reset: Date; daysLeft: number; checkout: boolean }) {
   const plan = PLANS[usage.plan];
@@ -104,7 +103,7 @@ export default function BillingView({ usage, reset, daysLeft, checkout }: { usag
           </dl>
           {isFree && (
             <RollPill href="#plans" native variant="secondary" size="sm" className="pm-acct-usage-cta">
-              Compare plans ↓
+              Compare plans
             </RollPill>
           )}
         </div>
@@ -113,7 +112,6 @@ export default function BillingView({ usage, reset, daysLeft, checkout }: { usag
       <section id="plans" className="pm-acct-plans-section" aria-labelledby="pm-acct-plans-title">
         <div className="pm-acct-section-head pm-acct-section-head-open">
           <div>
-            <p className="pm-t-label pm-acct-kicker">Plans</p>
             <h2 id="pm-acct-plans-title" className="pm-t-heading">
               {isFree ? "What upgrading gets you" : "Plans"}
             </h2>
@@ -170,7 +168,7 @@ export default function BillingView({ usage, reset, daysLeft, checkout }: { usag
             return isPro ? (
               <Reveal key={p.id} delay={idx * 80} className="pm-acct-plan-wrap">
                 <Tilt max={5} damping={8} className="pm-acct-plan-tilt">
-                  <Frame tone="graphite" columns={2} label={isFree ? "Upgrade" : "Your plan"} className="pm-acct-plan-frame" stageClassName="pm-acct-plan-stage">
+                  <Frame tone="sheet" label={isFree ? "Upgrade" : "Your plan"} className="pm-acct-plan-frame" stageClassName="pm-acct-plan-stage">
                     <article className="pm-acct-plan pm-acct-plan-pro" aria-labelledby={`pm-acct-plan-${p.id}`}>
                       {body}
                     </article>
@@ -191,7 +189,6 @@ export default function BillingView({ usage, reset, daysLeft, checkout }: { usag
       <section className="pm-acct-count-section" aria-labelledby="pm-acct-count-title">
         <div className="pm-acct-section-head pm-acct-section-head-open">
           <div>
-            <p className="pm-t-label pm-acct-kicker">Metering</p>
             <h2 id="pm-acct-count-title" className="pm-t-heading-sm">
               How calls are counted
             </h2>

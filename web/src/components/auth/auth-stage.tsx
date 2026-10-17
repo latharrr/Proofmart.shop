@@ -1,19 +1,18 @@
 import type { ReactNode } from "react";
 import Frame from "@/components/motion/frame";
-import Reveal from "@/components/motion/reveal";
-import { ScrollVar } from "@/components/motion/scroll-progress";
-import DocumentStage from "@/components/three/document-stage";
+import StatementSheet from "@/components/paper/statement-sheet";
+import Tickmark from "@/components/paper/tickmark";
 
-// The one depth moment on each auth page: the product itself, a statement
-// under examination in real-time 3D, in a framed graphite stage beside the
-// form (desktop) or after it (mobile). It never holds up the task: the poster
-// is a still of the same scene, three.js loads lazily behind it, and the form
-// never waits on either.
+// Beside each auth form (after it on a phone): the product itself, the
+// sample statement re-footed on its working paper, with one line under it
+// about what the page leads to. It is static markup, so the form never waits
+// on it.
 
 export type StageVerdict = "FAIL" | "REVIEW" | "CLEAR";
 
 export interface AuthStageProps {
   variant: "stack" | "single";
+  /** Accepted for older call sites; the sheet always shows page 4 as audited. */
   verdict?: StageVerdict;
   /** Content of the band under the scene. */
   band: ReactNode;
@@ -23,41 +22,16 @@ export interface AuthStageProps {
   file?: string;
 }
 
-const SCENE_LABEL: Record<StageVerdict, string> = {
-  FAIL: "A bank statement under examination in 3D: one row is boxed in red and marked FAIL.",
-  REVIEW: "A bank statement under examination in 3D: one row is boxed and marked REVIEW.",
-  CLEAR: "A bank statement under examination in 3D, marked CLEAR.",
-};
-
-export default function AuthStage({ variant, verdict = "FAIL", band, label, file = "northwind_apr26_statement.pdf" }: AuthStageProps) {
+export default function AuthStage({ variant, band, label, file = "hdfc_apr25_statement.pdf" }: AuthStageProps) {
   return (
-    <ScrollVar range="enter" className="pm-auth-stage-scroll">
-      <Frame
-        as="aside"
-        columns={2}
-        tone="graphite"
-        label={label}
-        className="pm-auth-stage pm-scroll-tilt"
-        stageClassName="pm-auth-stage-box"
-      >
-        <div className="pm-auth-stage-head" aria-hidden="true">
-          <span className="pm-t-mono">{file}</span>
-          <span className="pm-t-mono">{variant === "stack" ? "3 pages · p4 open" : "p4 / 6"}</span>
-        </div>
-        <div className="pm-auth-scene" data-variant={variant}>
-          <DocumentStage
-            variant={variant}
-            tone="graphite"
-            verdict={verdict}
-            preload
-            label={SCENE_LABEL[verdict]}
-          />
-        </div>
-        <Reveal delay={240} className="pm-auth-band">
-          {band}
-        </Reveal>
-      </Frame>
-    </ScrollVar>
+    <Frame as="aside" tone="sheet" label={label} className="pm-auth-stage" stageClassName="pm-auth-stage-box">
+      <div className="pm-auth-stage-head" aria-hidden="true">
+        <span className="pm-mono">{file}</span>
+        <span className="pm-mono">{variant === "stack" ? "6 pages · p4 open" : "p4 / 6"}</span>
+      </div>
+      <StatementSheet className="pm-auth-sheet" showNotes={false} />
+      <div className="pm-auth-band">{band}</div>
+    </Frame>
   );
 }
 
@@ -107,16 +81,7 @@ export function BenefitList({ className }: { className?: string }) {
     <ul className={className ? `pm-auth-benefits ${className}` : "pm-auth-benefits"}>
       {SIGNUP_BENEFITS.map((b) => (
         <li key={b.lead}>
-          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-            <path
-              d="M3.5 8.4 6.6 11.4 12.5 4.8"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <Tickmark kind="agreed" />
           <span>
             <span className="pm-auth-benefit-lead">{b.lead}</span> {b.rest}
           </span>

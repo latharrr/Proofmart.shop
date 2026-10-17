@@ -1,0 +1,44 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Audit Working Paper</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1440px;height:900px;overflow:hidden}
+body{background:#e6ecdf;font-family:"Helvetica Neue",Arial,sans-serif;color:#33363a;position:relative;
+ background-image:repeating-linear-gradient(0deg,transparent 0 31px,#b9c9b0 31px 32px),repeating-linear-gradient(90deg,transparent 0 119px,#9fb59a 119px 121px)}
+.top{position:absolute;top:0;left:0;right:0;height:64px;background:#e6ecdf;border-bottom:3px double #6f8a6a;display:flex;align-items:center;padding:0 40px;gap:30px;font-size:15px}
+.top b{font-size:22px;color:#222}
+.top .wp{margin-left:auto;border:2px solid #c8321e;color:#c8321e;padding:4px 10px;font-family:"Courier New";font-weight:700;transform:rotate(-2deg)}
+h1{position:absolute;left:60px;top:110px;font-size:104px;line-height:.95;font-weight:500;letter-spacing:-.03em;color:#26282b;width:760px;background:#e6ecdf}
+h1 em{font-style:normal;color:#c8321e}
+.sub{position:absolute;left:60px;top:450px;width:560px;font-size:21px;line-height:1.45;background:#e6ecdf}
+.btns{position:absolute;left:60px;top:580px;display:flex;gap:16px}
+.btns span{background:#26282b;color:#e6ecdf;padding:20px 28px;font-weight:700;font-size:18px}
+.btns span+span{background:transparent;color:#26282b;border:2px solid #26282b}
+.sheet{position:absolute;right:60px;top:110px;width:620px;font-family:"Courier New";font-size:16px;background:rgba(255,255,255,.35)}
+.r{display:grid;grid-template-columns:50px 1fr 120px 120px 40px;padding:6px 10px;border-bottom:1px solid #b9c9b0}
+.r i{color:#c8321e;font-style:normal;font-weight:700}
+.r.bad{background:rgba(200,50,30,.08)}
+.r.bad span:nth-child(4){color:#c8321e;text-decoration:line-through}
+.circle{position:absolute;right:120px;top:356px;width:170px;height:46px;border:3px solid #c8321e;border-radius:50%;transform:rotate(-4deg)}
+.note{position:absolute;right:300px;top:420px;color:#c8321e;font-family:"Bradley Hand","Comic Sans MS",cursive;font-size:24px;width:280px}
+.legend{position:absolute;left:60px;right:60px;bottom:40px;border-top:3px double #6f8a6a;padding-top:14px;display:flex;gap:40px;font-size:15px}
+.legend i{color:#c8321e;font-style:normal;font-weight:800;margin-right:6px}
+</style></head><body>
+<div class="top"><b>ProofMart</b><span>Markers</span><span>API</span><span>Security</span><span>Pricing</span><span class="wp">W/P B-4 · SAMPLE</span></div>
+<h1>Footed, cross-footed, <em>ticked.</em></h1>
+<p class="sub">Every balance on the statement re-added and ticked, every break circled with the sum that disproves it. Deterministic rules, no model.</p>
+<div class="btns"><span>Check a statement</span><span>Read the API</span></div>
+<div class="sheet">
+<div class="r"><span>14</span><span>IMPS TRANSFER</span><span>+7,500</span><span>84,210.00</span><i>✓</i></div>
+<div class="r"><span>15</span><span>ATM WDL</span><span>-2,000</span><span>82,210.00</span><i>✓</i></div>
+<div class="r"><span>16</span><span>CHQ DEP</span><span>+2,000</span><span>84,210.00</span><i>✓</i></div>
+<div class="r bad"><span>17</span><span>NEFT ACME LTD</span><span>+12,500</span><span>91,710.00</span><i>✗</i></div>
+<div class="r"><span>18</span><span>UPI SWIGGY</span><span>-640</span><span>91,070.00</span><i>✓</i></div>
+<div class="r"><span>19</span><span>ECS LIC</span><span>-3,200</span><span>87,870.00</span><i>✓</i></div>
+<div class="r"><span>20</span><span>UPI BESCOM</span><span>-1,480</span><span>86,390.00</span><i>✓</i></div>
+<div class="r"><span>Σ</span><span>FOOTED</span><span></span><span>86,602.00</span><i>F</i></div>
+</div>
+<div class="circle"></div>
+<div class="note">84,210 + 12,500 = 96,710 — BALANCE_BREAK, p4 r17</div>
+<div class="legend"><span><i>✓</i>agreed to running balance</span><span><i>F</i>footed</span><span><i>XF</i>cross-footed</span><span><i>✗</i>break · FAIL</span><span><i>○</i>review</span></div>
+</body></html>

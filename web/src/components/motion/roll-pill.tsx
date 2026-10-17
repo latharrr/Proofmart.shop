@@ -2,12 +2,12 @@ import Link from "next/link";
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ComponentProps, ReactNode, Ref } from "react";
 
 /**
- * The pill — design-system.md §5, bar.md §5. Full pill, uppercase 14px/500
- * label, optional 6px dot, and the rolling-label hover: the label slides up
- * out of its clip box while an identical copy rises from below
- * (300ms --ease-out); the fill shifts one step (400ms). No lift, no scale.
- *
- * Pure CSS (no client JS), so it works in Server Components.
+ * The button of the working-paper system (DESIGN.md, Components). Square
+ * corners, Libre Franklin 600 at 15px, three stocks: primary (graphite ink
+ * on paper), secondary (ruled outline), paper (the lighter sheet). `dot`
+ * adds the pencil arrow that marks a forward action. Pure markup, so it
+ * renders in Server Components. The component keeps its old name so every
+ * call site still resolves.
  *
  *   <RollPill href="/signup" dot>Start free</RollPill>              → next/link
  *   <RollPill href="https://…" native>Docs</RollPill>                → plain <a>
@@ -18,9 +18,9 @@ import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ComponentProps, ReactN
 
 type Common = {
   children: ReactNode;
-  /** primary = graphite, secondary = haze, paper = white (use on haze surfaces). */
+  /** primary = graphite ink, secondary = ruled outline, paper = the lighter sheet. */
   variant?: "primary" | "secondary" | "paper";
-  /** Show the 6px dot. `true` = after the label; "before" puts it first. */
+  /** Show the pencil arrow. `true` = after the label; "before" puts it first. */
   dot?: boolean | "before" | "after";
   /** Optional leading icon (e.g. the Google mark). Decorative. */
   icon?: ReactNode;
@@ -56,7 +56,11 @@ type ButtonProps = Common &
 export type RollPillProps = LinkProps | NativeAnchorProps | ButtonProps;
 
 function Inner({ label, dot, icon }: { label: ReactNode; dot: Common["dot"]; icon?: ReactNode }) {
-  const dotEl = <span className="pm-pill-dot" aria-hidden="true" />;
+  const arrow = (
+    <svg className="pm-pill-dot" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+      <path d="M2 7.2h9.2M7.6 3.4 11.4 7.2 7.6 11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="square" />
+    </svg>
+  );
   return (
     <>
       {icon ? (
@@ -64,12 +68,9 @@ function Inner({ label, dot, icon }: { label: ReactNode; dot: Common["dot"]; ico
           {icon}
         </span>
       ) : null}
-      {dot === "before" ? dotEl : null}
-      <span className="pm-pill-roll">
-        <span>{label}</span>
-        <span aria-hidden="true">{label}</span>
-      </span>
-      {dot === true || dot === "after" ? dotEl : null}
+      {dot === "before" ? arrow : null}
+      <span className="pm-pill-roll">{label}</span>
+      {dot === true || dot === "after" ? arrow : null}
     </>
   );
 }
@@ -135,7 +136,7 @@ export default function RollPill(props: RollPillProps) {
       data-size={size}
       data-block={block ? "" : undefined}
     >
-      <Inner label={pending ? pendingLabel : children} dot={pending ? "after" : dot} icon={icon} />
+      <Inner label={pending ? pendingLabel : children} dot={pending ? false : dot} icon={icon} />
     </button>
   );
 }

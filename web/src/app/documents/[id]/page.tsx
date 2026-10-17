@@ -7,7 +7,7 @@ import RollLabel from "@/components/app/roll-label";
 import RollPill from "@/components/motion/roll-pill";
 import SavedDocumentViewer from "@/components/documents/saved-document-viewer";
 import PendingSubmitButton from "@/components/documents/pending-submit-button";
-import { StatusBadge, VerdictBadge, filenameParts, formatDayTime } from "@/components/documents/verdict";
+import { BreakableFilename, StatusBadge, VerdictBadge, formatDayTime } from "@/components/documents/verdict";
 import { deleteDocument, rerunDocument } from "../actions";
 
 export default async function DocumentDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -77,7 +77,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
               <span className="pm-app-count">Report</span>
             </div>
           }
-          title={filenameParts(doc.filename)}
+          title={<BreakableFilename name={doc.filename} />}
           description={
             <>
               Verified <time dateTime={doc.created_at}>{formatDayTime(doc.created_at)}</time>

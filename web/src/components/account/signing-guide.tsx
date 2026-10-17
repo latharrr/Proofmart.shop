@@ -1,17 +1,17 @@
+import Tickmark from "@/components/paper/tickmark";
 import CodeCard from "./code-card";
 import DepthStage from "./depth-stage";
 
 /**
- * "How signing works": a delivery as it arrives (headers and body on the
- * graphite stage) with your server's check floating in front of it — the
- * HMAC you compute, equal to the header you received. Then the code that
- * does it, ready to paste.
+ * "How signing works": a delivery as it arrives (headers and body on a
+ * printout) with your server's check clipped beneath it: the HMAC you
+ * compute, equal to the header you received. Then the code that does it,
+ * ready to paste.
  */
 export default function SigningGuide() {
   return (
     <aside className="pm-acct-aside" aria-labelledby="pm-acct-sign-title">
       <div className="pm-acct-aside-head">
-        <p className="pm-t-label pm-acct-kicker">Signing</p>
         <h2 id="pm-acct-sign-title" className="pm-t-heading-sm">
           Verifying a delivery
         </h2>
@@ -31,7 +31,7 @@ export default function SigningGuide() {
             </p>
             <p className="pm-t-mono pm-acct-sig-v">sha256=4be1…9c0d</p>
             <p className="pm-acct-sig-eq">
-              <span className="pm-acct-sig-mark" aria-hidden="true" />
+              <Tickmark kind="agreed" size={15} className="pm-acct-sig-mark" />
               equals <code className="pm-t-mono">x-proofmart-signature</code>, so it came from ProofMart
             </p>
           </div>

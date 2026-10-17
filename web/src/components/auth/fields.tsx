@@ -168,7 +168,6 @@ export function PasswordField({
           )}
           {capsLock && (
             <span id={capsId} className="pm-auth-caps" role="status">
-              <span className="pm-auth-caps-key" aria-hidden="true">⇪</span>
               Caps Lock is on
             </span>
           )}

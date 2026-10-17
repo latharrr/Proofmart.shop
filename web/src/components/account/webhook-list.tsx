@@ -1,6 +1,7 @@
 import ConfirmSubmitButton from "@/components/confirm-submit-button";
 import { formatAgo, formatDay, formatDayTime } from "@/components/account/format";
 import { deleteWebhook, toggleWebhook } from "@/app/account/webhooks/actions";
+import Tickmark, { type TickKind } from "@/components/paper/tickmark";
 import PillLabel from "./pill-label";
 
 export interface WebhookRow {
@@ -19,22 +20,22 @@ export interface DeliveryRow {
 }
 
 /**
- * Delivery outcomes, in words. Everything stays achromatic — a delivery is
- * not a verdict, and red only ever means FAIL — so a failure is told apart
- * by its words, its × glyph and a heavier ink, not by colour.
+ * Delivery outcomes, in words and graphite tickmarks. Nothing here takes a
+ * pencil colour: a delivery is not a verdict, and red only ever means FAIL,
+ * so a failure is told apart by its words, its break mark and heavier ink.
  */
-function deliveryState(d: DeliveryRow): { label: string; glyph: string; tone?: "error" } {
+function deliveryState(d: DeliveryRow): { label: string; tick: TickKind; tone?: "error" } {
   switch (d.status) {
     case "success":
-      return { label: "Delivered", glyph: "✓" };
+      return { label: "Delivered", tick: "agreed" };
     case "pending":
-      return d.attempt_count > 0 ? { label: "Retrying", glyph: "↻" } : { label: "Queued", glyph: "·" };
+      return d.attempt_count > 0 ? { label: "Retrying", tick: "query" } : { label: "Queued", tick: "none" };
     case "exhausted":
-      return { label: "Gave up", glyph: "×", tone: "error" };
+      return { label: "Gave up", tick: "break", tone: "error" };
     case "failed":
-      return { label: "Failed", glyph: "×", tone: "error" };
+      return { label: "Failed", tick: "break", tone: "error" };
     default:
-      return { label: d.status, glyph: "·" };
+      return { label: d.status, tick: "none" };
   }
 }
 
@@ -137,7 +138,7 @@ export default function WebhookList({ hooks, deliveriesByWebhook, now }: { hooks
                     return (
                       <li key={j} className="pm-acct-delivery">
                         <span className="pm-acct-delivery-state" data-tone={st.tone}>
-                          <span aria-hidden="true">{st.glyph}</span> {st.label}
+                          <Tickmark kind={st.tick} size={14} /> {st.label}
                         </span>
                         <span className="pm-t-mono pm-acct-delivery-event">{d.event_type}</span>
                         <span className="pm-acct-delivery-meta">

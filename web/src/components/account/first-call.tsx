@@ -3,14 +3,13 @@ import CodeCard from "./code-card";
 import DepthStage from "./depth-stage";
 
 /**
- * "Make your first call": the request on a graphite terminal, and the
- * response it produces floating in front of it — the page's depth moment.
+ * "Make your first call": the request as a printout, and the response it
+ * produces clipped beneath it.
  */
 export default function FirstCall() {
   return (
     <aside className="pm-acct-aside" aria-labelledby="pm-acct-quick-title">
       <div className="pm-acct-aside-head">
-        <p className="pm-t-label pm-acct-kicker">Quickstart</p>
         <h2 id="pm-acct-quick-title" className="pm-t-heading-sm">
           Make your first call
         </h2>
@@ -19,7 +18,7 @@ export default function FirstCall() {
 
       <DepthStage
         label="POST /v1/verify"
-        floatLabel="← 200 OK · application/json"
+        floatLabel="200 OK · application/json"
         float={
           <div className="pm-acct-resp" aria-label="An example response">
             <div className="pm-acct-resp-head">

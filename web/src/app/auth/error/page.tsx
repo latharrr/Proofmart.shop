@@ -1,3 +1,4 @@
+import { Arrow } from "@/components/paper/tickmark";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import AuthShell, { CrossLink } from "@/components/auth/auth-shell";
@@ -121,9 +122,7 @@ export default async function AuthErrorPage({
                   <span className="pm-auth-path-doing">{p.doing}</span>
                   <span className="pm-auth-path-next pm-t-label">
                     {p.next}
-                    <span className="pm-auth-path-arrow" aria-hidden="true">
-                      →
-                    </span>
+                    <Arrow className="pm-auth-path-arrow" />
                   </span>
                 </Link>
               </li>

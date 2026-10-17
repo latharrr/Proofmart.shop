@@ -1,68 +1,90 @@
-import LineReveal from "@/components/motion/line-reveal";
-import Reveal from "@/components/motion/reveal";
 import RollPill from "@/components/motion/roll-pill";
-import Tilt from "@/components/motion/tilt";
-import SectionKicker from "@/components/home/section-kicker";
+import SheetHead from "@/components/home/sheet-head";
+import Tickmark from "@/components/paper/tickmark";
+import { PLANS } from "@/lib/billing/plans";
 import { PRICING } from "@/lib/home-data";
 
+/**
+ * The plans as a two-column comparison schedule, the form a buyer's finance
+ * team already reads: one row per line item, one column per plan, and the
+ * action written at the foot of each column. Mirrors lib/billing/plans.ts.
+ */
 export default function PricingSection() {
+  const [free, pro] = PRICING;
+  // Line items, each true of both columns as lib/billing/plans.ts and
+  // lib/home-data.ts state them; a dash means the plan doesn't include it.
+  const rows: { k: string; free: string; pro: string; tick?: boolean }[] = [
+    { k: "For", free: free.body, pro: pro.body },
+    {
+      k: "Verify calls a month",
+      free: PLANS.free.monthlyVerifyLimit.toLocaleString("en-IN"),
+      pro: PLANS.pro.monthlyVerifyLimit.toLocaleString("en-IN"),
+      tick: true,
+    },
+    { k: "Markers", free: "All six, same engine", pro: "All six, same engine", tick: true },
+    { k: "Ways in", free: "Upload, REST API, webhooks, CLI", pro: "Upload, REST API, webhooks, CLI", tick: true },
+    { k: "Support", free: "—", pro: "Priority email support", tick: true },
+  ];
   return (
-    <section id="pricing" className="pm-mk-section pm-mk-pricing" aria-labelledby="pricing-title">
+    <section id="pricing" className="pm-h-section" aria-labelledby="pricing-title">
       <div className="pm-wrap">
-        <div className="pm-mk-head pm-mk-head-split">
-          <div>
-            <SectionKicker n="06">Pricing</SectionKicker>
-            <LineReveal as="h2" id="pricing-title" className="pm-t-heading-lg">
-              Flat monthly. <br />
-              No per-page metering.
-            </LineReveal>
-          </div>
-          <div className="pm-mk-head-aside">
-            <Reveal as="p" className="pm-t-body-lg pm-mk-lead">
-              Start free with the full engine. Upgrade when your team runs ProofMart inside a review or underwriting loop.
-            </Reveal>
-          </div>
-        </div>
+        <SheetHead
+          id="pricing-title"
+          wp="F"
+          title="Flat monthly. No per-page metering."
+          aside={<p>Start free with the full engine. Upgrade when your team runs ProofMart inside a review or underwriting loop.</p>}
+        />
 
-        <div className="pm-mk-plans">
-          {PRICING.map((p, i) => {
-            const pro = p.highlight === true;
-            return (
-              <Reveal key={p.tier} delay={i * 80} className="pm-mk-plan-wrap">
-                <Tilt max={4} className="pm-mk-plan-tilt">
-                  <article className="pm-mk-plan" data-pro={pro ? "" : undefined}>
-                    <div className="pm-mk-plan-top">
-                      <span className="pm-t-label">{p.tier}</span>
-                      {pro && (
-                        <span className="pm-t-label pm-mk-plan-tag">
-                          <span className="pm-mk-kdot" aria-hidden="true" />
-                          Recommended
-                        </span>
-                      )}
-                    </div>
-                    <div className="pm-mk-plan-price">
-                      <span className="pm-t-heading-lg">{p.price}</span>
-                      <span className="pm-t-body pm-mk-plan-unit">{p.unit}</span>
-                    </div>
-                    <p className="pm-t-body pm-mk-plan-body">{p.body}</p>
-                    <ul className="pm-mk-plan-list">
-                      {p.included.map((li) => (
-                        <li key={li}>{li}</li>
-                      ))}
-                    </ul>
-                    <RollPill href="/signup" variant={pro ? "paper" : "primary"} dot={pro} className="pm-mk-plan-cta">
+        <div className="pm-ledger-wrap">
+          <table className="pm-ledger pm-h-plans">
+            <caption className="pm-sr">Plans compared</caption>
+            <thead>
+              <tr>
+                <td />
+                {PRICING.map((p) => (
+                  <th key={p.tier} scope="col" data-pro={p.highlight ? "" : undefined}>
+                    <span className="pm-h-plan-tier">{p.tier}</span>
+                    <span className="pm-h-plan-price">
+                      <span className="pm-mono">{p.price}</span>
+                      <span className="pm-h-plan-unit">{p.unit}</span>
+                    </span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.k}>
+                  <th scope="row">{r.k}</th>
+                  <td>
+                    {r.tick && r.free !== "—" ? <Tickmark kind="agreed" size={15} /> : null}
+                    {r.free}
+                  </td>
+                  <td data-pro="">
+                    {r.tick ? <Tickmark kind="agreed" size={15} /> : null}
+                    {r.pro}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td />
+                {PRICING.map((p) => (
+                  <td key={p.tier}>
+                    <RollPill href="/signup" variant={p.highlight ? "primary" : "secondary"} dot={p.highlight}>
                       {p.cta}
                     </RollPill>
-                  </article>
-                </Tilt>
-              </Reveal>
-            );
-          })}
+                  </td>
+                ))}
+              </tr>
+            </tfoot>
+          </table>
         </div>
 
-        <p className="pm-mk-note">
-          Prices in INR, billed monthly. A call is one <span className="pm-t-mono">/v1/verify</span> request, whatever the page count. Every key is
-          also rate-limited to 60 requests a minute on both plans.
+        <p className="pm-note">
+          Prices in INR, billed monthly. A call is one <span className="pm-mono">/v1/verify</span> request, whatever the page count. Every key is also
+          rate-limited to 60 requests a minute on both plans.
         </p>
       </div>
     </section>

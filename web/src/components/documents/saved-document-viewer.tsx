@@ -8,6 +8,8 @@ import type { VerifyEnvelope } from "@/lib/api/envelope";
 import type { PdfRect } from "@/lib/pdf/types";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import Frame from "@/components/motion/frame";
+import Tickmark, { Arrow, Ident, VERDICT_TICK } from "@/components/paper/tickmark";
+import { usePageTurn } from "@/components/paper/use-page-turn";
 import { VERDICT_TONE, VerdictBadge, documentKindLabel, plural, type VerdictValue } from "./verdict";
 
 const CANVAS_TARGET_WIDTH = 1000;
@@ -54,6 +56,8 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewRef = useRef<HTMLElement>(null);
   const renderChain = useRef<Promise<void>>(Promise.resolve());
+  const leafRef = useRef<HTMLDivElement>(null);
+  usePageTurn(leafRef, page);
 
   // Fetch the stored PDF once — the findings and verdict are already in
   // `envelope`; only the page image needs this round trip.
@@ -219,7 +223,9 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
           onClick={() => select(item)}
         >
           <span className="pm-rfind-top">
-            <span className="pm-rfind-marker">{item.marker}</span>
+            <span className="pm-rfind-marker">
+              <Ident>{item.marker}</Ident>
+            </span>
             {item.kind === "finding" ? <VerdictBadge verdict={item.verdict} /> : <span className="pm-rfind-loc-inline">{location(item)}</span>}
           </span>
           {item.name && <span className="pm-rfind-name">{item.name}</span>}
@@ -239,11 +245,11 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
   return (
     <div className="pm-report" data-testid="saved-document-report">
       <section className="pm-report-summary" aria-label="Verdict">
-        <Frame columns={5} tone="paper" stageClassName="pm-report-summary-stage">
+        <Frame tone="sheet" stageClassName="pm-report-summary-stage">
           <div className="pm-report-verdict" data-verdict={verification.verdict}>
             <p className="pm-report-label">Verdict</p>
             <p className="pm-report-verdict-word" style={{ color: tone.color }}>
-              <span aria-hidden="true" className="pm-report-verdict-dot" />
+              <Tickmark kind={VERDICT_TICK[verification.verdict]} size={36} className="pm-report-verdict-dot" />
               {tone.label}
             </p>
             <p className="pm-report-verdict-line">{sentence}</p>
@@ -324,16 +330,17 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
               </span>
               <span className="pm-report-stepper">
                 <button type="button" aria-label="Previous page" onClick={() => goToPage(-1)} disabled={page <= 1}>
-                  ‹
+                  <Arrow dir="left" />
                 </button>
                 <button type="button" aria-label="Next page" onClick={() => goToPage(1)} disabled={page >= pageCount}>
-                  ›
+                  <Arrow />
                 </button>
               </span>
             </div>
 
             <div className="pm-report-stage-wrap">
               <div className="pm-report-stage" style={{ ["--pm-ar" as string]: `${dims.widthPt / dims.heightPt}`, aspectRatio: `${dims.widthPt} / ${dims.heightPt}` }}>
+                <div ref={leafRef} className="pm-leaf" aria-hidden="true" />
                 {!hasStoredFile && (
                   <p className="pm-report-stage-note">The original PDF wasn&apos;t kept, so there&apos;s no page image to show. The findings are real.</p>
                 )}

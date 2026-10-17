@@ -6,10 +6,10 @@ import RollPill from "@/components/motion/roll-pill";
 import Wordmark from "@/components/brand/wordmark";
 
 /**
- * Marketing header. Signed out: wordmark · nav · SIGN IN · GET ACCESS.
- * Signed in: wordmark · nav · NEW SCAN · ACCOUNT (one pill holding the
- * email, account links and sign out) — the same footprint, so it never
- * wraps at 1440. Below 1180px the nav and account collapse into MENU.
+ * Marketing header: the printed head of the pad, closed by a double rule.
+ * Signed out: wordmark · nav · Sign in · Get access. Signed in: wordmark ·
+ * nav · New scan · Account (one control holding the email, account links and
+ * sign out). Below 1100px the nav and account collapse into Menu.
  */
 export default async function Topbar() {
   const signedIn = Boolean(await getSessionClaims());

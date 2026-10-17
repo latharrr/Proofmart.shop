@@ -25,8 +25,10 @@ chats/   the design conversation that produced them — historical
 
 `project/` and `chats/` are the design handoff bundle this repo started from.
 They are kept for provenance. **The application has since been built; do not
-treat those prototypes as the spec.** The marketing page's current design
-system lives in `design-system.md` and `bar.md` at the repo root.
+treat those prototypes as the spec.** The current design system (the
+"working paper" world, used on every page) is recorded in `DESIGN.md` at the
+repo root, with product context in `PRODUCT.md`. `design-system*.md` and
+`bar*.md` describe earlier, retired directions and are kept for history only.
 
 ---
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 /**
  * /security's sticky "On this page" list. Scroll spy: the last section whose
- * top has passed the line under the header carries the volt dot.
+ * top has passed the line under the header is ticked in red pencil.
  */
 export default function SecurityToc({ items }: { items: { id: string; label: string }[] }) {
   const [active, setActive] = useState<string | null>(null);
@@ -30,13 +30,13 @@ export default function SecurityToc({ items }: { items: { id: string; label: str
   }, [items]);
 
   return (
-    <nav aria-label="On this page" className="pm-mk-toc">
-      <p className="pm-t-label pm-mk-mute">On this page</p>
+    <nav aria-label="On this page" className="pm-sec-toc">
+      <p className="pm-label">On this page</p>
       <ol>
         {items.map((t, i) => (
           <li key={t.id}>
             <a href={`#${t.id}`} data-active={active === t.id ? "true" : "false"} aria-current={active === t.id ? "true" : undefined}>
-              <span className="pm-mk-toc-n">{String(i + 1).padStart(2, "0")}</span>
+              <span className="pm-mono pm-sec-toc-n">{String(i + 1).padStart(2, "0")}</span>
               {t.label}
             </a>
           </li>

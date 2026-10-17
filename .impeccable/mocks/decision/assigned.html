@@ -1,0 +1,56 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Reservation Chart</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1440px;height:900px;overflow:hidden}
+body{background:#173a6b;font-family:"Helvetica Neue",Arial,sans-serif;color:#f6f5f0;position:relative}
+body::before{content:"";position:absolute;inset:0;background:
+ repeating-linear-gradient(0deg,transparent 0 179px,rgba(0,0,0,.18) 179px 181px),
+ radial-gradient(circle at 20% 30%,rgba(255,255,255,.05),transparent 60%)}
+.led{position:absolute;left:0;right:0;top:0;height:56px;background:#0b0c0d;display:flex;align-items:center;gap:36px;padding:0 40px;font-family:"Courier New",monospace;font-weight:700;font-size:22px;letter-spacing:.12em;color:#ffb000;border-bottom:4px solid #f2c230}
+.led b{color:#d6312b}.led .g{color:#3fbf6a}
+.led .brand{color:#f6f5f0;letter-spacing:.04em;font-family:"Helvetica Neue",Arial;font-weight:800}
+.led nav{margin-left:auto;display:flex;gap:28px;color:#f6f5f0;font-family:Arial;font-weight:600;font-size:15px;letter-spacing:.02em}
+.stencil{position:absolute;left:56px;top:110px;font-family:"Arial Narrow","Helvetica Neue",Arial;font-weight:900;color:#f2c230;line-height:.86;letter-spacing:-.01em;font-size:150px;text-transform:uppercase}
+.coach{position:absolute;left:60px;top:96px;font-family:"Courier New",monospace;font-size:20px;color:#f2c230;letter-spacing:.2em}
+.sub{position:absolute;left:60px;top:560px;width:520px;font-size:22px;line-height:1.4;color:#dfe6f0}
+.act{position:absolute;left:60px;top:680px;display:flex;gap:14px}
+.drop{width:340px;height:120px;border:3px dashed #f2c230;display:flex;flex-direction:column;justify-content:center;padding:0 24px;color:#f2c230;font-size:24px;font-weight:800;background:rgba(0,0,0,.18)}
+.drop small{font-size:15px;color:#dfe6f0;font-weight:500;margin-top:6px}
+.key{height:120px;width:200px;background:#f2c230;color:#111;font-weight:800;font-size:22px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 16px}
+.chart{position:absolute;right:70px;top:96px;width:700px;height:860px;background:#f6f5f0;color:#23262e;transform:rotate(.6deg);box-shadow:0 2px 0 rgba(0,0,0,.25),0 30px 60px rgba(0,0,0,.35);font-family:"Courier New",monospace;padding:28px 64px}
+.chart::before,.chart::after{content:"";position:absolute;top:0;bottom:0;width:22px;background:radial-gradient(circle,#173a6b 5px,transparent 6px) 0 0/22px 30px repeat-y}
+.chart::before{left:10px}.chart::after{right:10px}
+.chart h3{font-size:22px;font-weight:700;letter-spacing:.08em;border-bottom:2px solid #23262e;padding-bottom:8px}
+.chart .meta{display:flex;justify-content:space-between;font-size:14px;margin:8px 0 14px;letter-spacing:.06em}
+.row{display:grid;grid-template-columns:44px 90px 1fr 110px 120px;font-size:15px;padding:6px 0;border-bottom:1px dotted #9a9b98;letter-spacing:.03em}
+.row.h{font-weight:700;border-bottom:2px solid #23262e}
+.row.f{background:rgba(214,49,43,.1);outline:3px solid #d6312b;outline-offset:2px;position:relative}
+.row.f s{color:#a8221c;text-decoration-thickness:3px}
+.row.r{outline:2px dashed #e58a00;outline-offset:2px}
+.verdict{position:absolute;right:56px;bottom:90px;border:5px solid #d6312b;color:#d6312b;font-family:"Arial Narrow",Arial;font-weight:900;font-size:76px;padding:4px 20px;transform:rotate(-7deg);letter-spacing:.04em}
+.tag{position:absolute;right:62px;top:62px;font-size:13px;letter-spacing:.2em;color:#a8221c;font-weight:700}
+</style></head><body>
+<div class="led"><span class="brand">ProofMart</span><span>SAMPLE · APR STATEMENT · 6 PP</span><b>FAIL</b><span>4 FINDINGS</span><span class="g">SAME BYTES · SAME VERDICT</span><nav><span>Markers</span><span>API</span><span>Security</span><span>Pricing</span><span>Sign in</span></nav></div>
+<div class="coach">PM · 01 &nbsp; THE CHECK</div>
+<div class="stencil">Every row<br>of the<br>statement,<br>checked.</div>
+<p class="sub">ProofMart re-adds a bank statement line by line and pins each break to the page and row it lives on. No model, no score: the arithmetic, shown.</p>
+<div class="act"><div class="drop">Drop a PDF here<small>or run the sample · no account needed</small></div><div class="key">Get an API key →</div></div>
+<div class="chart"><span class="tag">SAMPLE</span>
+<h3>VERIFICATION CHART · PAGE 4 OF 6</h3>
+<div class="meta"><span>ACCT XXXX 4821</span><span>01–30 APR</span><span>INR</span></div>
+<div class="row h"><span>ROW</span><span>DATE</span><span>DESCRIPTION</span><span>AMOUNT</span><span>BALANCE</span></div>
+<div class="row"><span>12</span><span>18 APR</span><span>UPI/RAZORPAY/RENT</span><span>-18,000</span><span>71,940.00</span></div>
+<div class="row"><span>13</span><span>19 APR</span><span>NEFT SALARY ADJ</span><span>+4,770</span><span>76,710.00</span></div>
+<div class="row r"><span>14</span><span>21 APR</span><span>IMPS/??RAN?SFER</span><span>+7,500</span><span>84,210.00</span></div>
+<div class="row"><span>15</span><span>22 APR</span><span>ATM WDL KORAMANGALA</span><span>-2,000</span><span>82,210.00</span></div>
+<div class="row"><span>16</span><span>24 APR</span><span>CHQ DEP 004512</span><span>+2,000</span><span>84,210.00</span></div>
+<div class="row f"><span>17</span><span>26 APR</span><span>NEFT/ACME LTD</span><span>+12,500</span><span><s>91,710.00</s></span></div>
+<div class="row"><span>18</span><span>27 APR</span><span>UPI/SWIGGY</span><span>-640</span><span>91,070.00</span></div>
+<div class="row"><span>19</span><span>28 APR</span><span>ECS/LIC PREMIUM</span><span>-3,200</span><span>87,870.00</span></div>
+<div class="row"><span>20</span><span>29 APR</span><span>UPI/BESCOM</span><span>-1,480</span><span>86,390.00</span></div>
+<div class="row"><span>21</span><span>30 APR</span><span>INT CREDIT</span><span>+212</span><span>86,602.00</span></div>
+<div class="row"><span>22</span><span>30 APR</span><span>CARRIED TO P5</span><span></span><span>86,602.00</span></div>
+<div class="verdict">FAIL</div>
+</div>
+</body></html>

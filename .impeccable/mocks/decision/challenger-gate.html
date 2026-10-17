@@ -1,0 +1,30 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Boarding pass and gate board</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1440px;height:900px;overflow:hidden}
+body{background:#0d0f12;color:#f7f7f5;font-family:"Helvetica Neue",Arial,sans-serif}
+.nav{display:flex;gap:30px;padding:22px 48px;font-size:15px;border-bottom:1px solid #2a2e33}.nav b{font-size:20px;margin-right:auto}
+h1{font-size:96px;line-height:.95;letter-spacing:-.03em;font-weight:700;padding:56px 48px 0;width:900px}
+.board{position:absolute;left:48px;right:520px;top:390px;font-family:"Courier New";font-size:22px;font-weight:700}
+.b{display:grid;grid-template-columns:140px 1fr 120px 150px;padding:14px 16px;border-bottom:1px solid #2a2e33;letter-spacing:.06em}
+.b.h{color:#8b9097;font-size:15px}
+.b.lit{background:#ffd400;color:#0d0f12}
+.F{color:#ff4b3e}.R{color:#ffb000}.C{color:#3fd07a}
+.pass{position:absolute;right:48px;top:150px;width:430px;height:680px;background:#f7f7f5;color:#0d0f12;padding:30px;font-family:"Courier New"}
+.pass .s{border-bottom:2px dashed #0d0f12;padding:14px 0;font-size:16px}.pass .s b{display:block;font-size:34px;font-family:"Helvetica Neue";margin-top:4px}
+.code{height:120px;margin-top:24px;background:repeating-linear-gradient(90deg,#0d0f12 0 3px,transparent 3px 5px,#0d0f12 5px 9px,transparent 9px 12px)}
+.cta{position:absolute;left:48px;top:300px;display:flex;gap:14px}.cta span{background:#ffd400;color:#0d0f12;padding:16px 26px;font-weight:800}.cta span+span{background:none;color:#f7f7f5;border:2px solid #f7f7f5}
+</style></head><body>
+<div class="nav"><b>ProofMart</b><span>Markers</span><span>API</span><span>Security</span><span>Sign in</span></div>
+<h1>Every PDF gets a verdict.</h1>
+<div class="cta"><span>Verify a PDF</span><span>API docs</span></div>
+<div class="board">
+<div class="b h"><span>DOC</span><span>FILE</span><span>PAGES</span><span>VERDICT</span></div>
+<div class="b lit"><span>PM-0412</span><span>APR_STATEMENT.PDF</span><span>6</span><span>FAIL</span></div>
+<div class="b"><span>PM-0411</span><span>MAR_STATEMENT.PDF</span><span>5</span><span class="R">REVIEW</span></div>
+<div class="b"><span>PM-0410</span><span>FEB_STATEMENT.PDF</span><span>4</span><span class="C">CLEAR</span></div>
+<div class="b"><span>PM-0409</span><span>SALARY_SLIP.PDF</span><span>1</span><span class="C">CLEAR</span></div>
+</div>
+<div class="pass"><div class="s">DOCUMENT<b>APR STATEMENT</b></div><div class="s">VERDICT<b class="F">FAIL</b></div><div class="s">FINDINGS<b>4 · p4 r17</b></div><div class="s">SHA256<b style="font-size:18px">9f2c…a71e</b></div><div class="code"></div></div>
+</body></html>

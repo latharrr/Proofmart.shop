@@ -9,12 +9,12 @@ import PricingSection from "@/components/home/pricing-section";
 import ClosingSection from "@/components/home/closing-section";
 import SiteFooter from "@/components/home/site-footer";
 
-// The case, in the order a buyer asks it: what is it and why believe it
-// (hero, then the live scan), how does it work, what does it catch, what do
-// I get back, how do I wire it in, what does it cost, and is it safe.
+// The developer's path, in order: see a document re-footed (hero), inspect
+// the evidence live (W/P A), how it works (B), what it checks (C), what the
+// API returns (D), how to wire it in (E), what it costs (F), and the close.
 export default function Home() {
   return (
-    <div className="pm-page pm-mk">
+    <div className="pm-page">
       <Topbar />
       <main id="main">
         <Hero />
