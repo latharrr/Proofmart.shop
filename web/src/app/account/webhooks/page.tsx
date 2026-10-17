@@ -1,35 +1,23 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
-import { MONO, SANS } from "@/lib/evidence-data";
+import AppShell, { AppPage, AppPageHeader } from "@/components/app/app-shell";
+import RollPill from "@/components/motion/roll-pill";
+import Reveal from "@/components/motion/reveal";
+import SigningGuide from "@/components/account/signing-guide";
 import CreateWebhookForm from "./create-webhook-form";
-import ConfirmSubmitButton from "@/components/confirm-submit-button";
-import { deleteWebhook, toggleWebhook } from "./actions";
+import WebhookList, { type DeliveryRow, type WebhookRow } from "@/components/account/webhook-list";
 
-interface WebhookRow {
-  id: string;
-  url: string;
-  enabled: boolean;
-  created_at: string;
-}
-
-interface DeliveryRow {
-  webhook_endpoint_id: string;
-  event_type: string;
-  status: string;
-  attempt_count: number;
-  created_at: string;
-}
-
-const STATUS_COLOR: Record<string, string> = { pending: "#767C83", success: "#1F6B4A", failed: "#B4231F", exhausted: "#B4231F" };
+/** Mirrors MAX_WEBHOOKS_PER_USER in ./actions.ts (a "use server" module can only export actions). */
+const WEBHOOK_LIMIT = 10;
 
 export default async function WebhooksPage() {
   if (!isSupabaseConfigured()) redirect("/login");
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) redirect("/login");
+  const email = typeof data.claims.email === "string" ? data.claims.email : null;
 
-  const { data: webhooks } = await supabase
+  const { data: webhooks, error } = await supabase
     .from("webhook_endpoints")
     .select("id, url, enabled, created_at")
     .order("created_at", { ascending: false })
@@ -53,77 +41,99 @@ export default async function WebhooksPage() {
     deliveriesByWebhook.set(d.webhook_endpoint_id, list);
   }
 
+  const hooks = webhooks ?? [];
+  const enabledCount = hooks.filter((h) => h.enabled).length;
+
   return (
-    <div style={{ minHeight: "100vh", background: "#FFFFFF" }}>
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "56px 24px" }}>
-        <Link href="/" className="pm-hoverable" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 40, width: "fit-content" }}>
-          <div aria-hidden="true" style={{ width: 22, height: 22, background: "#0E1216", position: "relative" }}>
-            <div style={{ position: "absolute", inset: 5, border: "1.5px solid #F5F5F0" }} />
+    <AppShell active="webhooks" email={email}>
+      <AppPage>
+        <AppPageHeader
+          title="Webhooks"
+          description={
+            <>
+              When a <code className="pm-acct-code-inline">/v1/verify</code> call made with one of your keys finishes, ProofMart POSTs the result to your
+              endpoints — signed, so you can prove it came from us. No polling.
+            </>
+          }
+          meta={
+            hooks.length > 0 ? (
+              <p className="pm-t-label pm-acct-meta">
+                <span className="pm-acct-meta-item" data-on="">
+                  {hooks.length} of {WEBHOOK_LIMIT} endpoints
+                </span>
+                {enabledCount < hooks.length && <span className="pm-acct-meta-item">{hooks.length - enabledCount} paused</span>}
+              </p>
+            ) : undefined
+          }
+        />
+
+        <div className="pm-acct-grid">
+          <div className="pm-acct-create-slot">
+            <CreateWebhookForm used={hooks.length} limit={WEBHOOK_LIMIT} />
           </div>
-          <span style={{ fontFamily: SANS, fontWeight: 600, letterSpacing: "-0.01em", fontSize: 17, color: "#0E1216" }}>ProofMart</span>
-        </Link>
 
-        <h1 style={{ fontFamily: SANS, fontWeight: 500, fontSize: 24, letterSpacing: "-0.01em", margin: "0 0 6px" }}>Webhooks</h1>
-        <p style={{ fontFamily: SANS, fontSize: 14, color: "#767C83", margin: "0 0 32px", lineHeight: 1.5 }}>
-          Get <code style={{ fontFamily: MONO }}>verification.completed</code> and <code style={{ fontFamily: MONO }}>verification.failed</code> events pushed to
-          your server whenever an API key of yours calls <code style={{ fontFamily: MONO }}>/v1/verify</code>. Each delivery is signed — verify the{" "}
-          <code style={{ fontFamily: MONO }}>x-proofmart-signature</code> header with the secret shown at creation.
-        </p>
+          <SigningGuide />
 
-        <div style={{ marginBottom: 40 }}>
-          <CreateWebhookForm />
+          <Reveal as="section" delay={80} className="pm-acct-card pm-acct-list" aria-labelledby="pm-acct-hooks-title">
+            <div className="pm-acct-section-head">
+              <div className="pm-acct-section-title">
+                <h2 id="pm-acct-hooks-title" className="pm-t-heading-sm">
+                  Endpoints
+                </h2>
+                <span className="pm-t-mono pm-acct-count">{String(hooks.length).padStart(2, "0")}</span>
+              </div>
+            </div>
+
+            {error ? (
+              <div className="pm-acct-notice" role="alert">
+                <p className="pm-acct-notice-title">Your endpoints couldn&apos;t be loaded.</p>
+                <p className="pm-acct-hint">Deliveries are unaffected. This is a problem reaching storage; reload to try again.</p>
+                <RollPill href="/account/webhooks" variant="secondary" size="sm">
+                  Reload
+                </RollPill>
+              </div>
+            ) : hooks.length > 0 ? (
+              <WebhookList hooks={hooks} deliveriesByWebhook={deliveriesByWebhook} />
+            ) : (
+              <WebhooksEmpty />
+            )}
+          </Reveal>
         </div>
+      </AppPage>
+    </AppShell>
+  );
+}
 
-        {!webhooks || webhooks.length === 0 ? (
-          <p style={{ fontFamily: SANS, fontSize: 14, color: "#767C83" }}>No webhooks yet.</p>
-        ) : (
-          <div style={{ border: "1px solid #DDE1E4", borderRadius: 3 }}>
-            {webhooks.map((hook, i) => {
-              const recent = deliveriesByWebhook.get(hook.id) ?? [];
-              return (
-                <div key={hook.id} style={{ padding: "14px 16px", borderTop: i === 0 ? "none" : "1px solid #DDE1E4", opacity: hook.enabled ? 1 : 0.5 }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 12 }}>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontFamily: MONO, fontSize: 13, color: "#0E1216", wordBreak: "break-all" }}>{hook.url}</div>
-                      <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", marginTop: 4 }}>
-                        {hook.enabled ? "enabled" : "disabled"} · added {new Date(hook.created_at).toLocaleDateString()}
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <form action={toggleWebhook.bind(null, hook.id, !hook.enabled)}>
-                        <button type="submit" className="pm-hoverable" style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", background: "none", border: "1px solid #DDE1E4", borderRadius: 3, padding: "6px 10px", cursor: "pointer" }}>
-                          {hook.enabled ? "Disable" : "Enable"}
-                        </button>
-                      </form>
-                      <form action={deleteWebhook.bind(null, hook.id)}>
-                        <ConfirmSubmitButton
-                          confirmMessage={`Delete the webhook for ${hook.url}? It will stop receiving events immediately — this can't be undone.`}
-                          className="pm-hoverable"
-                          style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", background: "none", border: "1px solid #DDE1E4", borderRadius: 3, padding: "6px 10px", cursor: "pointer" }}
-                        >
-                          Delete
-                        </ConfirmSubmitButton>
-                      </form>
-                    </div>
-                  </div>
-                  {recent.length > 0 && (
-                    <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 4 }}>
-                      {recent.slice(0, 5).map((d, j) => (
-                        <div key={j} style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", display: "flex", gap: 10 }}>
-                          <span style={{ color: STATUS_COLOR[d.status] ?? "#767C83", fontWeight: 600 }}>{d.status.toUpperCase()}</span>
-                          <span>{d.event_type}</span>
-                          <span>{d.attempt_count} attempt{d.attempt_count === 1 ? "" : "s"}</span>
-                          <span>{new Date(d.created_at).toLocaleString()}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+function WebhooksEmpty() {
+  const steps = [
+    { t: "Add your URL above.", b: "Any public http(s) address on your server." },
+    { t: "Save the signing secret.", b: "It's shown once, right after you add the endpoint." },
+    {
+      t: (
+        <>
+          Call <code className="pm-acct-code-inline">/v1/verify</code> with an API key.
+        </>
+      ),
+      b: "The verdict is POSTed here as soon as it's ready.",
+    },
+  ];
+  return (
+    <div className="pm-acct-empty" data-testid="webhooks-empty">
+      <p className="pm-acct-empty-title pm-acct-hint">No endpoints yet. Three steps to your first delivery:</p>
+      <ol className="pm-acct-steps">
+        {steps.map((s, i) => (
+          <li key={i}>
+            <span className="pm-t-mono pm-acct-step-n" aria-hidden="true">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <span className="pm-acct-step-t">{s.t}</span>
+            <span className="pm-acct-hint">{s.b}</span>
+          </li>
+        ))}
+      </ol>
+      <RollPill href="/account/api-keys" variant="secondary" size="sm" dot>
+        Get an API key
+      </RollPill>
     </div>
   );
 }

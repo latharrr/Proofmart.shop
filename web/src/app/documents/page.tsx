@@ -1,17 +1,10 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
-import { MONO, SANS, VERDICT } from "@/lib/evidence-data";
-import { formatBytes } from "@/lib/pdf/rail-adapter";
 import type { DocumentRow } from "@/lib/documents";
-import ConfirmSubmitButton from "@/components/confirm-submit-button";
-import { deleteDocument, rerunDocument } from "./actions";
-
-const STATUS_LABEL: Record<DocumentRow["status"], string> = {
-  processing: "PROCESSING",
-  ready: "",
-  error: "ERROR",
-};
+import AppShell, { AppPage, AppPageHeader } from "@/components/app/app-shell";
+import RollPill from "@/components/motion/roll-pill";
+import DocumentList from "@/components/documents/document-list";
+import DocumentsEmpty from "@/components/documents/documents-empty";
 
 const PAGE_SIZE = 25;
 
@@ -20,134 +13,87 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) redirect("/login");
+  const email = typeof data.claims.email === "string" ? data.claims.email : null;
 
   const { page: pageParam } = await searchParams;
   const page = Math.max(1, Number(pageParam) || 1);
   const from = (page - 1) * PAGE_SIZE;
 
-  const { data: docs, count } = await supabase
+  const {
+    data: docs,
+    count,
+    error,
+  } = await supabase
     .from("documents")
     .select("id, filename, size_bytes, status, verdict, document_kind, findings_count, error_message, created_at", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(from, from + PAGE_SIZE - 1)
     .returns<Pick<DocumentRow, "id" | "filename" | "size_bytes" | "status" | "verdict" | "document_kind" | "findings_count" | "error_message" | "created_at">[]>();
 
-  const hasMore = (count ?? 0) > from + PAGE_SIZE;
+  const total = count ?? 0;
+  const hasMore = total > from + PAGE_SIZE;
+  const hasDocs = Boolean(docs && docs.length > 0);
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
-    <div style={{ minHeight: "100vh", background: "#FFFFFF" }}>
-      <div style={{ maxWidth: 880, margin: "0 auto", padding: "56px 24px" }}>
-        <Link href="/" className="pm-hoverable" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 40, width: "fit-content" }}>
-          <div aria-hidden="true" style={{ width: 22, height: 22, background: "#0E1216", position: "relative" }}>
-            <div style={{ position: "absolute", inset: 5, border: "1.5px solid #F5F5F0" }} />
+    <AppShell active="documents" email={email}>
+      <AppPage>
+        <AppPageHeader
+          title="My documents"
+          description="Every PDF you verify while signed in is saved here with its report. Only you can see them."
+          meta={
+            hasDocs ? (
+              <p className="pm-app-count">
+                {total} {total === 1 ? "document" : "documents"}
+              </p>
+            ) : undefined
+          }
+        />
+
+        {error ? (
+          <div className="pm-app-notice" role="alert">
+            <p className="pm-app-notice-title">Your documents couldn&apos;t be loaded.</p>
+            <p className="pm-app-notice-body">Nothing has been lost — this is a problem reaching storage. Reload the page to try again.</p>
+            <RollPill href={page > 1 ? `/documents?page=${page}` : "/documents"} variant="secondary" size="sm">
+              Reload
+            </RollPill>
           </div>
-          <span style={{ fontFamily: SANS, fontWeight: 600, letterSpacing: "-0.01em", fontSize: 17, color: "#0E1216" }}>ProofMart</span>
-        </Link>
-
-        <h1 style={{ fontFamily: SANS, fontWeight: 500, fontSize: 24, letterSpacing: "-0.01em", margin: "0 0 6px" }}>My documents</h1>
-        <p style={{ fontFamily: SANS, fontSize: 14, color: "#767C83", margin: "0 0 32px", lineHeight: 1.5 }}>
-          Every document you verify while signed in is saved here automatically. Nothing here is shared or public.
-        </p>
-
-        {!docs || docs.length === 0 ? (
-          <p style={{ fontFamily: SANS, fontSize: 14, color: "#767C83" }}>
-            No documents yet. <Link href="/#run" className="pm-hoverable" style={{ color: "#0E1216" }}>Verify one</Link> and it&apos;ll show up here.
-          </p>
+        ) : hasDocs && docs ? (
+          <DocumentList docs={docs} />
+        ) : page > 1 ? (
+          <div className="pm-app-notice">
+            <p className="pm-app-notice-title">There&apos;s nothing on page {page}.</p>
+            <p className="pm-app-notice-body">You may have deleted the documents that were here.</p>
+            <RollPill href="/documents" variant="secondary" size="sm">
+              Back to the newest
+            </RollPill>
+          </div>
         ) : (
-          <div style={{ border: "1px solid #DDE1E4", borderRadius: 3 }}>
-            {docs.map((doc, i) => {
-              const v = doc.verdict ? VERDICT[doc.verdict] : null;
-              return (
-                <div
-                  key={doc.id}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr auto",
-                    alignItems: "center",
-                    gap: 12,
-                    padding: "14px 16px",
-                    borderTop: i === 0 ? "none" : "1px solid #DDE1E4",
-                  }}
-                >
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 4 }}>
-                      <Link
-                        href={`/documents/${doc.id}`}
-                        className="pm-hoverable"
-                        style={{ fontFamily: SANS, fontSize: 14, color: "#0E1216", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 340 }}
-                      >
-                        {doc.filename}
-                      </Link>
-                      {v && (
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: MONO, fontSize: 10, fontWeight: 600, letterSpacing: "0.06em", color: v.color }}>
-                          <span aria-hidden="true">{v.glyph}</span>
-                          {doc.verdict}
-                        </span>
-                      )}
-                      {doc.status !== "ready" && (
-                        <span style={{ fontFamily: MONO, fontSize: 10, color: doc.status === "error" ? "#B4231F" : "#767C83", letterSpacing: "0.06em" }}>
-                          {STATUS_LABEL[doc.status]}
-                        </span>
-                      )}
-                    </div>
-                    <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.02em" }}>
-                      {doc.status === "ready"
-                        ? `${doc.findings_count} finding${doc.findings_count === 1 ? "" : "s"} · ${doc.document_kind ?? "generic"} · ${formatBytes(doc.size_bytes)} · ${new Date(doc.created_at).toLocaleDateString()}`
-                        : doc.status === "error"
-                          ? `${doc.error_message ?? "Processing failed."} · ${new Date(doc.created_at).toLocaleDateString()}`
-                          : new Date(doc.created_at).toLocaleDateString()}
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <Link
-                      href={`/documents/${doc.id}`}
-                      className="pm-hoverable"
-                      style={{ fontFamily: MONO, fontSize: 11, color: "#43494F", border: "1px solid #DDE1E4", borderRadius: 3, padding: "6px 10px" }}
-                    >
-                      Open
-                    </Link>
-                    <form action={rerunDocument.bind(null, doc.id)}>
-                      <button
-                        type="submit"
-                        className="pm-hoverable"
-                        style={{ fontFamily: MONO, fontSize: 11, color: "#43494F", background: "none", border: "1px solid #DDE1E4", borderRadius: 3, padding: "6px 10px", cursor: "pointer" }}
-                      >
-                        Re-run
-                      </button>
-                    </form>
-                    <form action={deleteDocument.bind(null, doc.id)}>
-                      <ConfirmSubmitButton
-                        confirmMessage={`Delete "${doc.filename}"? The stored file and its findings will be permanently removed — this can't be undone.`}
-                        className="pm-hoverable"
-                        style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", background: "none", border: "1px solid #DDE1E4", borderRadius: 3, padding: "6px 10px", cursor: "pointer" }}
-                      >
-                        Delete
-                      </ConfirmSubmitButton>
-                    </form>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <DocumentsEmpty />
         )}
 
-        {(page > 1 || hasMore) && (
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20, fontFamily: MONO, fontSize: 12 }}>
+        {(page > 1 || hasMore) && hasDocs && (
+          <nav className="pm-pager" aria-label="Pages">
             {page > 1 ? (
-              <Link href={`/documents?page=${page - 1}`} className="pm-hoverable" style={{ color: "#0E1216" }}>
-                ← Newer
-              </Link>
+              <RollPill href={`/documents?page=${page - 1}`} variant="secondary" size="sm" rel="prev">
+                Newer
+              </RollPill>
             ) : (
               <span />
             )}
-            {hasMore && (
-              <Link href={`/documents?page=${page + 1}`} className="pm-hoverable" style={{ color: "#0E1216" }}>
-                Older →
-              </Link>
+            <span className="pm-pager-pos">
+              Page {page} of {totalPages}
+            </span>
+            {hasMore ? (
+              <RollPill href={`/documents?page=${page + 1}`} variant="secondary" size="sm" dot rel="next">
+                Older
+              </RollPill>
+            ) : (
+              <span />
             )}
-          </div>
+          </nav>
         )}
-      </div>
-    </div>
+      </AppPage>
+    </AppShell>
   );
 }

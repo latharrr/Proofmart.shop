@@ -1,65 +1,81 @@
 import Link from "next/link";
-import AuthShell from "@/components/auth/auth-shell";
+import AuthShell, { CrossLink, OrDivider } from "@/components/auth/auth-shell";
+import { FindingBand } from "@/components/auth/auth-stage";
 import GoogleMark from "@/components/auth/google-mark";
-import * as s from "@/components/auth/auth-styles";
+import FormAlert from "@/components/auth/form-alert";
+import { EmailField, PasswordField, ResendButton, SubmitButton } from "@/components/auth/fields";
+import { loginError } from "@/components/auth/auth-errors";
+import { resendConfirmation } from "@/app/signup/actions";
 import { login, signInWithGoogle } from "./actions";
+
+const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string | string[] }>;
 }) {
-  const { error } = await searchParams;
+  const error = one((await searchParams).error);
+  // The query text is only matched against known causes, never printed.
+  const err = error ? loginError(error) : null;
+  const alert = (id: string) =>
+    err && (
+      <FormAlert id={id} tone="error" title={err.title} body={err.body} action={err.action}>
+        {err.resend && <ResendButton action={resendConfirmation} />}
+      </FormAlert>
+    );
 
   return (
     <AuthShell
+      eyebrow="Welcome back"
       title="Sign in"
-      subtitle="Access your ProofMart account."
-      footer={
-        <>
-          Don&rsquo;t have an account?{" "}
-          <Link href="/signup" className="pm-hoverable" style={{ color: "#0E1216", textDecoration: "underline" }}>
-            Sign up
-          </Link>
-        </>
-      }
+      subtitle="Pick up your documents, reports and API keys where you left them."
+      switchTo={{ label: "Sign up", href: "/signup" }}
+      stage={{
+        variant: "stack",
+        verdict: "FAIL",
+        label: "Your last report",
+        band: (
+          <FindingBand
+            line="Every finding pinned to its box, with the arithmetic behind the verdict."
+            marker="BALANCE_BREAK · p4·r17"
+            arithmetic={<>84,210.00 + 12,500.00 = 96,710.00 ≠ 91,710.00</>}
+          />
+        ),
+      }}
+      footer={<CrossLink prompt="New to ProofMart?" label="Create a free account" href="/signup" />}
     >
-      {error && <div style={s.errorBanner}>{error}</div>}
-
-      <form action={signInWithGoogle}>
-        <button type="submit" className="pm-hoverable" style={s.secondaryButton}>
-          <GoogleMark />
+      <form action={signInWithGoogle} className="pm-auth-form">
+        <SubmitButton variant="paper" icon={<GoogleMark />} dot={false} pendingLabel="Opening Google">
           Continue with Google
-        </button>
+        </SubmitButton>
+        {err?.field === "google" && alert("login-google-error")}
       </form>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <span style={{ flex: 1, height: 1, background: "#DDE1E4" }} />
-        <span style={{ fontFamily: s.label.fontFamily, fontSize: 11, color: "#767C83" }}>OR</span>
-        <span style={{ flex: 1, height: 1, background: "#DDE1E4" }} />
-      </div>
+      <OrDivider />
 
-      <form action={login} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        <div>
-          <label htmlFor="email" style={s.label}>
-            EMAIL
-          </label>
-          <input id="email" name="email" type="email" autoComplete="email" required style={s.input} />
-        </div>
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-            <label htmlFor="password" style={s.label}>
-              PASSWORD
-            </label>
-            <Link href="/account/reset-password" className="pm-hoverable" style={{ fontFamily: s.label.fontFamily, fontSize: 11, color: "#767C83" }}>
-              Forgot?
+      <form action={login} className="pm-auth-form">
+        {err?.field === "form" && alert("login-error")}
+        <EmailField
+          restore={!!err}
+          invalid={err?.field === "email"}
+          describedBy={err?.field === "email" ? "login-email-error" : undefined}
+          autoFocus={err?.field === "email"}
+          error={err?.field === "email" && alert("login-email-error")}
+        />
+        <PasswordField
+          autoComplete="current-password"
+          invalid={err?.field === "password"}
+          describedBy={err?.field === "password" ? "login-password-error" : undefined}
+          autoFocus={err?.field === "password"}
+          error={err?.field === "password" && alert("login-password-error")}
+          aside={
+            <Link href="/account/reset-password" className="pm-inline-link pm-auth-forgot">
+              Forgot password?
             </Link>
-          </div>
-          <input id="password" name="password" type="password" autoComplete="current-password" required style={s.input} />
-        </div>
-        <button type="submit" className="pm-hoverable" style={{ ...s.primaryButton, marginTop: 4 }}>
-          SIGN IN →
-        </button>
+          }
+        />
+        <SubmitButton pendingLabel="Signing in">Sign in</SubmitButton>
       </form>
     </AuthShell>
   );

@@ -1,92 +1,91 @@
-import { MONO, SANS } from "@/lib/evidence-data";
+import RollPill from "@/components/motion/roll-pill";
+import SheetHead from "@/components/home/sheet-head";
+import Tickmark from "@/components/paper/tickmark";
+import { PLANS } from "@/lib/billing/plans";
 import { PRICING } from "@/lib/home-data";
 
+/**
+ * The plans as a two-column comparison schedule, the form a buyer's finance
+ * team already reads: one row per line item, one column per plan, and the
+ * action written at the foot of each column. Mirrors lib/billing/plans.ts.
+ */
 export default function PricingSection() {
+  const [free, pro] = PRICING;
+  // Line items, each true of both columns as lib/billing/plans.ts and
+  // lib/home-data.ts state them; a dash means the plan doesn't include it.
+  const rows: { k: string; free: string; pro: string; tick?: boolean }[] = [
+    { k: "For", free: free.body, pro: pro.body },
+    {
+      k: "Verify calls a month",
+      free: PLANS.free.monthlyVerifyLimit.toLocaleString("en-IN"),
+      pro: PLANS.pro.monthlyVerifyLimit.toLocaleString("en-IN"),
+      tick: true,
+    },
+    { k: "Markers", free: "All six, same engine", pro: "All six, same engine", tick: true },
+    { k: "Ways in", free: "Upload, REST API, webhooks, CLI", pro: "Upload, REST API, webhooks, CLI", tick: true },
+    { k: "Support", free: "—", pro: "Priority email support", tick: true },
+  ];
   return (
-    <section id="pricing" style={{ borderTop: "1px solid #DDE1E4" }}>
-      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "88px 32px" }}>
-        <div
-          className="pm-split-grid-48"
-          style={{
-            display: "grid",
-            gap: 56,
-            marginBottom: 48,
-            alignItems: "end",
-          }}
-        >
-          <div>
-            <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.1em", marginBottom: 12 }}>§ 07 · PRICING</div>
-            <h2 className="pm-h2" style={{ fontFamily: SANS, fontWeight: 500, lineHeight: 1.02, letterSpacing: "-0.025em", margin: 0 }}>
-              Flat monthly.
-              <br />
-              No per-document surprises.
-            </h2>
-          </div>
-          <p style={{ fontFamily: SANS, fontSize: 15, lineHeight: 1.55, color: "#43494F", maxWidth: "52ch", margin: 0 }}>
-            One plan, one price, a monthly call limit on /v1/verify. No per-finding or per-scan metering.
-          </p>
+    <section id="pricing" className="pm-h-section" aria-labelledby="pricing-title">
+      <div className="pm-wrap">
+        <SheetHead
+          id="pricing-title"
+          wp="F"
+          title="Flat monthly. No per-page metering."
+          aside={<p>Start free with the full engine. Upgrade when your team runs ProofMart inside a review or underwriting loop.</p>}
+        />
+
+        <div className="pm-ledger-wrap">
+          <table className="pm-ledger pm-h-plans">
+            <caption className="pm-sr">Plans compared</caption>
+            <thead>
+              <tr>
+                <td />
+                {PRICING.map((p) => (
+                  <th key={p.tier} scope="col" data-pro={p.highlight ? "" : undefined}>
+                    <span className="pm-h-plan-tier">{p.tier}</span>
+                    <span className="pm-h-plan-price">
+                      <span className="pm-mono">{p.price}</span>
+                      <span className="pm-h-plan-unit">{p.unit}</span>
+                    </span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.k}>
+                  <th scope="row">{r.k}</th>
+                  <td>
+                    {r.tick && r.free !== "—" ? <Tickmark kind="agreed" size={15} /> : null}
+                    {r.free}
+                  </td>
+                  <td data-pro="">
+                    {r.tick ? <Tickmark kind="agreed" size={15} /> : null}
+                    {r.pro}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td />
+                {PRICING.map((p) => (
+                  <td key={p.tier}>
+                    <RollPill href="/signup" variant={p.highlight ? "primary" : "secondary"} dot={p.highlight}>
+                      {p.cta}
+                    </RollPill>
+                  </td>
+                ))}
+              </tr>
+            </tfoot>
+          </table>
         </div>
 
-        <div className="pm-cols-2" style={{ display: "grid", gap: 0, border: "1px solid #DDE1E4" }}>
-          {PRICING.map((p, i) => (
-            <div
-              key={p.tier}
-              style={{
-                padding: "32px 28px 32px",
-                borderRight: i < PRICING.length - 1 ? "1px solid #DDE1E4" : "none",
-                background: p.highlight ? "#FAFAF7" : "#FFFFFF",
-                position: "relative",
-                display: "flex",
-                flexDirection: "column",
-                gap: 20,
-              }}
-            >
-              {p.highlight && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "#0E1216" }} />}
-              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-                <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.08em" }}>{p.tier.toUpperCase()}</span>
-                {p.highlight && (
-                  <span style={{ fontFamily: MONO, fontSize: 10, color: "#0E1216", letterSpacing: "0.1em", border: "1px solid #0E1216", padding: "2px 6px" }}>
-                    RECOMMENDED
-                  </span>
-                )}
-              </div>
-              <div>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                  <span style={{ fontFamily: SANS, fontSize: 40, fontWeight: 500, letterSpacing: "-0.02em" }}>{p.price}</span>
-                  <span style={{ fontFamily: MONO, fontSize: 12, color: "#767C83" }}>{p.unit}</span>
-                </div>
-              </div>
-              <p style={{ fontFamily: SANS, fontSize: 13, lineHeight: 1.55, color: "#43494F", margin: 0 }}>{p.body}</p>
-              <div style={{ borderTop: "1px solid #DDE1E4", paddingTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
-                {p.included.map((li) => (
-                  <div key={li} style={{ display: "flex", alignItems: "baseline", gap: 8, fontFamily: SANS, fontSize: 13, color: "#0E1216" }}>
-                    <span style={{ fontFamily: MONO, fontSize: 10, color: "#43494F" }}>·</span>
-                    <span>{li}</span>
-                  </div>
-                ))}
-              </div>
-              <a
-                href="/signup"
-                className="pm-hoverable"
-                style={{
-                  marginTop: "auto",
-                  fontFamily: MONO,
-                  fontSize: 12,
-                  letterSpacing: "0.06em",
-                  padding: "10px 12px",
-                  textAlign: "center",
-                  background: p.highlight ? "#0E1216" : "transparent",
-                  color: p.highlight ? "#F5F5F0" : "#0E1216",
-                  border: p.highlight ? "1px solid #0E1216" : "1px solid #DDE1E4",
-                  textDecoration: "none",
-                  borderRadius: 3,
-                }}
-              >
-                {p.cta.toUpperCase()} →
-              </a>
-            </div>
-          ))}
-        </div>
+        <p className="pm-note">
+          Prices in INR, billed monthly. A call is one <span className="pm-mono">/v1/verify</span> request, whatever the page count. Every key is also
+          rate-limited to 60 requests a minute on both plans.
+        </p>
       </div>
     </section>
   );

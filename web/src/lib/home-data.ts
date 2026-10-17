@@ -6,33 +6,37 @@ export interface PipelineStage {
   signal: string;
 }
 
+// Describes only what lib/api/pipeline.ts and lib/verification actually do.
+// An earlier version claimed template-registry matching and glyph-metric
+// checks; the registry's own docstring explains why neither exists, so the
+// page must not say they do.
 export const PIPELINE: PipelineStage[] = [
   {
     i: "01",
-    name: "Ingest",
+    name: "Inspect",
     ms: "210 ms",
-    body: "Byte-exact PDF parse. Object streams decoded, xref reconstructed, embedded fonts hashed against the template registry.",
-    signal: "producer · xref · fonts",
+    body: "Confirms the bytes are a real PDF, then classifies it as text-based, scanned or mixed, with a confidence score.",
+    signal: "pdfType · confidence · pages",
   },
   {
     i: "02",
     name: "Extract",
     ms: "1.4 s",
-    body: "Text runs recovered with sub-pixel coordinates. Table structure inferred from column occupancy, not ruled lines.",
-    signal: "runs · cells · glyphs",
+    body: "Recovers every text run with its position on the page. Pages without a usable text layer go through OCR, run in-process.",
+    signal: "runs · boxes · ocr",
   },
   {
     i: "03",
-    name: "Reason",
+    name: "Reconcile",
     ms: "2.9 s",
-    body: "Domain rules run over the run graph: arithmetic identities, template match, glyph metrics, semantic outliers.",
-    signal: "markers · rules · verdict",
+    body: "Rebuilds the ledger from column positions, then re-checks it: running balances, page carry-forwards, date order, duplicates.",
+    signal: "markers · evidence",
   },
   {
     i: "04",
     name: "Decide",
     ms: "260 ms",
-    body: "Findings are ranked by verdict precedence, FAIL before REVIEW before CLEAR, and returned as JSON with a per-finding coordinate box for audit.",
+    body: "A fixed rule, not a score: any FAIL finding makes the verdict FAIL, else any REVIEW makes it REVIEW, else CLEAR.",
     signal: "verdict · findings · coordinates",
   },
 ];
@@ -65,15 +69,18 @@ export const MARKER_TABS = ["All", "Arithmetic", "Semantic", "Extraction"] as co
 
 export interface Integration {
   name: string;
+  /** What you need before you can use it. */
   kind: string;
   body: string;
+  /** The machine string a developer would actually type or see. */
+  code: string;
 }
 
 export const INTEGRATIONS: Integration[] = [
-  { name: "Upload", kind: "live today", body: "The upload flow on this page. Drop, paste, or pick a PDF and get real findings back, no account required." },
-  { name: "API", kind: "live today", body: "/v1/verify, /v1/inspect, /v1/extract — the same engine this page calls, behind an API key you create at /account/api-keys." },
-  { name: "Webhook", kind: "live today", body: "Register a URL at /account/webhooks and every /v1/verify call delivers an HMAC-signed verification.completed/failed callback, retried on failure." },
-  { name: "CLI", kind: "live today", body: "proofmart verify|inspect|extract file.pdf — a small dependency-free client for the same public API, nothing more." },
+  { name: "Upload", kind: "No account", body: "The live scan on this page. Drop, paste or pick a PDF and get real findings back.", code: "drag · paste · click" },
+  { name: "REST API", kind: "API key", body: "Three depths of the same pipeline: classify only, extract, or the full verification.", code: "/v1/verify · /v1/extract · /v1/inspect" },
+  { name: "Webhooks", kind: "API key", body: "Every verification also posts its result to your URL, HMAC-signed and retried on failure.", code: "verification.completed · .failed" },
+  { name: "CLI", kind: "API key", body: "A small, dependency-free client for the same public API, for scripts and batch jobs.", code: "proofmart verify statement.pdf" },
 ];
 
 export interface PricingTier {
@@ -97,7 +104,7 @@ export const PRICING: PricingTier[] = [
     unit: "/ month",
     body: "For trying ProofMart against real documents before committing to a plan.",
     cta: "Start free",
-    included: ["50 /v1/verify calls / month", "Web upload + JSON findings", "Rail review app"],
+    included: ["50 verification calls a month", "All six markers, same engine as Pro", "Upload, REST API, webhooks and CLI"],
   },
   {
     tier: "Pro",
@@ -105,18 +112,52 @@ export const PRICING: PricingTier[] = [
     unit: "/ month",
     body: "For teams running ProofMart in a review or underwriting loop.",
     cta: "Upgrade to Pro",
-    included: ["2,000 /v1/verify calls / month", "Everything in Free", "Priority email support"],
+    included: ["2,000 verification calls a month", "Everything in Free", "Priority email support"],
     highlight: true,
   },
 ];
 
-export interface FooterColumn {
-  h: string;
-  links: string[];
+export interface FooterLink {
+  label: string;
+  href: string;
 }
 
+export interface FooterColumn {
+  h: string;
+  links: FooterLink[];
+}
+
+// Every link here resolves to something that actually exists — an anchor on
+// this page or a real route. The previous version listed 15 links of which
+// 14 were href="#" placeholders (Changelog, Status page, Press kit, a
+// "Careers · 4" headcount, and so on). On a product whose entire pitch is
+// not claiming more than it can evidence, a footer full of dead ends was
+// the wrong thing to ship. Anything added back here needs a destination.
 export const FOOTER: FooterColumn[] = [
-  { h: "Product", links: ["Pipeline", "Marker catalog", "Dossier format", "Changelog", "Status page"] },
-  { h: "Developers", links: ["REST reference", "Webhooks", "CLI", "Verify signatures", "Sample vault"] },
-  { h: "Company", links: ["Manifesto", "Trust & security", "Careers", "Press kit", "Contact"] },
+  {
+    h: "Product",
+    links: [
+      { label: "How it works", href: "/#pipeline" },
+      { label: "Marker catalog", href: "/#markers" },
+      { label: "Response & dossier", href: "/#outputs" },
+      { label: "Pricing", href: "/#pricing" },
+    ],
+  },
+  {
+    h: "Developers",
+    links: [
+      { label: "Integrations", href: "/#integrate" },
+      { label: "API keys", href: "/account/api-keys" },
+      { label: "Webhooks", href: "/account/webhooks" },
+      { label: "My documents", href: "/documents" },
+    ],
+  },
+  {
+    h: "Company",
+    links: [
+      { label: "Trust & security", href: "/security" },
+      { label: "Sign in", href: "/login" },
+      { label: "Create account", href: "/signup" },
+    ],
+  },
 ];

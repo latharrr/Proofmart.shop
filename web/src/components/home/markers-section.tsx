@@ -1,99 +1,85 @@
 "use client";
 
 import { useState } from "react";
-import { MONO, SANS, VERDICT } from "@/lib/evidence-data";
+import SheetHead from "@/components/home/sheet-head";
+import Tickmark, { Ident, VERDICT_TICK } from "@/components/paper/tickmark";
 import { MARKER_TABS, MARKERS, type MarkerCategory } from "@/lib/home-data";
 
 type TabValue = (typeof MARKER_TABS)[number];
 
-export default function MarkersSection() {
-  const [markerFilter, setMarkerFilter] = useState<TabValue>("All");
+const countFor = (t: TabValue) => (t === "All" ? MARKERS.length : MARKERS.filter((m) => m.cat === t).length);
 
-  const filtered = markerFilter === "All" ? MARKERS : MARKERS.filter((m) => m.cat === (markerFilter as MarkerCategory));
+/**
+ * The marker catalogue as a ledger with index tabs along its top edge, the
+ * way a working-paper file is tabbed by section. Mirrors the live registry
+ * exactly (lib/home-data.ts), six rows and no more.
+ */
+export default function MarkersSection() {
+  const [filter, setFilter] = useState<TabValue>("All");
+  const shown = filter === "All" ? MARKERS : MARKERS.filter((m) => m.cat === (filter as MarkerCategory));
 
   return (
-    <section id="markers" style={{ borderTop: "1px solid #DDE1E4" }}>
-      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "88px 32px" }}>
-        <div
-          className="pm-split-grid-57"
-          style={{
-            display: "grid",
-            gap: 56,
-            marginBottom: 48,
-            alignItems: "end",
-          }}
-        >
-          <div>
-            <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.1em", marginBottom: 12 }}>§ 03 · CATALOG</div>
-            <h2 className="pm-h2" style={{ fontFamily: SANS, fontWeight: 500, lineHeight: 1.02, letterSpacing: "-0.025em", margin: 0 }}>
-              Every marker
-              <br />
-              is a rule with a citation.
-            </h2>
-          </div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "end", justifyContent: "flex-end" }}>
-            {MARKER_TABS.map((t) => {
-              const active = t === markerFilter;
-              return (
-                <button
-                  key={t}
-                  onClick={() => setMarkerFilter(t)}
-                  className="pm-hoverable"
-                  style={{
-                    padding: "6px 12px",
-                    fontFamily: MONO,
-                    fontSize: 11,
-                    letterSpacing: "0.04em",
-                    color: active ? "#F5F5F0" : "#43494F",
-                    background: active ? "#0E1216" : "#FFFFFF",
-                    border: "1px solid " + (active ? "#0E1216" : "#DDE1E4"),
-                    borderRadius: 3,
-                  }}
-                >
-                  {t}
-                </button>
-              );
-            })}
-          </div>
+    <section id="markers" className="pm-h-section" aria-labelledby="markers-title">
+      <div className="pm-wrap">
+        <SheetHead
+          id="markers-title"
+          wp="C"
+          title="Six checks. Each one shows its work."
+          aside={
+            <p>
+              Every marker is a narrow rule with a fixed verdict. When one fires, the finding carries the page, the box and the comparison it made, so a
+              reviewer can check it by eye.
+            </p>
+          }
+        />
+
+        <div className="pm-tabs" role="group" aria-label="Filter markers by category">
+          {MARKER_TABS.map((t) => (
+            <button key={t} type="button" className="pm-tab" aria-pressed={t === filter} onClick={() => setFilter(t)}>
+              {t}
+              <span className="pm-tab-count">{countFor(t)}</span>
+            </button>
+          ))}
         </div>
 
-        <div style={{ borderTop: "1px solid #DDE1E4", overflowX: "auto" }}>
-          {filtered.map((m, i) => {
-            const v = VERDICT[m.verdict];
-            return (
-              <div
-                key={m.id}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "48px 2.6fr 1fr 1.2fr 1.2fr",
-                  columnGap: 24,
-                  alignItems: "center",
-                  padding: "18px 0",
-                  borderBottom: "1px solid #DDE1E4",
-                  minWidth: 640,
-                }}
-              >
-                <div style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", letterSpacing: "0.1em" }}>{String(i + 1).padStart(2, "0")}</div>
-                <div>
-                  <div style={{ fontFamily: MONO, fontSize: 13, fontWeight: 500, letterSpacing: "0.01em" }}>{m.id}</div>
-                  <div style={{ fontFamily: SANS, fontSize: 13, color: "#43494F", marginTop: 4, lineHeight: 1.4 }}>{m.desc}</div>
-                </div>
-                <div style={{ fontFamily: MONO, fontSize: 11, color: "#43494F", letterSpacing: "0.04em" }}>{m.cat.toUpperCase()}</div>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ width: 12, textAlign: "center", fontFamily: MONO, fontSize: 12, color: v.color, fontWeight: 500 }}>{v.glyph}</span>
-                  <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", color: v.color }}>{m.verdict}</span>
-                </div>
-                <div style={{ fontFamily: MONO, fontSize: 11, color: "#43494F", letterSpacing: "0.02em", textAlign: "right" }}>
-                  cites · <span style={{ color: "#0E1216" }}>{m.cites}</span>
-                </div>
-              </div>
-            );
-          })}
+        <div className="pm-ledger-wrap pm-ledger-tabbed">
+          <table className="pm-ledger pm-h-markers">
+            <caption className="pm-sr">Marker catalogue{filter === "All" ? "" : `, ${filter} only`}</caption>
+            <thead>
+              <tr>
+                <th scope="col">Marker</th>
+                <th scope="col">Fires when</th>
+                <th scope="col">Cites</th>
+                <th scope="col">Verdict</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shown.map((m) => (
+                <tr key={m.id}>
+                  <th scope="row">
+                    <span className="pm-mono pm-h-marker-id">
+                      <Ident>{m.id}</Ident>
+                    </span>
+                    <span className="pm-h-marker-cat">{m.cat}</span>
+                  </th>
+                  <td>{m.desc}</td>
+                  <td className="pm-mono pm-h-marker-cites">{m.cites}</td>
+                  <td>
+                    <span className="pm-vtag" data-tone={m.verdict}>
+                      <Tickmark kind={VERDICT_TICK[m.verdict]} size={15} />
+                      {m.verdict}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
-        <div style={{ marginTop: 24, fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.04em" }}>
-          <span>These are the only six markers the verification engine runs today. No others exist yet.</span>
-        </div>
+        <p className="pm-note">
+          <strong>Not checked yet:</strong> producer and template mismatches, and font-metric edits. We don&rsquo;t have the evidence to run them honestly,
+          so we don&rsquo;t. A CLEAR verdict means these six checks found nothing, not that the document is authentic.
+        </p>
       </div>
     </section>
   );

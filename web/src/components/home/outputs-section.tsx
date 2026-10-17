@@ -1,155 +1,181 @@
-import { MONO, SANS } from "@/lib/evidence-data";
+import type { ReactNode } from "react";
+import SheetHead from "@/components/home/sheet-head";
+import Tickmark, { VERDICT_TICK } from "@/components/paper/tickmark";
+import { SAMPLE_FINDINGS } from "@/components/evidence-rail/sample-statement";
 
+/*
+ * The sample response, in the envelope lib/api/envelope.ts's verifyEnvelope()
+ * returns: { document, classification, verdict, findings, facts, processing }
+ * plus requestId. Trimmed (one finding shown, arrays elided) but never
+ * reshaped.
+ */
+const BOX = SAMPLE_FINDINGS[0].rect!;
+const RESPONSE = `{
+  "requestId": "req_8fk2",
+  "verdict": "FAIL",
+  "classification": {
+    "pdfType": "TextBased",
+    "documentKind": "bank_statement"
+  },
+  "findings": [
+    {
+      "markerId": "BALANCE_BREAK",
+      "verdict": "FAIL",
+      "severity": "critical",
+      "evidence": {
+        "summary": "Running balance differs by ₹5,000.00",
+        "detail": "84,210.00 + 12,500.00 = 96,710.00 · shows 91,710.00",
+        "coordinates": [
+          { "page": 4, "rect": { "x": ${BOX.x}, "y": ${BOX.y}, "w": ${BOX.w}, "h": ${BOX.h} } }
+        ]
+      }
+    },
+    …3 more
+  ],
+  "processing": { "processingTimeMs": 4800, "markersRun": […6] }
+}`;
+
+// Keys recede to pencil grey, values print in ink, and the only red in the
+// block is the verdict itself.
+const TOKEN = /("(?:[^"\\]|\\.)*")(\s*:)?|(-?\d[\d.]*)|([{}[\],:])/g;
+
+function highlight(src: string): ReactNode[] {
+  const out: ReactNode[] = [];
+  let last = 0;
+  let k = 0;
+  for (const m of src.matchAll(TOKEN)) {
+    const idx = m.index ?? 0;
+    if (idx > last) out.push(src.slice(last, idx));
+    if (m[1] && m[2]) {
+      out.push(
+        <span key={k++} className="pm-j-key">
+          {m[1]}
+        </span>,
+        <span key={k++} className="pm-j-punct">
+          {m[2]}
+        </span>,
+      );
+    } else if (m[1]) {
+      out.push(
+        <span key={k++} className={m[1] === '"FAIL"' ? "pm-j-fail" : "pm-j-val"}>
+          {m[1]}
+        </span>,
+      );
+    } else if (m[3]) {
+      out.push(
+        <span key={k++} className="pm-j-val">
+          {m[3]}
+        </span>,
+      );
+    } else {
+      out.push(
+        <span key={k++} className="pm-j-punct">
+          {m[4]}
+        </span>,
+      );
+    }
+    last = idx + m[0].length;
+  }
+  if (last < src.length) out.push(src.slice(last));
+  return out;
+}
+
+const FIELDS = [
+  { key: "verdict", body: "FAIL, REVIEW or CLEAR, or INCONCLUSIVE when no check had enough data to run. One field to route on." },
+  { key: "evidence.detail", body: "The comparison the marker made, so a reviewer can redo it by hand." },
+  { key: "coordinates[].rect", body: "Where, on which page, in PDF points. Draw it over the page and you are looking at the cell." },
+];
+
+const DOSSIER = SAMPLE_FINDINGS.map((f) => ({ addr: f.addr1.replace("·", " · "), id: f.marker, verdict: f.verdict as "FAIL" | "REVIEW", body: f.explanation }));
+
+/**
+ * What comes back: the API response as a printout clipped beside the field
+ * notes, and the signed dossier as the sheet you hand to someone else.
+ */
 export default function OutputsSection() {
   return (
-    <section id="outputs" style={{ borderTop: "1px solid #DDE1E4", background: "#0E1216", color: "#F5F5F0" }}>
-      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "88px 32px" }}>
-        <div
-          className="pm-split-grid-48"
-          style={{
-            display: "grid",
-            gap: 56,
-            alignItems: "start",
-            marginBottom: 48,
-          }}
-        >
-          <div>
-            <div style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.1em", marginBottom: 12 }}>§ 05 · OUTPUTS</div>
-            <h2 className="pm-h2" style={{ fontFamily: SANS, fontWeight: 500, lineHeight: 1.02, letterSpacing: "-0.025em", margin: "0 0 16px", color: "#F5F5F0" }}>
-              The JSON is real.
-              <br />
-              So is the dossier.
-            </h2>
-          </div>
-          <p style={{ fontFamily: SANS, fontSize: 17, lineHeight: 1.55, color: "#C2C7CC", maxWidth: "60ch", margin: "8px 0 0" }}>
-            The JSON below is what the API returns today. A signed-in scan can also be exported as an Ed25519-signed PDF dossier your
-            reviewers can countersign, built from the same finding graph — anyone can check that signature back against ProofMart, no
-            account required.
-          </p>
-        </div>
+    <section id="outputs" className="pm-h-section" aria-labelledby="outputs-title">
+      <div className="pm-wrap">
+        <SheetHead
+          id="outputs-title"
+          wp="D"
+          title="One verdict, and the evidence."
+          aside={<p>The API returns JSON you can route on. A saved scan also exports as a signed PDF dossier that anyone can check, no account needed.</p>}
+        />
 
-        <div className="pm-cols-2" style={{ display: "grid", gap: 32 }}>
-          {/* JSON output */}
-          <div style={{ background: "#14181D", border: "1px solid #2A2F35", borderRadius: 4, overflow: "hidden" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #2A2F35" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.08em" }}>POST /v1/verify → 200 OK</span>
+        <div className="pm-h-outputs">
+          <figure className="pm-print pm-h-json" aria-label="Sample /v1/verify response">
+            <div className="pm-print-head">
+              <span className="pm-mono">POST /v1/verify</span>
+              <span className="pm-mono">200 OK · application/json</span>
+              <span className="pm-sample">Sample</span>
+            </div>
+            <div className="pm-json" role="figure" aria-label="Sample /v1/verify response body">
+              {RESPONSE.split("\n").map((line, i) => {
+                const indent = line.length - line.trimStart().length;
+                return (
+                  <div key={i} className="pm-json-line" style={{ ["--indent" as string]: indent }}>
+                    <span className="pm-json-n" aria-hidden="true">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span>{highlight(line.trimStart())}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </figure>
+
+          <div className="pm-h-outputs-side">
+            <dl className="pm-h-fields">
+              {FIELDS.map((f) => (
+                <div key={f.key}>
+                  <dt className="pm-mono">{f.key}</dt>
+                  <dd>{f.body}</dd>
+                </div>
+              ))}
+            </dl>
+
+            <article className="pm-dossier" aria-label="Sample signed dossier">
+              <header className="pm-dossier-top">
+                <span className="pm-dossier-title">ProofMart dossier</span>
+                <span className="pm-mono">req_8fk2.dossier.pdf</span>
+                <span className="pm-sample">Sample</span>
+              </header>
+              <div className="pm-dossier-row">
+                <span className="pm-label">Subject</span>
+                <span className="pm-mono">hdfc_apr25_statement.pdf</span>
               </div>
-              <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83" }}>application/json</span>
-            </div>
-            <pre style={{ margin: 0, padding: "18px 20px", fontFamily: MONO, fontSize: 12, lineHeight: 1.65, color: "#F5F5F0", overflowX: "auto" }}>
-              <span style={{ color: "#767C83" }}>{'{\n  "document": { '}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;filename&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#E2C48A" }}>&quot;hdfc_apr25_statement.pdf&quot;</span>
-              <span style={{ color: "#767C83" }}>{", "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;pageCount&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#C9D1B6" }}>6</span>
-              <span style={{ color: "#767C83" }}>{" },\n  "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;verification&quot;</span>
-              <span style={{ color: "#767C83" }}>{": {\n    "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;verdict&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#E38A82" }}>&quot;FAIL&quot;</span>
-              <span style={{ color: "#767C83" }}>{",\n    "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;findings&quot;</span>
-              <span style={{ color: "#767C83" }}>{": [{\n      "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;markerId&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#E2C48A" }}>&quot;BALANCE_BREAK&quot;</span>
-              <span style={{ color: "#767C83" }}>{",\n      "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;verdict&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#E38A82" }}>&quot;FAIL&quot;</span>
-              <span style={{ color: "#767C83" }}>{",\n      "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;evidence&quot;</span>
-              <span style={{ color: "#767C83" }}>{": { "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;summary&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#E2C48A" }}>&quot;Running balance differs by -5,000.00&quot;</span>
-              <span style={{ color: "#767C83" }}>{",\n        "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;coordinates&quot;</span>
-              <span style={{ color: "#767C83" }}>{": [{ "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;page&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#C9D1B6" }}>4</span>
-              <span style={{ color: "#767C83" }}>{", "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;rect&quot;</span>
-              <span style={{ color: "#767C83" }}>{": { "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;x&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#C9D1B6" }}>548</span>
-              <span style={{ color: "#767C83" }}>{", "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;y&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#C9D1B6" }}>528</span>
-              <span style={{ color: "#767C83" }}>{" } }]\n      }\n    }],\n    "}</span>
-              <span style={{ color: "#A9BFD8" }}>&quot;documentKind&quot;</span>
-              <span style={{ color: "#767C83" }}>{": "}</span>
-              <span style={{ color: "#E2C48A" }}>&quot;bank_statement&quot;</span>
-              <span style={{ color: "#767C83" }}>{"\n  }\n}"}</span>
-            </pre>
-          </div>
-
-          {/* PDF dossier */}
-          <div style={{ background: "#14181D", border: "1px solid #2A2F35", borderRadius: 4, overflow: "hidden" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #2A2F35" }}>
-              <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.08em" }}>req_8fk2.dossier.pdf</span>
-              <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83" }}>signed-in scans only</span>
-            </div>
-            <div style={{ padding: 24, background: "#14181D", height: "100%", display: "flex", alignItems: "stretch" }}>
-              <div
-                style={{
-                  flex: 1,
-                  background: "#F5F5F0",
-                  color: "#0E1216",
-                  padding: "22px 24px",
-                  fontFamily: SANS,
-                  boxShadow: "0 10px 30px -10px rgba(0,0,0,0.6)",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 14,
-                  minHeight: 380,
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", borderBottom: "1px solid #DDE1E4", paddingBottom: 10 }}>
-                  <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 15, letterSpacing: "-0.01em" }}>ProofMart Dossier</div>
-                  <div style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", letterSpacing: "0.08em" }}>REQ_8FK2 · 12 AUG 2026</div>
-                </div>
-                <div>
-                  <div style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", letterSpacing: "0.12em" }}>SUBJECT</div>
-                  <div style={{ fontFamily: MONO, fontSize: 12, marginTop: 2 }}>hdfc_apr25_statement.pdf</div>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", background: "rgba(180,35,31,0.08)", borderLeft: "2px solid #B4231F" }}>
-                  <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, color: "#B4231F", letterSpacing: "0.08em" }}>× FAIL</span>
-                  <span style={{ fontFamily: SANS, fontSize: 13, color: "#0E1216" }}>4 markers · 2 fail, 2 review</span>
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "60px 1fr", rowGap: 10, columnGap: 10, fontSize: 12 }}>
-                  <div style={{ fontFamily: MONO, fontSize: 10, color: "#767C83" }}>01 · p4</div>
-                  <div>
-                    <div style={{ fontFamily: MONO, fontSize: 11, fontWeight: 500 }}>BALANCE_BREAK</div>
-                    <div style={{ color: "#43494F", fontSize: 11, lineHeight: 1.4 }}>Running balance short ₹5,000 on row 17.</div>
-                  </div>
-                  <div style={{ fontFamily: MONO, fontSize: 10, color: "#767C83" }}>02 · p4</div>
-                  <div>
-                    <div style={{ fontFamily: MONO, fontSize: 11, fontWeight: 500 }}>CROSS_PAGE_TOTAL_MISMATCH</div>
-                    <div style={{ color: "#43494F", fontSize: 11, lineHeight: 1.4 }}>Balance carried from page 3 to page 4 differs by ₹1,240.</div>
-                  </div>
-                </div>
-                <div style={{ marginTop: "auto", paddingTop: 10, borderTop: "1px solid #DDE1E4", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ fontFamily: MONO, fontSize: 9, color: "#767C83", letterSpacing: "0.1em" }}>SIGNATURE · ED25519</div>
-                  <div style={{ width: 44, height: 44, border: "1px solid #1F6B4A", display: "grid", placeItems: "center", fontFamily: MONO, fontSize: 8, letterSpacing: "0.1em", color: "#1F6B4A" }}>
-                    ✓ SIGNED
-                  </div>
-                </div>
+              <div className="pm-dossier-row">
+                <span className="pm-label">Verdict</span>
+                <span className="pm-vtag" data-tone="FAIL" data-size="lg">
+                  <Tickmark kind="break" size={18} />
+                  FAIL
+                </span>
+                <span className="pm-dossier-sub">4 findings · 2 fail, 2 review</span>
               </div>
-            </div>
-          </div>
-        </div>
+              <ul className="pm-dossier-findings">
+                {DOSSIER.map((f) => (
+                  <li key={f.id} data-tone={f.verdict}>
+                    <Tickmark kind={VERDICT_TICK[f.verdict]} size={15} />
+                    <span className="pm-mono pm-dossier-addr">{f.addr}</span>
+                    <span>
+                      <span className="pm-mono">{f.id}</span>
+                      <span className="pm-dossier-body">{f.body}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <footer className="pm-dossier-sig">
+                <span className="pm-label">Signed</span>
+                <span className="pm-mono">ed25519 · check it at /v1/verify-signature</span>
+              </footer>
+            </article>
 
-        <div style={{ marginTop: 24, display: "flex", alignItems: "center", gap: 24, fontFamily: MONO, fontSize: 11, color: "#767C83" }}>
-          <span>The JSON above matches the live API response shape. The dossier PDF renders and signs from a saved, signed-in scan at /api/documents/[id]/dossier — anonymous scans aren&rsquo;t saved, so there&rsquo;s nothing to sign.</span>
+            <p className="pm-note">
+              Dossiers are signed from a saved, signed-in scan at <span className="pm-mono">/api/documents/[id]/dossier</span> and checked by anyone at{" "}
+              <span className="pm-mono">/v1/verify-signature</span>. Signed-out scans aren&rsquo;t saved, so there is nothing to sign.
+            </p>
+          </div>
         </div>
       </div>
     </section>

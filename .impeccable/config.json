@@ -1,0 +1,71 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-10-17T10:19:45.247Z",
+        "reason": "Claude: unchosen decision-round sketch (Reservation Chart), rendered as a skeleton thumbnail only; never shipped"
+      },
+      {
+        "rule": "overused-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-10-17T10:19:45.272Z",
+        "reason": "Claude: unchosen decision-round sketch (Reservation Chart), rendered as a skeleton thumbnail only; never shipped"
+      },
+      {
+        "rule": "kicker-above-heading",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-10-17T10:19:45.296Z",
+        "reason": "Claude: unchosen decision-round sketch (Reservation Chart), rendered as a skeleton thumbnail only; never shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-10-17T11:16:06.054Z",
+        "reason": "Claude: decision-round sketch written before DESIGN.md existed, system-font placeholders, never shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/model-pick.html"
+        ],
+        "createdAt": "2026-10-17T11:16:06.066Z",
+        "reason": "Claude: decision-round sketch written before DESIGN.md existed, system-font placeholders, never shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/challenger-gate.html"
+        ],
+        "createdAt": "2026-10-17T11:16:06.078Z",
+        "reason": "Claude: decision-round sketch written before DESIGN.md existed, system-font placeholders, never shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/canon.html"
+        ],
+        "createdAt": "2026-10-17T11:16:06.089Z",
+        "reason": "Claude: decision-round sketch written before DESIGN.md existed, system-font placeholders, never shipped"
+      }
+    ]
+  }
+}

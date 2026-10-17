@@ -45,6 +45,8 @@ Next.js 16, React 19, TypeScript, Tailwind 4, Supabase (auth, database, row-leve
 
 The app lives in [`web/`](web/). Start with [`web/README.md`](web/README.md) for setup, environment variables, auth, the API, Vercel deployment and known limits. `chats/` and `project/` hold the original design handoff files.
 
+The visual design (the "working paper" system used on every page) is recorded in [`DESIGN.md`](DESIGN.md), with product context in [`PRODUCT.md`](PRODUCT.md). `design-system*.md` and `bar*.md` describe earlier, retired directions and are kept for history only.
+
 ## Run locally
 
 ```bash

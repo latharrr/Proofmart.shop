@@ -1,64 +1,41 @@
 import Link from "next/link";
-import { APP_VERSION, MONO, SANS } from "@/lib/evidence-data";
+import Wordmark from "@/components/brand/wordmark";
+import { APP_VERSION } from "@/lib/evidence-data";
 import { FOOTER } from "@/lib/home-data";
 
-// Only this one footer link goes anywhere real right now — the rest are
-// placeholder copy from the original marketing handoff (out of scope for
-// this change; see the footer's other links). "Trust & security" now has
-// a real, truthful destination behind it, so it gets a real href.
-const REAL_HREFS: Record<string, string> = { "Trust & security": "/security" };
-
+/** The foot of the pad: closed with a double rule, like the last sheet of a schedule. */
 export default function SiteFooter() {
   return (
-    <footer style={{ borderTop: "1px solid #DDE1E4", background: "#FAFAF7" }}>
-      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "56px 32px 32px" }}>
-        <div
-          className="pm-footer-grid"
-          style={{
-            display: "grid",
-            gap: 40,
-            paddingBottom: 40,
-            borderBottom: "1px solid #DDE1E4",
-          }}
-        >
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-              <div aria-hidden="true" style={{ width: 22, height: 22, background: "#0E1216", position: "relative" }}>
-                <div style={{ position: "absolute", inset: 5, border: "1.5px solid #F5F5F0" }} />
-              </div>
-              <span style={{ fontFamily: SANS, fontWeight: 600, fontSize: 17 }}>ProofMart</span>
-            </div>
-            <p style={{ fontFamily: SANS, fontSize: 14, color: "#43494F", maxWidth: "40ch", lineHeight: 1.55 }}>
-              Document forensics as a structured evidence graph. Built in Bengaluru.
-            </p>
+    <footer className="pm-footer">
+      <div className="pm-wrap">
+        <div className="pm-footer-grid">
+          <div className="pm-footer-brand">
+            <Wordmark href="/" />
+            <p>Re-checks the arithmetic in PDF statements and shows its work. Built in Bengaluru.</p>
           </div>
           {FOOTER.map((c) => (
             <div key={c.h}>
-              <div style={{ fontFamily: MONO, fontSize: 10, color: "#767C83", letterSpacing: "0.12em", marginBottom: 14 }}>{c.h.toUpperCase()}</div>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
-                {c.links.map((l) => {
-                  const href = REAL_HREFS[l];
-                  return (
-                    <li key={l}>
-                      {href ? (
-                        <Link href={href} className="pm-hoverable" style={{ fontFamily: SANS, fontSize: 13, color: "#43494F" }}>
-                          {l}
-                        </Link>
-                      ) : (
-                        <a href="#" className="pm-hoverable" style={{ fontFamily: SANS, fontSize: 13, color: "#43494F" }}>
-                          {l}
-                        </a>
-                      )}
+              <p className="pm-label pm-footer-h">{c.h}</p>
+              <ul className="pm-footer-links">
+                {c.links.map((l) =>
+                  // Home anchors stay plain <a> ("/#pipeline" works from /security too).
+                  l.href.startsWith("/#") ? (
+                    <li key={l.href}>
+                      <a href={l.href}>{l.label}</a>
                     </li>
-                  );
-                })}
+                  ) : (
+                    <li key={l.href}>
+                      <Link href={l.href}>{l.label}</Link>
+                    </li>
+                  ),
+                )}
               </ul>
             </div>
           ))}
         </div>
-        <div style={{ paddingTop: 22, display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: MONO, fontSize: 11, color: "#767C83" }}>
-          <span>© 2026 ProofMart Systems · MIT No. 2026/PMT/0041</span>
-          <span>v{APP_VERSION} · public beta</span>
+        <div className="pm-footer-base">
+          <span>© 2026 ProofMart Systems</span>
+          <span className="pm-mono">v{APP_VERSION} · public beta</span>
         </div>
       </div>
     </footer>

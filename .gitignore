@@ -1,0 +1,30 @@
+# Repo-root ignores. `web/.gitignore` covers the Next.js app; its rules are
+# rooted at `web/`, so anything outside it (the CLI, tooling output at the top
+# level) needs to be listed here as well.
+
+# dependencies
+node_modules/
+
+# test + tooling output
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+coverage/
+
+# environment — never commit real credentials
+.env
+.env.local
+.env.*.local
+
+# editor / OS
+.DS_Store
+*.pem
+*.swp
+.idea/
+.vscode/
+
+# impeccable working files: screenshots, caches and served questions
+.impeccable/review/
+.impeccable/hook.cache.json
+.impeccable/questions/

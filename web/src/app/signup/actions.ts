@@ -24,3 +24,31 @@ export async function signup(formData: FormData) {
 
   redirect("/signup?check-email=1");
 }
+
+/**
+ * Sends the signup confirmation email again: for a link that expired, was
+ * already used, or never arrived. Lands on the check-your-inbox screen either
+ * way, with `?resend=` saying how it went. Supabase answers the same for an
+ * address with no pending signup, so this can't be used to probe accounts.
+ */
+export async function resendConfirmation(formData: FormData) {
+  if (!isSupabaseConfigured()) redirect("/signup?check-email=1&resend=unavailable");
+  const supabase = await createClient();
+  const origin = (await headers()).get("origin");
+
+  const email = String(formData.get("email") ?? "").trim();
+  if (!email) redirect("/signup?check-email=1&resend=missing");
+
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: { emailRedirectTo: `${origin}/auth/callback` },
+  });
+
+  if (error) {
+    const rate = /rate limit|security purposes|too many/i.test(error.message) || error.status === 429;
+    redirect(`/signup?check-email=1&resend=${rate ? "rate" : "error"}`);
+  }
+
+  redirect("/signup?check-email=1&resend=sent");
+}

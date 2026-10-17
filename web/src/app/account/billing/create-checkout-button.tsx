@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import * as s from "@/components/auth/auth-styles";
+import RollPill from "@/components/motion/roll-pill";
 
 declare global {
   interface Window {
@@ -69,7 +69,7 @@ export default function CreateCheckoutButton() {
         description: `${order.planName} plan`,
         order_id: order.orderId,
         prefill: order.prefill,
-        theme: { color: "#0E1216" },
+        theme: { color: "#2b2e3a" },
         handler: () => setStarted(true),
       });
       rzp.open();
@@ -81,15 +81,23 @@ export default function CreateCheckoutButton() {
   }
 
   if (started) {
-    return <div style={s.successBanner}>Payment received — your plan updates within a few seconds. Refresh to see it reflected.</div>;
+    return (
+      <p className="pm-acct-checkout-done" role="status">
+        Payment received. Your plan switches to Pro within a few seconds; refresh this page to see it.
+      </p>
+    );
   }
 
   return (
-    <div>
-      <button type="button" disabled={pending} onClick={startCheckout} className="pm-hoverable" style={{ ...s.primaryButton, width: "auto", padding: "10px 16px" }}>
-        {pending ? "Starting…" : "Upgrade to Pro"}
-      </button>
-      {error && <div style={{ ...s.errorBanner, marginTop: 10 }}>{error}</div>}
+    <div className="pm-acct-checkout">
+      <RollPill variant="paper" dot pending={pending} pendingLabel="Opening checkout" onClick={startCheckout}>
+        Upgrade to Pro
+      </RollPill>
+      {error && (
+        <p role="alert" className="pm-acct-error">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

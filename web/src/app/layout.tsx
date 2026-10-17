@@ -1,17 +1,25 @@
 import type { Metadata } from "next";
-import { Instrument_Sans, IBM_Plex_Mono } from "next/font/google";
+import { JetBrains_Mono, Libre_Franklin } from "next/font/google";
 import "./globals.css";
 
-const instrumentSans = Instrument_Sans({
-  variable: "--font-sans",
+// Both are self-hosted by next/font at build time. The CSP allows
+// `font-src 'self'` only, so a <link> to fonts.googleapis.com would be
+// blocked by the browser and the page would silently fall back to a system
+// stack: next/font is the only way these can load here.
+//
+// The working-paper system (DESIGN.md): Libre Franklin, the gothic printed
+// on ledger pads and bank forms, sets headings, UI and prose; JetBrains Mono
+// sets figures, code and identifiers, where every digit must line up.
+const franklin = Libre_Franklin({
+  variable: "--font-franklin",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
-const ibmPlexMono = IBM_Plex_Mono({
-  variable: "--font-mono",
+const jetbrains = JetBrains_Mono({
+  variable: "--font-jetbrains",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  display: "swap",
 });
 
 const TITLE = "ProofMart · Document forensics API";
@@ -38,7 +46,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${instrumentSans.variable} ${ibmPlexMono.variable}`}>
+    <html lang="en" className={`${franklin.variable} ${jetbrains.variable}`}>
       <body>
         <a href="#main" className="pm-skip-link">
           Skip to content

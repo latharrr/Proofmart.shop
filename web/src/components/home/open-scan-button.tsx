@@ -1,36 +1,58 @@
 "use client";
 
-import type { CSSProperties, ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
+import RollPill from "@/components/motion/roll-pill";
+import { SCAN_INTENT_EVENT } from "@/components/evidence-rail/scan-intent";
 
 /**
- * Scrolls the Evidence Rail into view rather than linking to an anchor. The
- * rail sits beside this button in the hero on desktop, so scrolling to it is
- * a no-op there — a CTA literally called "start a scan" needs to visibly do
- * something regardless of viewport. Deliberately does NOT auto-open the
- * native file picker: popping the OS file dialog the instant someone clicks
- * a nav button is jarring and skips past the rail's own drop-zone UI
- * (drag/paste/click hints). Landing on the rail and letting the user choose
- * how to add a file is the minimal, calmer version of this CTA.
+ * Starts a scan: scrolls the Evidence Rail into view and tells it to show its
+ * drop zone, whose "Choose a PDF" button takes focus — the visible step.
+ * Deliberately does NOT open the native file picker itself: springing the OS
+ * dialog from a marketing button skips the rail's own drag / paste / choose
+ * affordances (tests/e2e/scan-cta.spec.ts holds this). Off the home page it
+ * goes to SCAN_URL's anchor.
  */
 export default function OpenScanButton({
   children,
   className,
-  style,
+  variant = "primary",
+  dot = true,
+  size = "md",
+  onDone,
 }: {
   children: ReactNode;
   className?: string;
-  style?: CSSProperties;
+  variant?: "primary" | "secondary" | "paper";
+  dot?: boolean;
+  size?: "md" | "sm";
+  /** Called after the intent fires (e.g. to close the phone menu). */
+  onDone?: () => void;
 }) {
+  const router = useRouter();
+
   return (
-    <button
-      type="button"
+    <RollPill
+      variant={variant}
+      dot={dot}
+      size={size}
       className={className}
-      style={style}
       onClick={() => {
-        document.getElementById("access")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        onDone?.();
+        // Look for the rail itself: /security also has an #access section.
+        const found = document.querySelector('[data-testid="evidence-rail"]');
+        const rail = found ? (found.closest("#access") ?? found) : null;
+        // The rail only exists on the home page; anywhere else, go there armed.
+        if (!rail) {
+          router.push("/?scan=1#access");
+          return;
+        }
+        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        rail.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
+        window.dispatchEvent(new Event(SCAN_INTENT_EVENT));
       }}
     >
       {children}
-    </button>
+    </RollPill>
   );
 }

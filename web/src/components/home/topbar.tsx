@@ -1,60 +1,40 @@
-import AuthControls from "@/components/home/auth-controls";
+import AuthControls, { getSessionClaims } from "@/components/home/auth-controls";
+import MobileMenu from "@/components/home/mobile-menu";
+import NavLinks from "@/components/home/nav-links";
 import OpenScanButton from "@/components/home/open-scan-button";
-import { APP_VERSION, MONO, SANS } from "@/lib/evidence-data";
+import RollPill from "@/components/motion/roll-pill";
+import Wordmark from "@/components/brand/wordmark";
 
-const NAV_LINKS = [
-  { href: "#pipeline", label: "Pipeline" },
-  { href: "#markers", label: "Markers" },
-  { href: "#run", label: "Run" },
-  { href: "#outputs", label: "Outputs" },
-  { href: "#integrate", label: "Integrate" },
-  { href: "#pricing", label: "Pricing" },
-];
-
+/**
+ * Marketing header: the printed head of the pad, closed by a double rule.
+ * Signed out: wordmark · nav · Sign in · Get access. Signed in: wordmark ·
+ * nav · New scan · Account (one control holding the email, account links and
+ * sign out). Below 1100px the nav and account collapse into Menu.
+ */
 export default async function Topbar() {
+  const signedIn = Boolean(await getSessionClaims());
+
   return (
-    <header
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 20,
-        background: "rgba(255,255,255,0.92)",
-        backdropFilter: "saturate(1.2) blur(10px)",
-        WebkitBackdropFilter: "saturate(1.2) blur(10px)",
-        borderBottom: "1px solid #DDE1E4",
-      }}
-    >
-      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "14px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div aria-hidden="true" style={{ width: 22, height: 22, background: "#0E1216", position: "relative" }}>
-            <div style={{ position: "absolute", inset: 5, border: "1.5px solid #F5F5F0" }} />
+    <header className="pm-mk-top" data-signed-in={signedIn ? "" : undefined}>
+      <div className="pm-wrap pm-mk-top-inner">
+        <Wordmark href="/#main" />
+        <NavLinks />
+        <div className="pm-mk-top-actions">
+          <div className="pm-mk-top-auth">
+            <AuthControls />
           </div>
-          <span style={{ fontFamily: SANS, fontWeight: 600, letterSpacing: "-0.01em", fontSize: 17 }}>ProofMart</span>
-          <span style={{ fontFamily: MONO, fontSize: 11, color: "#767C83", letterSpacing: "0.06em", marginLeft: 4 }}>V{APP_VERSION} BETA</span>
-        </div>
-        <nav aria-label="Primary" className="pm-nav-links" style={{ alignItems: "center", gap: 28, fontFamily: SANS, fontSize: 14, color: "#43494F" }}>
-          {NAV_LINKS.map((l) => (
-            <a key={l.href} href={l.href} className="pm-hoverable" style={{ color: "#43494F" }}>
-              {l.label}
-            </a>
-          ))}
-        </nav>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <AuthControls />
-          <OpenScanButton
-            className="pm-hoverable"
-            style={{
-              fontFamily: MONO,
-              fontSize: 12,
-              letterSpacing: "0.04em",
-              padding: "8px 12px",
-              background: "#0E1216",
-              color: "#F5F5F0",
-              borderRadius: 3,
-            }}
-          >
-            GET ACCESS →
-          </OpenScanButton>
+          {/* Signed out, the header CTA grants access; signed in, the account
+              is already there, so it becomes the next useful action. */}
+          {signedIn ? (
+            <OpenScanButton size="sm" className="pm-mk-top-cta">
+              New scan
+            </OpenScanButton>
+          ) : (
+            <RollPill href="/signup" size="sm" dot className="pm-mk-top-cta">
+              Get access
+            </RollPill>
+          )}
+          <MobileMenu account={<AuthControls layout="menu" />} />
         </div>
       </div>
     </header>

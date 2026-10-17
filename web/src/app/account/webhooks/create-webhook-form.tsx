@@ -1,50 +1,35 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import * as s from "@/components/auth/auth-styles";
-import { MONO } from "@/lib/evidence-data";
+import RollPill from "@/components/motion/roll-pill";
+import SecretReveal from "@/components/account/secret-reveal";
 import { createWebhook } from "./actions";
+
+const EVENTS = ["verification.completed", "verification.failed"];
 
 // Same reasoning as the API key form: the signing secret is shown once,
 // held only in local state, never put anywhere it could end up logged.
-export default function CreateWebhookForm() {
+export default function CreateWebhookForm({ used, limit, initialSecret }: { used?: number; limit?: number; initialSecret?: string }) {
   const [url, setUrl] = useState("");
-  const [revealedSecret, setRevealedSecret] = useState<string | null>(null);
+  const [revealedSecret, setRevealedSecret] = useState<string | null>(initialSecret ?? null);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
   const [pending, startTransition] = useTransition();
 
   if (revealedSecret) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <div style={s.successBanner}>Copy this signing secret now — it won&rsquo;t be shown again. Use it to verify the x-proofmart-signature header on deliveries.</div>
-        <div style={{ fontFamily: MONO, fontSize: 13, padding: "10px 12px", border: "1px solid #DDE1E4", borderRadius: 3, background: "#EDEFF1", wordBreak: "break-all" }}>
-          {revealedSecret}
-        </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          <button
-            type="button"
-            className="pm-hoverable"
-            style={{ ...s.secondaryButton, width: "auto", padding: "8px 14px" }}
-            onClick={async () => {
-              await navigator.clipboard.writeText(revealedSecret);
-              setCopied(true);
-              setTimeout(() => setCopied(false), 1400);
-            }}
-          >
-            {copied ? "Copied" : "Copy"}
-          </button>
-          <button type="button" className="pm-hoverable" style={{ ...s.primaryButton, width: "auto", padding: "8px 14px" }} onClick={() => setRevealedSecret(null)}>
-            Done
-          </button>
-        </div>
-      </div>
+      <SecretReveal title="Copy the signing secret now." secret={revealedSecret} secretLabel="Secret" envName="PROOFMART_WEBHOOK_SECRET" onDone={() => setRevealedSecret(null)}>
+        Your endpoint is live. Every delivery carries an <code className="pm-acct-code-inline">x-proofmart-signature</code> header computed with this secret — check it before
+        trusting the body. It&rsquo;s shown once; if it&rsquo;s lost, delete the endpoint and add it again for a new one.
+      </SecretReveal>
     );
   }
 
+  const full = typeof used === "number" && typeof limit === "number" && used >= limit;
+
   return (
     <form
-      style={{ display: "flex", gap: 10 }}
+      className="pm-acct-card pm-acct-create"
+      aria-labelledby="pm-acct-create-title"
       onSubmit={(e) => {
         e.preventDefault();
         setError(null);
@@ -58,16 +43,59 @@ export default function CreateWebhookForm() {
         });
       }}
     >
-      <input
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        placeholder="https://your-server.example.com/webhooks/proofmart"
-        style={{ ...s.input, flex: 1 }}
-      />
-      <button type="submit" disabled={pending} className="pm-hoverable" style={{ ...s.primaryButton, width: "auto", padding: "10px 16px" }}>
-        {pending ? "Adding…" : "Add webhook"}
-      </button>
-      {error && <div style={s.errorBanner}>{error}</div>}
+      <div className="pm-acct-create-text">
+        <h2 id="pm-acct-create-title" className="pm-t-heading-sm pm-acct-create-title">
+          Add an endpoint
+          {typeof used === "number" && typeof limit === "number" && (
+            <span className="pm-t-mono pm-acct-kicker-count">
+              {String(used).padStart(2, "0")} / {limit}
+            </span>
+          )}
+        </h2>
+        <p className="pm-acct-hint">
+          A public URL on your server that accepts a JSON <code className="pm-acct-code-inline">POST</code> and answers with any 2xx within 10 seconds.
+        </p>
+      </div>
+      <div className="pm-acct-create-row">
+        <label className="pm-acct-field">
+          <span className="pm-acct-sr">Endpoint URL</span>
+          <input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://api.example.com/hooks"
+            className="pm-acct-input pm-acct-input-mono"
+            inputMode="url"
+            autoComplete="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? "pm-acct-create-error pm-acct-events" : "pm-acct-events"}
+          />
+        </label>
+        <RollPill type="submit" dot pending={pending} pendingLabel="Adding" className="pm-acct-create-submit">
+          Add endpoint
+        </RollPill>
+      </div>
+      <div className="pm-acct-events" id="pm-acct-events">
+        <span className="pm-t-label pm-acct-events-label">Sends</span>
+        <ul className="pm-acct-event-list" aria-label="Events sent to every endpoint">
+          {EVENTS.map((ev) => (
+            <li key={ev} className="pm-t-mono pm-acct-event">
+              <span className="pm-acct-event-dot" aria-hidden="true" />
+              {ev}
+            </li>
+          ))}
+        </ul>
+        <span className="pm-acct-hint pm-acct-events-note">
+          Every endpoint receives both. Branch on the <code className="pm-acct-code-inline">x-proofmart-event</code> header.
+        </span>
+      </div>
+      {error && (
+        <p id="pm-acct-create-error" role="alert" className="pm-acct-error">
+          {error}
+        </p>
+      )}
+      {full && !error && <p className="pm-acct-hint">You&apos;ve reached the limit of {limit} endpoints. Delete one to add another.</p>}
     </form>
   );
 }

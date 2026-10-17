@@ -36,8 +36,8 @@ test.describe("live document upload", () => {
     await expect(rail(page).getByText("of 5")).toBeVisible();
 
     const canvas = rail(page).locator("canvas").first();
-    const nextButton = rail(page).getByRole("button", { name: "›" });
-    const prevButton = rail(page).getByRole("button", { name: "‹" });
+    const nextButton = rail(page).getByRole("button", { name: "Next page" });
+    const prevButton = rail(page).getByRole("button", { name: "Previous page" });
     const pageIndicator = rail(page).getByText("page").locator("..").getByText(/^\d+$/);
 
     await expect(prevButton).toBeDisabled();

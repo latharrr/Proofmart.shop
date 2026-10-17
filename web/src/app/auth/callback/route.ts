@@ -29,8 +29,19 @@ export async function GET(request: Request) {
       }
       return NextResponse.redirect(`${origin}${next}`);
     }
-    return NextResponse.redirect(`${origin}/auth/error?error=${encodeURIComponent(error.message)}`);
+    const failed = new URLSearchParams({ error: error.message.slice(0, 200) });
+    if (error.code) failed.set("error_code", error.code);
+    return NextResponse.redirect(`${origin}/auth/error?${failed}`);
   }
 
-  return NextResponse.redirect(`${origin}/auth/error`);
+  // No code: the provider sent an error instead (a cancelled Google consent,
+  // an expired email link, a server fault). Pass it on so /auth/error can say
+  // which one it was.
+  const forwarded = new URLSearchParams();
+  for (const key of ["error", "error_code", "error_description"]) {
+    const value = searchParams.get(key);
+    if (value) forwarded.set(key, value.slice(0, 200));
+  }
+  const qs = forwarded.toString();
+  return NextResponse.redirect(`${origin}/auth/error${qs ? `?${qs}` : ""}`);
 }

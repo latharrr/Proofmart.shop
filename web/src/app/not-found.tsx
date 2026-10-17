@@ -1,64 +1,73 @@
-import Link from "next/link";
 import Topbar from "@/components/home/topbar";
 import SiteFooter from "@/components/home/site-footer";
-import { MONO, SANS, VERDICT } from "@/lib/evidence-data";
+import RollPill from "@/components/motion/roll-pill";
+import RequestedPath from "@/components/account/requested-path";
+import MissingPageStage, { type Way } from "@/components/account/missing-page-stage";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
-export default function NotFound() {
-  const v = VERDICT.INCONCLUSIVE;
+const SIGNED_OUT: Way[] = [
+  { href: "/#access", title: "Verify a document", body: "Upload a PDF and get one verdict, with the arithmetic shown." },
+  { href: "/#pipeline", title: "How it works", body: "What the markers check, from running balances to duplicate rows." },
+  { href: "/#pricing", title: "Pricing", body: "Free for 50 API calls a month. Pro when you need more." },
+  { href: "/login", title: "Sign in", body: "Back to your saved documents, API keys and webhooks." },
+];
+
+const SIGNED_IN: Way[] = [
+  { href: "/documents", title: "My documents", body: "Every report you've saved, newest first." },
+  { href: "/#access", title: "Verify a document", body: "Upload a PDF and get one verdict, with the arithmetic shown." },
+  { href: "/account/api-keys", title: "API keys", body: "Create and revoke keys, with a request ready to paste." },
+  { href: "/security", title: "Trust & security", body: "How documents are stored, who can see them, and deletion." },
+];
+
+export default async function NotFound() {
+  // Same check the topbar makes; a missing Supabase config is "signed out".
+  const signedIn = isSupabaseConfigured() ? Boolean((await (await createClient()).auth.getClaims()).data?.claims) : false;
+  const ways = signedIn ? SIGNED_IN : SIGNED_OUT;
 
   return (
-    <div style={{ width: "100%", minHeight: "100vh", background: "#FFFFFF", color: "#0E1216" }}>
+    <div className="pm-page">
       <Topbar />
-      <main id="main" style={{ maxWidth: 1320, margin: "0 auto", padding: "120px 32px 160px" }}>
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            fontFamily: MONO,
-            fontSize: 11,
-            color: "#767C83",
-            letterSpacing: "0.08em",
-            marginBottom: 24,
-          }}
-        >
-          <span aria-hidden="true" style={{ width: 12, textAlign: "center", fontFamily: MONO, fontSize: 12, color: v.color, fontWeight: 500 }}>
-            {v.glyph}
-          </span>
-          404 · NO RECORD AT THIS ADDRESS
-        </div>
-        <h1
-          style={{
-            fontFamily: SANS,
-            fontWeight: 500,
-            fontSize: 56,
-            lineHeight: 1,
-            letterSpacing: "-0.03em",
-            margin: "0 0 20px",
-            maxWidth: "14ch",
-          }}
-        >
-          This page isn&rsquo;t on the rail.
-        </h1>
-        <p style={{ fontFamily: SANS, fontSize: 17, lineHeight: 1.55, color: "#43494F", maxWidth: "48ch", margin: "0 0 40px" }}>
-          Nothing was found at this URL. It may have moved, or the link may be wrong. The rest of the site is unaffected.
-        </p>
-        <Link
-          href="/"
-          className="pm-hoverable"
-          style={{
-            display: "inline-block",
-            fontFamily: MONO,
-            fontSize: 12,
-            letterSpacing: "0.06em",
-            padding: "12px 18px",
-            background: "#0E1216",
-            color: "#F5F5F0",
-            borderRadius: 3,
-          }}
-        >
-          ← BACK TO PROOFMART
-        </Link>
+      <main id="main">
+        <section className="pm-wrap pm-nf" aria-labelledby="pm-nf-title">
+          <div className="pm-nf-text">
+            {/* A missing page is not a verdict about anyone's document, so
+                nothing here takes a pencil colour. */}
+            <h1 id="pm-nf-title" className="pm-nf-title">
+              Page not found.
+            </h1>
+            <div>
+              <p className="pm-h-lead pm-nf-lead">
+                Nothing is published at <RequestedPath />. The link may be mistyped or out of date. Everything else on ProofMart is working normally.
+              </p>
+              <div className="pm-nf-cta">
+                {signedIn ? (
+                  <>
+                    <RollPill href="/documents" dot>
+                      Go to my documents
+                    </RollPill>
+                    <RollPill href="/" variant="secondary">
+                      ProofMart home
+                    </RollPill>
+                  </>
+                ) : (
+                  <>
+                    <RollPill href="/" dot>
+                      Go to the homepage
+                    </RollPill>
+                    <RollPill href="/#access" native variant="secondary">
+                      Verify a document
+                    </RollPill>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="pm-nf-visual">
+            <MissingPageStage ways={ways} />
+          </div>
+        </section>
+
       </main>
       <SiteFooter />
     </div>

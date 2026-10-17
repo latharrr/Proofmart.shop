@@ -1,72 +1,95 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
-import { MONO, SANS } from "@/lib/evidence-data";
+import Link from "next/link";
+import Wordmark from "@/components/brand/wordmark";
+import RollPill from "@/components/motion/roll-pill";
+import AuthStage, { type AuthStageProps } from "@/components/auth/auth-stage";
 
+/**
+ * Frame for every auth page: the pad's printed head (mark home, a plain way
+ * back to the site, a button to the other flow), one column that states the
+ * page's single purpose, and the
+ * sample statement on its working paper beside the form (after it on a
+ * phone).
+ */
 export default function AuthShell({
   title,
+  size = "lg",
   subtitle,
   children,
   footer,
+  switchTo,
+  stage,
+  below,
 }: {
-  title: string;
-  subtitle?: string;
+  /** Accepted for older call sites; the title carries the page's state. */
+  eyebrow?: string;
+  title: ReactNode;
+  /** lg = heading-lg (short titles), md = heading (sentences). */
+  size?: "lg" | "md";
+  subtitle?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
+  /** The pill in the top bar: the other auth flow. */
+  switchTo?: { label: string; href: string };
+  stage: AuthStageProps;
+  /** Extra content after the footer. */
+  below?: ReactNode;
 }) {
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "48px 24px",
-        background: "#FFFFFF",
-      }}
-    >
-      <Link
-        href="/"
-        className="pm-hoverable"
-        style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 40 }}
-      >
-        <div aria-hidden="true" style={{ width: 22, height: 22, background: "#0E1216", position: "relative" }}>
-          <div style={{ position: "absolute", inset: 5, border: "1.5px solid #F5F5F0" }} />
-        </div>
-        <span style={{ fontFamily: SANS, fontWeight: 600, letterSpacing: "-0.01em", fontSize: 17, color: "#0E1216" }}>
-          ProofMart
-        </span>
-      </Link>
+    <div className="pm-auth">
+      <header className="pm-auth-top">
+        <Wordmark href="/" />
+        <nav className="pm-auth-nav" aria-label="Account">
+          <Link href="/" className="pm-link pm-auth-home">
+            <span className="pm-auth-home-long">Back to home</span>
+            <span className="pm-auth-home-short">Home</span>
+          </Link>
+          {switchTo && (
+            <RollPill href={switchTo.href} variant="secondary" size="sm" dot>
+              {switchTo.label}
+            </RollPill>
+          )}
+        </nav>
+      </header>
 
-      <div style={{ width: "100%", maxWidth: 360 }}>
-        <h1 style={{ fontFamily: SANS, fontWeight: 500, fontSize: 22, letterSpacing: "-0.01em", margin: "0 0 6px" }}>
-          {title}
-        </h1>
-        {subtitle && (
-          <p style={{ fontFamily: SANS, fontSize: 14, color: "#767C83", margin: "0 0 28px", lineHeight: 1.5 }}>
-            {subtitle}
-          </p>
-        )}
-        {!subtitle && <div style={{ marginBottom: 28 }} />}
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>{children}</div>
-
-        {footer && (
-          <div
-            style={{
-              marginTop: 24,
-              paddingTop: 20,
-              borderTop: "1px solid #DDE1E4",
-              fontFamily: MONO,
-              fontSize: 12,
-              color: "#767C83",
-              textAlign: "center",
-            }}
-          >
-            {footer}
+      <div className="pm-auth-grid">
+        <main id="main" className="pm-auth-col">
+          <div className="pm-auth-title-row">
+            <h1 className="pm-auth-title" data-size={size}>
+              {title}
+            </h1>
           </div>
-        )}
+          {subtitle && <p className="pm-auth-sub">{subtitle}</p>}
+
+          <div className="pm-auth-stack">{children}</div>
+
+          {footer && <div className="pm-auth-footer">{footer}</div>}
+          {below}
+        </main>
+
+        <AuthStage {...stage} />
       </div>
+    </div>
+  );
+}
+
+/** "Already have an account? Sign in →": the cross-link under each form. */
+export function CrossLink({ prompt, label, href }: { prompt: string; label: string; href: string }) {
+  return (
+    <p className="pm-auth-cross">
+      <span>{prompt}</span>{" "}
+      <Link href={href} className="pm-link pm-auth-xlink">
+        {label}
+      </Link>
+    </p>
+  );
+}
+
+/** The "or" rule between Google and email. */
+export function OrDivider() {
+  return (
+    <div className="pm-auth-or" role="separator" aria-label="or">
+      <span aria-hidden="true">or</span>
     </div>
   );
 }
