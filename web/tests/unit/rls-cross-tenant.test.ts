@@ -31,12 +31,25 @@ const env = { ...loadEnvLocal(), ...process.env };
 const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 const SERVICE_KEY = env.SUPABASE_SERVICE_ROLE_KEY;
-const hasCreds = Boolean(SUPABASE_URL && SUPABASE_KEY && SERVICE_KEY);
-
-// Two long-lived, dedicated test accounts already provisioned in this
-// project for exactly this purpose (see Gate 4/5 E2E verification).
-const USER_A = { email: "gate4-e2e-test@proofmart.internal", password: "Gate4TestPassword!2026" };
-const USER_B = { email: "gate5-e2e-test@proofmart.internal", password: "Gate5TestPassword!2026" };
+// Dedicated test accounts, supplied via env (RLS_TEST_USER_A/B_EMAIL and
+// RLS_TEST_USER_A/B_PASSWORD) so no credentials live in the repo.
+const USER_A = {
+  email: env.RLS_TEST_USER_A_EMAIL ?? "",
+  password: env.RLS_TEST_USER_A_PASSWORD ?? "",
+};
+const USER_B = {
+  email: env.RLS_TEST_USER_B_EMAIL ?? "",
+  password: env.RLS_TEST_USER_B_PASSWORD ?? "",
+};
+const hasCreds = Boolean(
+  SUPABASE_URL &&
+  SUPABASE_KEY &&
+  SERVICE_KEY &&
+  USER_A.email &&
+  USER_A.password &&
+  USER_B.email &&
+  USER_B.password,
+);
 
 describe.skipIf(!hasCreds)("cross-tenant RLS isolation (live Supabase project)", () => {
   let clientA: SupabaseClient;
