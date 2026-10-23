@@ -290,8 +290,16 @@ rewrite or redirect in `next.config.ts` that strips a trailing backslash on
 **Status 2026-10-17:** done. `src/app/v1/[...path]/route.ts` returns JSON
 `{"error": "not_found"}` with 404 for GET/POST/PUT/PATCH/DELETE on any
 unknown `/v1/*` path (concrete routes take precedence — verified in the
-build's route table); malformed paths like `/v1/verify\` land here too.
-Covered by `tests/unit/v1-catchall.test.ts`.
+build's route table). Covered by `tests/unit/v1-catchall.test.ts`.
+
+**Follow-up 2026-10-23:** the catch-all did not cover the original
+trailing-backslash case — `/v1/verify\` still 500'd on Vercel (it throws
+inside Next's route matching before the catch-all is consulted; not
+reproducible on a local build). Fixed at the earliest interception point:
+`src/proxy.ts` now answers any `/v1/*` path containing a backslash (literal
+or `%5C`) with the same JSON 404 before routing runs. Guard logic is a pure
+function (`src/lib/api/backslash-guard.ts`) covered by
+`tests/unit/backslash-guard.test.ts`.
 
 ### 14. Tests and CI
 
