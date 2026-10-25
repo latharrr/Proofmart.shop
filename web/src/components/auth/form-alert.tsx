@@ -15,7 +15,7 @@ export default function FormAlert({
   action,
   children,
 }: {
-  tone: "error" | "success";
+  tone: "error" | "success" | "busy";
   id?: string;
   title: string;
   body?: string;
@@ -26,7 +26,7 @@ export default function FormAlert({
   return (
     <div id={id} className="pm-auth-alert" data-tone={tone} role={tone === "error" ? "alert" : "status"}>
       <p className="pm-auth-alert-title">
-        <span className="pm-auth-sr">{tone === "error" ? "Error: " : "Done: "}</span>
+        <span className="pm-auth-sr">{tone === "error" ? "Error: " : tone === "busy" ? "Busy: " : "Done: "}</span>
         {title}
       </p>
       {body && <p className="pm-auth-alert-body">{body}</p>}

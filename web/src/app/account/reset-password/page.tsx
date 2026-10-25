@@ -15,9 +15,34 @@ const band = (
 export default async function ResetPasswordPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sent?: string | string[] }>;
+  searchParams: Promise<{ sent?: string | string[]; busy?: string | string[] }>;
 }) {
-  const { sent } = await searchParams;
+  const { sent, busy } = await searchParams;
+
+  if (busy) {
+    return (
+      <AuthShell
+        eyebrow="Reset link not sent"
+        title="Sending is busy right now"
+        subtitle="A lot of reset emails are going out at the moment, so yours couldn’t be sent just yet. Your password hasn’t changed."
+        switchTo={{ label: "Sign in", href: "/login" }}
+        stage={{ variant: "single", verdict: "REVIEW", label: "Not sent yet, try again shortly", band }}
+        footer={<CrossLink prompt="Remembered it?" label="Back to sign in" href="/login" />}
+      >
+        <FormAlert
+          tone="busy"
+          title="No email was sent this time."
+          body="Wait a few minutes, then send the link again. It usually goes through on the next try."
+        />
+        <p className="pm-t-body pm-auth-note">
+          Ready to retry?{" "}
+          <Link href="/account/reset-password" className="pm-inline-link">
+            Send the link again
+          </Link>
+        </p>
+      </AuthShell>
+    );
+  }
 
   if (sent) {
     return (
