@@ -15,14 +15,26 @@ export { isSupabaseConfigured } from "./config";
 const JWKS_TTL_MS = 10 * 60 * 1000;
 let jwksCache: { jwks: { keys: JWK[] }; at: number } | null = null;
 
+/** Only a structurally valid, non-empty key set may enter the 10-minute cache — a malformed 200 body must not poison it. */
+function isValidJwks(data: unknown): data is { keys: JWK[] } {
+  if (typeof data !== "object" || data === null) return false;
+  const keys = (data as { keys?: unknown }).keys;
+  return (
+    Array.isArray(keys) &&
+    keys.length > 0 &&
+    keys.every((k) => typeof k === "object" && k !== null && typeof (k as JWK).kid === "string" && typeof (k as JWK).kty === "string")
+  );
+}
+
 async function sharedJwks(): Promise<{ keys: JWK[] } | undefined> {
   if (jwksCache && Date.now() - jwksCache.at < JWKS_TTL_MS) return jwksCache.jwks;
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/.well-known/jwks.json`);
     if (!res.ok) return undefined;
-    const jwks = (await res.json()) as { keys: JWK[] };
-    jwksCache = { jwks, at: Date.now() };
-    return jwks;
+    const body: unknown = await res.json();
+    if (!isValidJwks(body)) return undefined; // do NOT cache — next request tries again
+    jwksCache = { jwks: body, at: Date.now() };
+    return body;
   } catch {
     return undefined; // fall back to the client's own fetch path
   }
