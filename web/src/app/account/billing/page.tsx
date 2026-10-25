@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { createClient, getVerifiedClaims, isSupabaseConfigured } from "@/lib/supabase/server";
 import { checkUsageQuota } from "@/lib/billing/usage";
 import { isRazorpayConfigured } from "@/lib/billing/razorpay";
 import AppShell, { AppPage, AppPageHeader } from "@/components/app/app-shell";
@@ -13,7 +13,7 @@ function nextReset(now: Date): Date {
 export default async function BillingPage() {
   if (!isSupabaseConfigured()) redirect("/login");
   const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
+  const { data } = await getVerifiedClaims(supabase);
   const userId = data?.claims?.sub;
   if (typeof userId !== "string") redirect("/login");
   const email = typeof data?.claims?.email === "string" ? data.claims.email : null;

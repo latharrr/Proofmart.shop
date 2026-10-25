@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { createClient, getVerifiedClaims, isSupabaseConfigured } from "@/lib/supabase/server";
 import AppShell, { AppPage, AppPageHeader } from "@/components/app/app-shell";
 import RollPill from "@/components/motion/roll-pill";
 import Reveal from "@/components/motion/reveal";
@@ -13,7 +13,7 @@ const WEBHOOK_LIMIT = 10;
 export default async function WebhooksPage() {
   if (!isSupabaseConfigured()) redirect("/login");
   const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
+  const { data } = await getVerifiedClaims(supabase);
   if (!data?.claims) redirect("/login");
   const email = typeof data.claims.email === "string" ? data.claims.email : null;
 

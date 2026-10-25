@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import Wordmark from "@/components/brand/wordmark";
 import RollPill from "@/components/motion/roll-pill";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { createClient, getVerifiedClaims, isSupabaseConfigured } from "@/lib/supabase/server";
 import { SCAN_URL } from "@/components/evidence-rail/scan-intent";
 import AccountMenu from "./account-menu";
 import AppMobileMenu from "./mobile-menu";
@@ -45,7 +45,7 @@ export const VERIFY_HREF = SCAN_URL;
 
 async function sessionEmail(): Promise<string | null> {
   if (!isSupabaseConfigured()) return null;
-  const { data } = await (await createClient()).auth.getClaims();
+  const { data } = await getVerifiedClaims(await createClient());
   return typeof data?.claims?.email === "string" ? data.claims.email : null;
 }
 

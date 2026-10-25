@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { createClient, getVerifiedClaims, isSupabaseConfigured } from "@/lib/supabase/server";
 import type { DocumentRow } from "@/lib/documents";
 import AppShell, { AppPage, AppPageHeader } from "@/components/app/app-shell";
 import RollPill from "@/components/motion/roll-pill";
@@ -11,7 +11,7 @@ const PAGE_SIZE = 25;
 export default async function DocumentsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   if (!isSupabaseConfigured()) redirect("/login");
   const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
+  const { data } = await getVerifiedClaims(supabase);
   if (!data?.claims) redirect("/login");
   const email = typeof data.claims.email === "string" ? data.claims.email : null;
 

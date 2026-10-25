@@ -32,7 +32,7 @@ export default async function ResetPasswordPage({
         <FormAlert
           tone="busy"
           title="No email was sent this time."
-          body="Wait a few minutes, then send the link again. It usually goes through on the next try."
+          body="Wait a few minutes, then send the link again."
         />
         <p className="pm-t-body pm-auth-note">
           Ready to retry?{" "}

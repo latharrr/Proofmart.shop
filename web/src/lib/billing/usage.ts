@@ -20,20 +20,24 @@ export async function checkUsageQuota(userId: string): Promise<{ allowed: boolea
   const supabase = createServiceClient();
   if (!supabase) return { allowed: true, plan: "free", used: 0, limit: PLANS.free.monthlyVerifyLimit };
 
-  const { data: sub } = await supabase.from("subscriptions").select("plan, status").eq("user_id", userId).maybeSingle();
-  const plan: PlanId = sub && sub.status === "active" && sub.plan === "pro" ? "pro" : "free";
-  const limit = PLANS[plan].monthlyVerifyLimit;
-
   const monthStart = new Date();
   monthStart.setUTCDate(1);
   monthStart.setUTCHours(0, 0, 0, 0);
 
-  const { count, error } = await supabase
-    .from("api_usage_events")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .in("event_type", METERED_EVENT_TYPES)
-    .gte("created_at", monthStart.toISOString());
+  // Independent reads, one network round: the plan row and the month's
+  // metered-event count don't depend on each other, so awaiting them in
+  // series just doubles the page's database latency.
+  const [{ data: sub }, { count, error }] = await Promise.all([
+    supabase.from("subscriptions").select("plan, status").eq("user_id", userId).maybeSingle(),
+    supabase
+      .from("api_usage_events")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .in("event_type", METERED_EVENT_TYPES)
+      .gte("created_at", monthStart.toISOString()),
+  ]);
+  const plan: PlanId = sub && sub.status === "active" && sub.plan === "pro" ? "pro" : "free";
+  const limit = PLANS[plan].monthlyVerifyLimit;
 
   if (error || count === null) return { allowed: true, plan, used: 0, limit };
   return { allowed: count < limit, plan, used: count, limit };

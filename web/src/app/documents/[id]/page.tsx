@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { createClient, getVerifiedClaims, isSupabaseConfigured } from "@/lib/supabase/server";
 import type { DocumentRow } from "@/lib/documents";
 import AppShell, { AppPage, AppPageHeader, VERIFY_HREF } from "@/components/app/app-shell";
 import ConfirmSubmitButton from "@/components/confirm-submit-button";
@@ -15,7 +15,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
 
   if (!isSupabaseConfigured()) redirect("/login");
   const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
+  const { data } = await getVerifiedClaims(supabase);
   if (!data?.claims) redirect("/login");
   const email = typeof data.claims.email === "string" ? data.claims.email : null;
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { createClient, getVerifiedClaims, isSupabaseConfigured } from "@/lib/supabase/server";
 import AppShell, { AppPage, AppPageHeader } from "@/components/app/app-shell";
 import RollPill from "@/components/motion/roll-pill";
 import Reveal from "@/components/motion/reveal";
@@ -37,7 +37,7 @@ function keysHref(params: { page?: number; q?: string }): string {
 export default async function ApiKeysPage({ searchParams }: { searchParams: Promise<{ page?: string; q?: string }> }) {
   if (!isSupabaseConfigured()) redirect("/login");
   const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
+  const { data } = await getVerifiedClaims(supabase);
   if (!data?.claims) redirect("/login");
   const email = typeof data.claims.email === "string" ? data.claims.email : null;
 
