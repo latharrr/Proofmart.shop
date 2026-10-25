@@ -323,7 +323,7 @@ export default function SecurityPage() {
 
             <Section id="report" n="11" title="Reporting an issue">
               <p>
-                To report a security issue, write to <span className="pm-mono">security@proofmart.shop</span> — the address is also published at{" "}
+                To report a security issue, write to <span className="pm-mono">deepanshulathar@gmail.com</span> — the address is also published at{" "}
                 <span className="pm-mono">/.well-known/security.txt</span>. Include what you found, how to reproduce it, and how to reach you.
                 There is no bug-bounty program; urgent reports go first.
               </p>

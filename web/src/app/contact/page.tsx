@@ -48,7 +48,7 @@ export default function ContactPage() {
                     <tr>
                       <th scope="row">Security issues</th>
                       <td>
-                        <span className="pm-mono">security@proofmart.shop</span> — see <span className="pm-mono">/.well-known/security.txt</span>
+                        <span className="pm-mono">deepanshulathar@gmail.com</span> — see <span className="pm-mono">/.well-known/security.txt</span>
                       </td>
                     </tr>
                   </tbody>

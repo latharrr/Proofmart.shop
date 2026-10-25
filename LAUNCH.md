@@ -261,11 +261,11 @@ findings and geometry unchanged; sample filename renamed to
 `security@proofmart.shop` (a forwarding alias is enough), publish
 `/.well-known/security.txt`, and update the "Reporting an issue" section.
 
-**Status 2026-10-17:** code done — `public/.well-known/security.txt`
-published (`Contact: mailto:security@proofmart.shop`, expires 2027-10-17)
-and the `/security` reporting section points at it. Remaining: you create
-the `security@proofmart.shop` alias (a forwarder is enough); until then the
-page points at an unmonitored inbox.
+**Status 2026-10-25:** no MX/alias exists for `security@proofmart.shop`, so
+`/security`, `/contact` and `/.well-known/security.txt` now point at the
+monitored `deepanshulathar@gmail.com` instead of promising a dead inbox.
+Remaining: create the `security@proofmart.shop` forwarder, then switch the
+three references back.
 
 ### 12. Supabase hardening (from the Supabase advisor)
 
