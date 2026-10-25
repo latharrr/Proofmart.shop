@@ -3,7 +3,7 @@ import AppShell, { AppPage, AppPageHeaderSkeleton } from "@/components/app/app-s
 /** My documents while the list query is in flight: the real frame, the header's shape, and placeholder rows where the documents will be. */
 export default function DocumentsLoading() {
   return (
-    <AppShell active="documents">
+    <AppShell active="documents" email={null}>
       <AppPage>
         <AppPageHeaderSkeleton label="Loading your documents" />
         <div className="pm-docs pm-skeleton" aria-hidden="true">

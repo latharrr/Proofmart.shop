@@ -10,7 +10,7 @@ import AppShell, { AppPage, AppPageHeaderSkeleton } from "@/components/app/app-s
  */
 export default function AccountLoading() {
   return (
-    <AppShell>
+    <AppShell email={null}>
       <AppPage>
         <AppPageHeaderSkeleton label="Loading your account" />
         <div className="pm-docs pm-skeleton" aria-hidden="true">

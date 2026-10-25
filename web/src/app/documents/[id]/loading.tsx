@@ -3,7 +3,7 @@ import AppShell, { AppPage, AppPageHeaderSkeleton } from "@/components/app/app-s
 /** A saved report while its row (and the full result envelope) loads: the frame, the back link, and the report's shape. */
 export default function DocumentLoading() {
   return (
-    <AppShell active="documents">
+    <AppShell active="documents" email={null}>
       <AppPage>
         <AppPageHeaderSkeleton back="My documents" size="md" label="Loading the report" />
         <div className="pm-report pm-skeleton" aria-hidden="true">
