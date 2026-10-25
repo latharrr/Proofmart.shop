@@ -6,7 +6,7 @@ import RollPill from "@/components/motion/roll-pill";
 /**
  * Signed-in account control for the marketing header: one ACCOUNT pill that
  * opens a floating panel with the email, the account links and sign out.
- * The contents are server-rendered (auth-controls.tsx) and passed through.
+ * The contents are rendered by header-auth.tsx and passed through.
  * Closes on Escape, on an outside click, and when a link inside is followed.
  */
 export default function TopAccount({ email, children }: { email: string; children: ReactNode }) {

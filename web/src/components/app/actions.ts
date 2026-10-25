@@ -7,7 +7,7 @@ import { recordAuditEvent } from "@/lib/audit";
 
 /**
  * Sign-out for the signed-in app shell. Same sequence as the marketing
- * topbar's inline action (components/home/auth-controls.tsx): end the
+ * the marketing header (components/home/sign-out.ts): end the
  * session, record it, drop every cached layout, go home.
  */
 export async function signOutAction(): Promise<void> {

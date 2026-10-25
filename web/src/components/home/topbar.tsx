@@ -1,8 +1,6 @@
-import AuthControls, { getSessionClaims } from "@/components/home/auth-controls";
+import HeaderAuth from "@/components/home/header-auth";
 import MobileMenu from "@/components/home/mobile-menu";
 import NavLinks from "@/components/home/nav-links";
-import OpenScanButton from "@/components/home/open-scan-button";
-import RollPill from "@/components/motion/roll-pill";
 import Wordmark from "@/components/brand/wordmark";
 
 /**
@@ -10,31 +8,21 @@ import Wordmark from "@/components/brand/wordmark";
  * Signed out: wordmark · nav · Sign in · Get access. Signed in: wordmark ·
  * nav · New scan · Account (one control holding the email, account links and
  * sign out). Below 1100px the nav and account collapse into Menu.
+ *
+ * This component is intentionally NOT async and reads no session: keeping it
+ * free of cookie reads is what lets the marketing pages prerender and serve
+ * from the CDN. The signed-in/out swap happens in HeaderAuth on the client
+ * (initial render is the signed-out state, matching the server HTML).
  */
-export default async function Topbar() {
-  const signedIn = Boolean(await getSessionClaims());
-
+export default function Topbar() {
   return (
-    <header className="pm-mk-top" data-signed-in={signedIn ? "" : undefined}>
+    <header className="pm-mk-top">
       <div className="pm-wrap pm-mk-top-inner">
         <Wordmark href="/#main" />
         <NavLinks />
         <div className="pm-mk-top-actions">
-          <div className="pm-mk-top-auth">
-            <AuthControls />
-          </div>
-          {/* Signed out, the header CTA grants access; signed in, the account
-              is already there, so it becomes the next useful action. */}
-          {signedIn ? (
-            <OpenScanButton size="sm" className="pm-mk-top-cta">
-              New scan
-            </OpenScanButton>
-          ) : (
-            <RollPill href="/signup" size="sm" dot className="pm-mk-top-cta">
-              Get access
-            </RollPill>
-          )}
-          <MobileMenu account={<AuthControls layout="menu" />} />
+          <HeaderAuth layout="bar" />
+          <MobileMenu account={<HeaderAuth layout="menu" />} />
         </div>
       </div>
     </header>

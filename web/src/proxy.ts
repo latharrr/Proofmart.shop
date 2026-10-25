@@ -17,6 +17,16 @@ export async function proxy(request: NextRequest) {
   // (see the matcher below), so an unconfigured deploy must pass requests
   // through untouched, not 500 on every single page.
   if (!isSupabaseConfigured()) return NextResponse.next();
+
+  // Anonymous requests carry no Supabase auth cookies, so there is no
+  // session to refresh: skip the Supabase client entirely. This keeps
+  // public marketing responses free of Set-Cookie and cacheable at the
+  // CDN, and the browser-side Supabase client (header-auth.tsx) owns
+  // session freshness on public pages for signed-in visitors. Any request
+  // that DOES carry auth cookies still gets the full refresh below, so
+  // protected pages and API routes behave exactly as before.
+  const hasAuthCookie = request.cookies.getAll().some((c) => c.name.startsWith("sb-"));
+  if (!hasAuthCookie) return NextResponse.next();
   return await updateSession(request);
 }
 
