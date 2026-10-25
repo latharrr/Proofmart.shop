@@ -79,6 +79,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       return errorResponse(requestId, "Dossier signing is not configured on this deployment.", 503);
     }
 
+    // Generate the PDF BEFORE recording the signature: a rendering failure
+    // must not leave an orphan verification_signatures row for a dossier no
+    // one received (this happened in production when font encoding threw).
+    const pdfBytes = await generateDossierPdf({ filename: doc.filename, envelope: doc.result, signature });
+
     await supabase.from("verification_signatures").insert({
       id: payload.verificationId,
       document_id: doc.id,
@@ -91,8 +96,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       algorithm: signature.algorithm,
       key_id: signature.keyId,
     });
-
-    const pdfBytes = await generateDossierPdf({ filename: doc.filename, envelope: doc.result, signature });
 
     logRequest({ requestId, route: "/api/documents/[id]/dossier", method: "GET", status: 200, durationMs: Date.now() - start, userId });
     return new Response(new Blob([new Uint8Array(pdfBytes)]), {

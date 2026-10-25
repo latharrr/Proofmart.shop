@@ -1,6 +1,8 @@
 import "server-only";
 
+import fontkit from "@pdf-lib/fontkit";
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
+import { MONO_TTF_B64, SANS_BOLD_TTF_B64, SANS_TTF_B64 } from "./fonts";
 import type { VerifyEnvelope } from "@/lib/api/envelope";
 import type { SignatureEnvelope } from "@/lib/signing/sign";
 import { MARKER_REGISTRY } from "@/lib/verification/registry";
@@ -40,6 +42,23 @@ const DISCLOSURE =
   "it claims to be from, or wasn't produced by a party aware of what ProofMart checks for. Treat this dossier " +
   "as one input to a review, not as a substitute for verifying the document with its issuer.";
 
+type FontkitFont = ReturnType<typeof fontkit.create>;
+
+/** Code points above 0xFF that WinAnsi (cp1252) can still encode. */
+const WINANSI_EXTRA = new Set([0x20ac, 0x201a, 0x0192, 0x201e, 0x2026, 0x2020, 0x2021, 0x02c6, 0x2030, 0x0160, 0x2039, 0x0152, 0x017d, 0x2018, 0x2019, 0x201c, 0x201d, 0x2022, 0x2013, 0x2014, 0x02dc, 0x2122, 0x0161, 0x203a, 0x0153, 0x017e, 0x0178]);
+
+/** Readable spell-outs for the non-WinAnsi characters ProofMart's own marker text and currency formatting actually use, applied only under the standard-font fallback. */
+const WINANSI_SUBSTITUTES = new Map<number, string>([
+  [0x20b9, "Rs."], // ₹
+  [0x2212, "-"], // − minus sign
+  [0x2248, "~"], // ≈
+  [0x2260, "!="], // ≠
+  [0x2264, "<="], // ≤
+  [0x2265, ">="], // ≥
+  [0x00d7, "x"], // ×
+  [0x2192, "->"], // →
+]);
+
 interface DossierInput {
   filename: string;
   envelope: VerifyEnvelope;
@@ -54,15 +73,71 @@ class Layout {
   mono!: PDFFont;
   y = 0;
 
+  /**
+   * Coverage maps of the embedded TTFs, keyed by role — null when the
+   * WinAnsi fallback fonts are in use. Used by clean() to substitute
+   * unsupported glyphs rather than let pdf-lib throw (its StandardFonts
+   * throw on anything outside WinAnsi, e.g. the "−"/"₹" in ProofMart's own
+   * marker text — which is exactly what took dossier generation down when
+   * only StandardFonts were used).
+   */
+  private coverage: { font: FontkitFont | null; bold: FontkitFont | null; mono: FontkitFont | null } = { font: null, bold: null, mono: null };
+
+  /** How many characters clean() has replaced — surfaced on the dossier so substituted text is never silent. */
+  substituted = 0;
+
   static async create(): Promise<Layout> {
     const l = new Layout();
     l.doc = await PDFDocument.create();
     l.doc.setTitle("ProofMart Verification Dossier");
-    l.font = await l.doc.embedFont(StandardFonts.Helvetica);
-    l.bold = await l.doc.embedFont(StandardFonts.HelveticaBold);
-    l.mono = await l.doc.embedFont(StandardFonts.Courier);
+    l.doc.registerFontkit(fontkit);
+    try {
+      const sansBytes = Buffer.from(SANS_TTF_B64, "base64");
+      const sansBoldBytes = Buffer.from(SANS_BOLD_TTF_B64, "base64");
+      const monoBytes = Buffer.from(MONO_TTF_B64, "base64");
+      const sans = fontkit.create(sansBytes) as FontkitFont;
+      const sansBold = fontkit.create(sansBoldBytes) as FontkitFont;
+      const mono = fontkit.create(monoBytes) as FontkitFont;
+      l.font = await l.doc.embedFont(sansBytes);
+      l.bold = await l.doc.embedFont(sansBoldBytes);
+      l.mono = await l.doc.embedFont(monoBytes);
+      l.coverage = { font: sans, bold: sansBold, mono };
+    } catch {
+      // A bad embedded asset must never take dossier generation down: fall
+      // back to WinAnsi standard fonts, and clean() then maps/strips the
+      // characters those fonts cannot encode.
+      l.font = await l.doc.embedFont(StandardFonts.Helvetica);
+      l.bold = await l.doc.embedFont(StandardFonts.HelveticaBold);
+      l.mono = await l.doc.embedFont(StandardFonts.Courier);
+    }
     l.newPage();
     return l;
+  }
+
+  /**
+   * Makes `text` drawable by `font`: with the embedded TTFs, any glyph the
+   * font lacks becomes "?"; under the WinAnsi fallback, ProofMart's own
+   * recurring non-WinAnsi characters get spelled out (₹ -> Rs., − -> -)
+   * and anything else unencodable becomes "?". Never throws.
+   */
+  clean(text: string, font: PDFFont): string {
+    const cover = font === this.bold ? this.coverage.bold : font === this.mono ? this.coverage.mono : this.coverage.font;
+    const replace = (sub: string) => {
+      this.substituted += 1;
+      return sub;
+    };
+    if (cover) {
+      let out = "";
+      for (const ch of text) out += cover.hasGlyphForCodePoint(ch.codePointAt(0) ?? 0) ? ch : replace("?");
+      return out;
+    }
+    let out = "";
+    for (const ch of text) {
+      const cp = ch.codePointAt(0) ?? 0;
+      if ((cp <= 0xff && cp >= 0x20) || WINANSI_EXTRA.has(cp)) out += ch;
+      else out += replace(WINANSI_SUBSTITUTES.get(cp) ?? "?");
+    }
+    return out;
   }
 
   newPage() {
@@ -77,6 +152,7 @@ class Layout {
   /** Wraps `text` to `CONTENT_WIDTH` using real glyph widths for `font`, drawing each line and advancing `y`. */
   wrapped(text: string, opts: { font?: PDFFont; size?: number; color?: ReturnType<typeof rgb>; lineHeight?: number; maxWidth?: number } = {}) {
     const font = opts.font ?? this.font;
+    text = this.clean(text, font);
     const size = opts.size ?? 10;
     const color = opts.color ?? INK;
     const lineHeight = opts.lineHeight ?? size * 1.5;
@@ -106,7 +182,7 @@ class Layout {
   heading(text: string) {
     this.ensureSpace(30);
     this.y -= 8;
-    this.page.drawText(text, { x: MARGIN, y: this.y - 12, size: 13, font: this.bold, color: INK });
+    this.page.drawText(this.clean(text, this.bold), { x: MARGIN, y: this.y - 12, size: 13, font: this.bold, color: INK });
     this.y -= 20;
     this.page.drawLine({ start: { x: MARGIN, y: this.y }, end: { x: PAGE.width - MARGIN, y: this.y }, thickness: 0.75, color: LINE });
     this.y -= 14;
@@ -119,6 +195,7 @@ class Layout {
     const size = 10;
     const lineHeight = size * 1.5;
 
+    value = this.clean(value, this.font);
     const words = value.split(/\s+/);
     let line = "";
     const lines: string[] = [];
@@ -134,7 +211,7 @@ class Layout {
     lines.push(line);
 
     this.ensureSpace(lineHeight * lines.length);
-    this.page.drawText(label, { x: MARGIN, y: this.y - 9, size: 9, font: this.mono, color: MUTED });
+    this.page.drawText(this.clean(label, this.mono), { x: MARGIN, y: this.y - 9, size: 9, font: this.mono, color: MUTED });
     for (const l of lines) {
       this.page.drawText(l, { x: valueX, y: this.y - size, size, font: this.font, color: INK });
       this.y -= lineHeight;
@@ -160,15 +237,15 @@ export async function generateDossierPdf({ filename, envelope, signature }: Doss
 
   // --- Header / branding ---
   l.page.drawRectangle({ x: MARGIN, y: l.y - 14, width: 14, height: 14, color: INK });
-  l.page.drawText("ProofMart", { x: MARGIN + 22, y: l.y - 12, size: 15, font: l.bold, color: INK });
-  l.page.drawText("Verification dossier", { x: PAGE.width - MARGIN - 130, y: l.y - 11, size: 10, font: l.mono, color: MUTED });
+  l.page.drawText(l.clean("ProofMart", l.bold), { x: MARGIN + 22, y: l.y - 12, size: 15, font: l.bold, color: INK });
+  l.page.drawText(l.clean("Verification dossier", l.mono), { x: PAGE.width - MARGIN - 130, y: l.y - 11, size: 10, font: l.mono, color: MUTED });
   l.y -= 34;
   l.page.drawLine({ start: { x: MARGIN, y: l.y }, end: { x: PAGE.width - MARGIN, y: l.y }, thickness: 1, color: INK });
   l.y -= 24;
 
   // --- Verdict banner ---
   const banner = verifiedBanner(verdict);
-  l.page.drawText(banner.label, { x: MARGIN, y: l.y - 16, size: 18, font: l.bold, color: banner.color });
+  l.page.drawText(l.clean(banner.label, l.bold), { x: MARGIN, y: l.y - 16, size: 18, font: l.bold, color: banner.color });
   l.y -= 30;
   l.wrapped(`${envelope.findings.length} finding(s) · engine v${payload.engineVersion} · ${payload.timestamp}`, { font: l.mono, size: 9, color: MUTED });
   l.spacer(10);
@@ -208,8 +285,8 @@ export async function generateDossierPdf({ filename, envelope, signature }: Doss
   for (const f of envelope.findings) {
     l.ensureSpace(50);
     const color = VERDICT_COLOR[f.verdict as keyof typeof VERDICT_COLOR] ?? INCONCLUSIVE;
-    l.page.drawText(`${f.verdict}`, { x: MARGIN, y: l.y - 10, size: 10, font: l.bold, color });
-    l.page.drawText(f.markerId, { x: MARGIN + 60, y: l.y - 10, size: 10, font: l.mono, color: INK });
+    l.page.drawText(l.clean(`${f.verdict}`, l.bold), { x: MARGIN, y: l.y - 10, size: 10, font: l.bold, color });
+    l.page.drawText(l.clean(f.markerId, l.mono), { x: MARGIN + 60, y: l.y - 10, size: 10, font: l.mono, color: INK });
     l.y -= 16;
     l.wrapped(f.evidence.summary, { size: 10, color: INK });
     if (f.evidence.detail) l.wrapped(f.evidence.detail, { font: l.mono, size: 9, color: MUTED });
@@ -225,7 +302,7 @@ export async function generateDossierPdf({ filename, envelope, signature }: Doss
       const marker = MARKER_REGISTRY.find((m) => m.id === id);
       if (!marker) continue;
       l.ensureSpace(30);
-      l.page.drawText(`${marker.id} — ${marker.name}`, { x: MARGIN, y: l.y - 10, size: 10, font: l.bold, color: INK });
+      l.page.drawText(l.clean(`${marker.id} — ${marker.name}`, l.bold), { x: MARGIN, y: l.y - 10, size: 10, font: l.bold, color: INK });
       l.y -= 16;
       l.wrapped(marker.description, { size: 9.5, color: INK });
       if (marker.limitations.length > 0) l.wrapped(`Limitations: ${marker.limitations.join(" ")}`, { size: 9, color: MUTED });
@@ -249,6 +326,13 @@ export async function generateDossierPdf({ filename, envelope, signature }: Doss
 
   // --- Limitations ---
   l.heading("Limitations");
+  if (l.substituted > 0) {
+    l.wrapped(
+      `Note: ${l.substituted} character(s) in the source text had no glyph in this dossier's fonts and were replaced (shown as "?" or spelled out). This affects only how the text is printed here — the signed payload below covers the original, unaltered findings text.`,
+      { size: 9.5, color: MUTED },
+    );
+    l.spacer(4);
+  }
   l.wrapped(
     "This is not a legal, forensic, or accounting certification. ProofMart's markers detect specific, " +
       "well-defined structural and arithmetic patterns — they do not evaluate whether transactions are " +
