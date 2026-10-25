@@ -21,13 +21,13 @@ function Section({ id, n, title, children }: { id: string; n: string; title: str
 export default function ContactPage() {
   return (
     <div className="pm-page">
-      {/* <!-- DRAFT — pending review by [BUSINESS NAME]. Contact details are loud placeholders until confirmed. Do not treat as final. --> */}
+      {/* Contact details confirmed by the owner on 2026-10-25. */}
       <Topbar />
       <main id="main">
         <header className="pm-wrap pm-sec-hero">
           <h1 className="pm-sec-title">Contact.</h1>
           <p className="pm-h-lead">
-            How to reach the people behind ProofMart. <strong>Draft.</strong> The details below are placeholders until [BUSINESS NAME] confirms them.
+            How to reach the people behind ProofMart.
           </p>
         </header>
 
@@ -39,11 +39,11 @@ export default function ContactPage() {
                   <tbody>
                     <tr>
                       <th scope="row">Email</th>
-                      <td>[CONTACT EMAIL]</td>
+                      <td>deepanshulathar@gmail.com</td>
                     </tr>
                     <tr>
                       <th scope="row">Post</th>
-                      <td>[BUSINESS NAME], [REGISTERED ADDRESS]</td>
+                      <td>Deepanshu Lathar, Delhi 110002</td>
                     </tr>
                     <tr>
                       <th scope="row">Security issues</th>
@@ -59,7 +59,7 @@ export default function ContactPage() {
 
             <Section id="data" n="02" title="Data and deletion requests">
               <p>
-                To ask for a copy of your data, a correction, or the deletion of your account and its documents, write to [CONTACT EMAIL] from the
+                To ask for a copy of your data, a correction, or the deletion of your account and its documents, write to deepanshulathar@gmail.com from the
                 email address on the account. Saved documents can also be deleted directly from My documents at any time — the record and the stored
                 file go together.
               </p>
@@ -70,7 +70,7 @@ export default function ContactPage() {
                 We make no promise about response times on this page — a support SLA we haven&rsquo;t staffed would be fiction. Everything that arrives
                 is read; urgent security reports go first.
               </p>
-              <p className="pm-mono">Last reviewed: not yet — draft.</p>
+              <p className="pm-mono">Last updated: 25 October 2026.</p>
             </Section>
           </div>
         </div>

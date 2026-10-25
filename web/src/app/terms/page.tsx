@@ -22,16 +22,13 @@ function Section({ id, n, title, children }: { id: string; n: string; title: str
 export default function TermsPage() {
   return (
     <div className="pm-page">
-      {/* <!-- DRAFT — pending review by [BUSINESS NAME] (and ideally a lawyer). Business name, address and contact email are loud placeholders. Do not treat as final legal advice. --> */}
+      {/* Operator details confirmed by the owner on 2026-10-25. Prices remain placeholders until the owner confirms them. Not reviewed by a lawyer. */}
       <Topbar />
       <main id="main">
         <header className="pm-wrap pm-sec-hero">
           <h1 className="pm-sec-title">Terms of service.</h1>
           <p className="pm-h-lead">
-            The terms under which [BUSINESS NAME] provides ProofMart. By creating an account or using the API, you accept these terms.
-          </p>
-          <p className="pm-h-lead">
-            <strong>Draft.</strong> This page is pending legal review. Business details are placeholders until [BUSINESS NAME] confirms them.
+            The terms under which Deepanshu Lathar provides ProofMart. By creating an account or using the API, you accept these terms.
           </p>
         </header>
 
@@ -49,7 +46,7 @@ export default function TermsPage() {
               <ul>
                 <li>You must provide a working email address. Sign-in is handled by Supabase Auth; ProofMart never stores your password.</li>
                 <li>You are responsible for keeping your credentials and API keys safe. An API key is shown once, at creation; only its SHA-256 hash is stored.</li>
-                <li>You may revoke an API key at any time; revocation takes effect immediately. You may ask for your account to be deleted at any time by writing to [CONTACT EMAIL].</li>
+                <li>You may revoke an API key at any time; revocation takes effect immediately. You may ask for your account to be deleted at any time by writing to deepanshulathar@gmail.com.</li>
               </ul>
             </Section>
 
@@ -64,7 +61,7 @@ export default function TermsPage() {
             <Section id="pricing" n="04" title="Pricing and payments">
               <p>
                 <strong>The prices shown on this site are placeholders and are not confirmed with the business.</strong> Treat every price you see as
-                provisional until [BUSINESS NAME] confirms the real pricing.
+                provisional until the operator confirms the real pricing.
               </p>
               <p>Billing, when enabled, runs on Razorpay in INR. Online payments are not yet enabled; no charges are being collected today.</p>
               <p>
@@ -82,7 +79,7 @@ export default function TermsPage() {
 
             <Section id="ip" n="06" title="Intellectual property">
               <p>
-                ProofMart, its design and its code are the property of [BUSINESS NAME]. Your documents remain yours; the verification results we
+                ProofMart, its design and its code are the property of Deepanshu Lathar. Your documents remain yours; the verification results we
                 generate for you are yours to use. Nothing here transfers any intellectual-property right except the right to use the service.
               </p>
             </Section>
@@ -102,8 +99,8 @@ export default function TermsPage() {
 
             <Section id="liability" n="08" title="Liability">
               <p>
-                To the maximum extent the law allows, [BUSINESS NAME]&rsquo;s liability for anything arising from your use of ProofMart is limited to
-                what you paid for the service in the twelve months before the claim. [BUSINESS NAME] is not liable for indirect or consequential
+                To the maximum extent the law allows, Deepanshu Lathar&rsquo;s liability for anything arising from your use of ProofMart is limited to
+                what you paid for the service in the twelve months before the claim. Deepanshu Lathar is not liable for indirect or consequential
                 losses, including decisions made on the basis of a verification result.
               </p>
             </Section>
@@ -117,8 +114,8 @@ export default function TermsPage() {
             </Section>
 
             <Section id="law" n="10" title="Governing law and contact">
-              <p>These terms are governed by the laws of India. [BUSINESS NAME], [REGISTERED ADDRESS]. Questions: [CONTACT EMAIL].</p>
-              <p className="pm-mono">Last reviewed: not yet — draft.</p>
+              <p>These terms are governed by the laws of India. Deepanshu Lathar, Delhi 110002. Questions: deepanshulathar@gmail.com.</p>
+              <p className="pm-mono">Last updated: 25 October 2026.</p>
             </Section>
           </div>
         </div>

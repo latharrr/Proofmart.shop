@@ -24,7 +24,7 @@ Checked against production on **17 Oct 2026** (live site, Vercel project
 | Signup / reset emails | ⚠️ Testing-grade | Supabase built-in sender; rate-limited to a couple of emails per hour |
 | Google sign-in | ❓ Unverified | Needs Google provider in Supabase dashboard |
 | Payments | ❌ Not configured | No `RAZORPAY_*` env vars; never tested with a real account |
-| Legal pages | ⚠️ Code-built, pending your details | `/privacy` `/terms` `/refunds` `/contact` built with `[BUSINESS NAME]` placeholders, linked from footer + signup form, in sitemap — needs real business details + legal review (2026-10-17) |
+| Legal pages |  ✅ Live, operator details filled 2026-10-25 | `/privacy` `/terms` `/refunds` `/contact` live with owner-confirmed details (Deepanshu Lathar / deepanshulathar@gmail.com / Delhi 110002), linked from footer + signup form, in sitemap — a lawyer's review still advisable (2026-10-25) |
 | Real usage so far | None | `documents` and `profiles` tables have 0 rows |
 
 ---

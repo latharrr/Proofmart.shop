@@ -27,7 +27,7 @@ function Section({ id, n, title, children }: { id: string; n: string; title: str
 export default function PrivacyPage() {
   return (
     <div className="pm-page">
-      {/* <!-- DRAFT — pending review by [BUSINESS NAME] (and ideally a lawyer). Business name, address and contact email are loud placeholders. Do not treat as final legal advice. --> */}
+      {/* Operator details confirmed by the owner on 2026-10-25 (name, email, published location). Not reviewed by a lawyer. */}
       <Topbar />
       <main id="main">
         <header className="pm-wrap pm-sec-hero">
@@ -37,17 +37,14 @@ export default function PrivacyPage() {
             facts here match the <Link href="/security" className="pm-link">security page</Link> exactly; that page describes the systems this policy
             rests on.
           </p>
-          <p className="pm-h-lead">
-            <strong>Draft.</strong> This policy is pending legal review. Business details are placeholders until [BUSINESS NAME] confirms them.
-          </p>
         </header>
 
         <div className="pm-wrap pm-sec-layout">
           <div className="pm-sec-body">
             <Section id="who" n="01" title="Who we are">
               <p>
-                This service is operated by <strong>[BUSINESS NAME]</strong>, [REGISTERED ADDRESS]. For anything about your personal data, write to{" "}
-                <strong>[CONTACT EMAIL]</strong>.
+                This service is operated by <strong>Deepanshu Lathar (Deepanshu Labs)</strong>, Delhi 110002. For anything about your personal data, write to{" "}
+                <strong>deepanshulathar@gmail.com</strong>.
               </p>
             </Section>
 
@@ -180,7 +177,7 @@ export default function PrivacyPage() {
                   record and its stored file together, never one without the other.
                 </li>
                 <li>
-                  <strong>Your account:</strong> write to [CONTACT EMAIL] to ask for your account and its data to be deleted, or to correct it.
+                  <strong>Your account:</strong> write to deepanshulathar@gmail.com to ask for your account and its data to be deleted, or to correct it.
                 </li>
                 <li>
                   <strong>API keys:</strong> revoking a key takes effect immediately; the stored hash can no longer authenticate a request.
@@ -195,7 +192,7 @@ export default function PrivacyPage() {
 
             <Section id="changes" n="08" title="Changes to this policy">
               <p>If this policy changes in a way that matters, the change will be noted here with the date. Continued use of the service after a change means you accept the updated policy.</p>
-              <p className="pm-mono">Last reviewed: not yet — draft.</p>
+              <p className="pm-mono">Last updated: 25 October 2026.</p>
             </Section>
           </div>
         </div>
