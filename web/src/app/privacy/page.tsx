@@ -37,6 +37,9 @@ export default function PrivacyPage() {
             facts here match the <Link href="/security" className="pm-link">security page</Link> exactly; that page describes the systems this policy
             rests on.
           </p>
+          <p className="pm-h-lead">
+            <strong>Draft.</strong> This policy has not yet had a legal review.
+          </p>
         </header>
 
         <div className="pm-wrap pm-sec-layout">

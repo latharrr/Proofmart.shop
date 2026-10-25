@@ -28,7 +28,7 @@ export default function RefundsPage() {
         <header className="pm-wrap pm-sec-hero">
           <h1 className="pm-sec-title">Refund policy.</h1>
           <p className="pm-h-lead">
-            How plan cancellations and refunds work.
+            How plan cancellations and refunds work. <strong>Draft.</strong> This page has not yet had a legal review.
           </p>
         </header>
 

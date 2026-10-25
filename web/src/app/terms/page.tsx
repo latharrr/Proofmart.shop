@@ -30,6 +30,9 @@ export default function TermsPage() {
           <p className="pm-h-lead">
             The terms under which Deepanshu Lathar provides ProofMart. By creating an account or using the API, you accept these terms.
           </p>
+          <p className="pm-h-lead">
+            <strong>Draft.</strong> These terms have not yet had a legal review.
+          </p>
         </header>
 
         <div className="pm-wrap pm-sec-layout">
