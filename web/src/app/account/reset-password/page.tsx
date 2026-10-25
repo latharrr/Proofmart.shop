@@ -49,12 +49,12 @@ export default async function ResetPasswordPage({
       <AuthShell
         eyebrow="Reset link requested"
         title="Check your inbox"
-        subtitle="If there’s a ProofMart account for that email, a reset link is on its way. Open it in this browser to choose a new password."
+        subtitle="If there’s a ProofMart account for that email, we send a reset link to it. Open the link in this browser to choose a new password."
         switchTo={{ label: "Sign in", href: "/login" }}
         stage={{ variant: "single", verdict: "CLEAR", label: "Nothing changes while you reset", band }}
         footer={<CrossLink prompt="Remembered it?" label="Back to sign in" href="/login" />}
       >
-        <FormAlert tone="success" title="Reset link requested." body="It can take a minute to arrive. Check spam or promotions if you don’t see it." />
+        <FormAlert tone="success" title="Reset link requested." body="Give it a few minutes, and check spam or promotions. Nothing there by then? Send the link again below." />
         <p className="pm-t-body pm-auth-note">
           Nothing arrived, or used a different address?{" "}
           <Link href="/account/reset-password" className="pm-inline-link">
