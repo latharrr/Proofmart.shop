@@ -11,7 +11,7 @@ export default function SiteFooter() {
         <div className="pm-footer-grid">
           <div className="pm-footer-brand">
             <Wordmark href="/" />
-            <p>Re-checks the arithmetic in PDF statements and shows its work. Built in Bengaluru.</p>
+            <p>Re-checks the arithmetic in PDF statements and shows its work.</p>
           </div>
           {FOOTER.map((c) => (
             <div key={c.h}>
@@ -34,7 +34,7 @@ export default function SiteFooter() {
           ))}
         </div>
         <div className="pm-footer-base">
-          <span>© 2026 ProofMart Systems</span>
+          <span>© 2026 Deepanshu Labs</span>
           <span className="pm-mono">v{APP_VERSION} · public beta</span>
         </div>
       </div>
