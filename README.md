@@ -6,6 +6,14 @@ Re-adds every row of a PDF bank statement and shows the arithmetic: each balance
 
 ![CI](https://github.com/latharrr/Proofmart.shop/actions/workflows/ci.yml/badge.svg)
 
+| | |
+|---|---|
+| **Status** | Live beta at proofmart.shop. Live payments have not run yet (see Known limitations) |
+| **Stack** | Next.js 16, TypeScript, Supabase (Postgres + RLS + Auth), Vercel Blob, Tesseract.js OCR |
+| **Method** | Fixed arithmetic rules over the statement's own numbers. No AI model in the verdict path |
+| **Tests** | 215 unit tests (197 pass, 7 OCR tests need a fixed Chromium path, 11 skipped); CI runs type-check, lint, tests, build |
+| **My role** | Product, design, parsing pipeline, API, CLI, auth and storage, deployment |
+
 ## Why this exists
 
 Checking a statement by hand means re-adding columns and hunting for duplicate or out-of-order rows. ProofMart does that with fixed rules over the page's own numbers. There is no AI model and no score in the path. The same bytes give the same verdict, and every result records the engine version that made it.
