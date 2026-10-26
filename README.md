@@ -12,7 +12,7 @@ Re-adds every row of a PDF bank statement and shows the arithmetic: each balance
 | **Stack** | Next.js 16, TypeScript, Supabase (Postgres + RLS + Auth), Vercel Blob, Tesseract.js OCR |
 | **Method** | Fixed arithmetic rules over the statement's own numbers. No AI model in the verdict path |
 | **Tests** | 215 unit tests (197 pass, 7 OCR tests need a fixed Chromium path, 11 skipped); CI runs type-check, lint, tests, build |
-| **My role** | Product, design, parsing pipeline, API, CLI, auth and storage, deployment |
+| **Scope** | Web app, PDF parsing pipeline, public API, CLI, auth and storage |
 
 ## Why this exists
 
