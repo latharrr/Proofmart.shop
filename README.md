@@ -6,7 +6,7 @@ Re-adds every row of a PDF bank statement and shows the arithmetic: each balance
 
 ![CI](https://github.com/latharrr/Proofmart.shop/actions/workflows/ci.yml/badge.svg)
 
-| | |
+| At a glance | |
 |---|---|
 | **Status** | Live beta at proofmart.shop. Live payments have not run yet (see Known limitations) |
 | **Stack** | Next.js 16, TypeScript, Supabase (Postgres + RLS + Auth), Vercel Blob, Tesseract.js OCR |
