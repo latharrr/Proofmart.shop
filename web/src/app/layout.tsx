@@ -52,6 +52,19 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${franklin.variable} ${jetbrains.variable}`}>
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "ProofMart",
+              url: "https://proofmart.shop",
+              description:
+                "ProofMart takes a PDF and returns a structured report of findings, each pinned to its pixel, each with the arithmetic.",
+            }),
+          }}
+        />
         <a href="#main" className="pm-skip-link">
           Skip to content
         </a>
