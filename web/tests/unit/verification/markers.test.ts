@@ -247,6 +247,29 @@ describe("DUPLICATE_TRANSACTION", () => {
     expect(outcome.findings[0].verdict).toBe("REVIEW");
     expect(outcome.findings[0].evidence.coordinates).toHaveLength(4); // date+amount cell for each of 2 rows
   });
+
+  it("negative: a debit and its same-day reversal credit, and filler cells, are not duplicates", () => {
+    const row = (y: number, date: string, debit: string | null, credit: string | null) => [
+      textItem({ text: date, x: 72, y, page: 1 }),
+      ...(debit === null ? [] : [textItem({ text: debit, x: 340, y, page: 1 })]),
+      ...(credit === null ? [] : [textItem({ text: credit, x: 430, y, page: 1 })]),
+    ];
+    const context = ctx(
+      doc({ pages: [page({ hasTable: true })] }),
+      raw({
+        textItems: [
+          ...header,
+          textItem({ text: "Credit", x: 430, y: 700, page: 1 }),
+          ...row(678, "02 Apr", "250.00", null),
+          ...row(656, "02 Apr", null, "250.00"), // reversal of the row above
+          ...row(634, "03 Apr", "0.00", "75.00"),
+          ...row(612, "03 Apr", "0.00", "90.00"),
+          ...row(590, "04 Apr", "-", "60.00"),
+        ],
+      }),
+    );
+    expect(duplicateTransactionMarker.run(context)).toMatchObject({ status: "applicable", findings: [] });
+  });
 });
 
 describe("DATE_SEQUENCE_ANOMALY", () => {

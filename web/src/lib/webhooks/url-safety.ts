@@ -40,10 +40,17 @@ function isPrivateIPv6(ip: string): boolean {
   const lower = ip.toLowerCase();
   if (lower === "::1") return true; // loopback
   if (lower === "::") return true; // unspecified
-  if (lower.startsWith("fe80:") || lower.startsWith("fe80::")) return true; // link-local
+  if (/^fe[89ab]/.test(lower)) return true; // link-local (fe80::/10)
   if (lower.startsWith("fc") || lower.startsWith("fd")) return true; // unique local (fc00::/7)
   if (lower.startsWith("ff")) return true; // multicast (ff00::/8)
-  if (lower.startsWith("::ffff:")) return isPrivateIPv4(lower.slice("::ffff:".length)); // IPv4-mapped
+  if (lower.startsWith("::ffff:")) {
+    // IPv4-mapped. `URL` rewrites the dotted form to hex ("::ffff:127.0.0.1" -> "::ffff:7f00:1"), so read both.
+    const rest = lower.slice("::ffff:".length);
+    if (rest.includes(".")) return isPrivateIPv4(rest);
+    const [hi, lo] = rest.split(":").map((g) => parseInt(g, 16));
+    if (Number.isNaN(hi) || Number.isNaN(lo)) return true; // unreadable: refuse rather than guess
+    return isPrivateIPv4(`${hi >> 8}.${hi & 255}.${lo >> 8}.${lo & 255}`);
+  }
   return false;
 }
 

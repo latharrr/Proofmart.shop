@@ -71,13 +71,20 @@ export const duplicateTransactionMarker: Marker = {
       for (let i = headerRowIndex + 1; i < rows.length; i++) {
         const assignment = assignRowToColumns(rows[i], columns);
         const dateItem = assignment.get("date");
-        const amountItem = assignment.get("debit") ?? assignment.get("credit");
-        if (!dateItem || !amountItem) continue;
+        if (!dateItem) continue;
+        // The side that actually carries money: the other cell is often a filler ("-", "0.00").
+        const side = (["debit", "credit"] as const).find((name) => {
+          const cell = assignment.get(name);
+          return cell !== undefined && (parseAmount(cell.text) ?? 0) !== 0;
+        });
+        const amountItem = side && assignment.get(side);
+        if (!side || !amountItem) continue;
         const amount = parseAmount(amountItem.text);
         if (amount === null) continue;
 
         const dateText = dateItem.text.trim().toLowerCase();
-        const key = `${dateText}|${amount.toFixed(2)}`;
+        // A debit and a credit of the same amount on one day (a reversal) is not a duplicate.
+        const key = `${dateText}|${side}|${amount.toFixed(2)}`;
         const entry = { coords: [cellCoordinate(raw, page, dateItem), cellCoordinate(raw, page, amountItem)], dateText: dateItem.text.trim(), amount };
         const existing = groups.get(key);
         if (existing) existing.push(entry);

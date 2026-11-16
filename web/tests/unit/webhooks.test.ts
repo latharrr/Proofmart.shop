@@ -69,6 +69,14 @@ describe("checkUrlShape (sync SSRF checks)", () => {
     expect(checkUrlShape("http://[::1]/hook").safe).toBe(false);
   });
 
+  it("rejects IPv4-mapped IPv6 literals that point at private addresses", async () => {
+    const { checkUrlShape } = await import("@/lib/webhooks/url-safety");
+    expect(checkUrlShape("http://[::ffff:127.0.0.1]/hook").safe).toBe(false);
+    expect(checkUrlShape("http://[::ffff:169.254.169.254]/latest/meta-data").safe).toBe(false);
+    expect(checkUrlShape("http://[::ffff:a00:1]/hook").safe).toBe(false);
+    expect(checkUrlShape("http://[::ffff:93.184.216.34]/hook")).toEqual({ safe: true });
+  });
+
   it("accepts a public IPv4 address", async () => {
     const { checkUrlShape } = await import("@/lib/webhooks/url-safety");
     expect(checkUrlShape("http://93.184.216.34/hook")).toEqual({ safe: true });
