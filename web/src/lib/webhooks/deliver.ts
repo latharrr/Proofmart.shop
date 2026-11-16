@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { signWebhookBody } from "./hmac";
+import { pinnedPost } from "./pinned-post";
 import { resolveAndCheck } from "./url-safety";
 
 /** Delay before each retry, indexed by (attempt_count - 1) at the moment the retry is scheduled — i.e. the first entry is the wait after the initial (immediate) attempt fails. Five retries over ~13 hours, then exhausted. */
@@ -64,29 +65,28 @@ export async function attemptDelivery(supabase: SupabaseClient, deliveryId: stri
     errorMessage = urlCheck.reason ?? "Could not verify the destination URL's safety.";
   } else {
     try {
-      const res = await fetch(endpoint.url, {
-        method: "POST",
-        // Manual, not "follow" (fetch's default): a 3xx response is a live
-        // network round-trip this server would otherwise make automatically,
-        // to a destination that never went through resolveAndCheck above —
-        // exactly the SSRF gap that check exists to close. A receiving
-        // endpoint that wants to move should update its registered URL, not
-        // rely on us following a redirect to wherever it points today.
-        redirect: "manual",
-        headers: {
-          "content-type": "application/json",
-          "x-proofmart-event": delivery.event_type,
-          "x-proofmart-delivery": delivery.id,
-          "x-proofmart-signature": signature,
+      // Connects only to the addresses resolveAndCheck approved, and never
+      // follows a redirect: a 3xx would send this server to a destination
+      // that was not checked. An endpoint that moves should update its URL.
+      const res = await pinnedPost(
+        endpoint.url,
+        {
+          headers: {
+            "content-type": "application/json",
+            "x-proofmart-event": delivery.event_type,
+            "x-proofmart-delivery": delivery.id,
+            "x-proofmart-signature": signature,
+          },
+          body: rawBody,
+          signal: AbortSignal.timeout(10_000),
         },
-        body: rawBody,
-        signal: AbortSignal.timeout(10_000),
-      });
-      if (res.type === "opaqueredirect" || (res.status >= 300 && res.status < 400)) {
+        urlCheck.addresses ?? [],
+      );
+      if (res.status >= 300 && res.status < 400) {
         errorMessage = "Receiving endpoint returned a redirect, which is not followed (SSRF protection).";
       } else {
         responseStatus = res.status;
-        if (!res.ok) errorMessage = `Receiving endpoint returned HTTP ${res.status}.`;
+        if (res.status < 200 || res.status >= 300) errorMessage = `Receiving endpoint returned HTTP ${res.status}.`;
       }
     } catch (err) {
       errorMessage = err instanceof Error && err.name === "TimeoutError" ? "Request timed out after 10s." : "Network error delivering webhook.";

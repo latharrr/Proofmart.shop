@@ -64,6 +64,8 @@ function isPrivateIp(ip: string): boolean {
 export interface UrlSafetyResult {
   safe: boolean;
   reason?: string;
+  /** Set when `safe: true` came from a DNS lookup: the exact addresses that were checked, for the caller to connect to. */
+  addresses?: LookupAddress[];
   /**
    * Only meaningful when `safe: false`. `true` for a transient failure to
    * even determine safety (DNS timeout, temporary resolution failure) — the
@@ -116,7 +118,7 @@ export async function resolveAndCheck(rawUrl: string): Promise<UrlSafetyResult> 
     if (records.some((r) => isPrivateIp(r.address))) {
       return { safe: false, reason: "Hostname resolves to a private or loopback address." };
     }
-    return { safe: true };
+    return { safe: true, addresses: records };
   } catch {
     // A DNS timeout or lookup error says nothing about whether the URL is
     // actually unsafe — only that this attempt couldn't find out. Treating

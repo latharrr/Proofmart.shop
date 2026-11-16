@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+// Delivery posts through pinnedPost; the tests stand in for it the way they used to for fetch.
+const post = vi.hoisted(() => ({ fn: (..._args: unknown[]): unknown => undefined }));
+vi.mock("@/lib/webhooks/pinned-post", () => ({ pinnedPost: (...args: unknown[]) => post.fn(...args) }));
+
 /**
  * Fakes just enough of the Supabase JS query-builder chain attemptDelivery
  * actually calls (`.from(...).select(...).eq(...).maybeSingle()` and
@@ -46,7 +50,7 @@ describe("attemptDelivery", () => {
   it("marks success on a 2xx response and sends the expected headers/body", async () => {
     vi.doMock("node:dns/promises", () => ({ lookup: vi.fn().mockResolvedValue([{ address: "93.184.216.34", family: 4 }]) }));
     const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 200 }));
-    vi.stubGlobal("fetch", fetchMock);
+    post.fn = fetchMock;
 
     const { attemptDelivery } = await import("@/lib/webhooks/deliver");
     const { client, updates } = fakeSupabase(baseDelivery);
@@ -55,7 +59,6 @@ describe("attemptDelivery", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe("https://example.com/hook");
-    expect(init.method).toBe("POST");
     expect(init.headers["x-proofmart-event"]).toBe("verification.completed");
     expect(init.headers["x-proofmart-delivery"]).toBe(baseDelivery.id);
     expect(init.headers["x-proofmart-signature"]).toMatch(/^sha256=[0-9a-f]{64}$/);
@@ -67,7 +70,7 @@ describe("attemptDelivery", () => {
 
   it("schedules a retry on a non-2xx response, without ever including the payload in last_error", async () => {
     vi.doMock("node:dns/promises", () => ({ lookup: vi.fn().mockResolvedValue([{ address: "93.184.216.34", family: 4 }]) }));
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("some receiver-controlled body", { status: 500 })));
+    post.fn = vi.fn().mockResolvedValue(new Response("some receiver-controlled body", { status: 500 }));
 
     const { attemptDelivery } = await import("@/lib/webhooks/deliver");
     const { client, updates } = fakeSupabase(baseDelivery);
@@ -83,7 +86,7 @@ describe("attemptDelivery", () => {
 
   it("marks exhausted once every retry attempt has been used", async () => {
     vi.doMock("node:dns/promises", () => ({ lookup: vi.fn().mockResolvedValue([{ address: "93.184.216.34", family: 4 }]) }));
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, { status: 500 })));
+    post.fn = vi.fn().mockResolvedValue(new Response(null, { status: 500 }));
 
     const { attemptDelivery, MAX_ATTEMPTS } = await import("@/lib/webhooks/deliver");
     const { client, updates } = fakeSupabase({ ...baseDelivery, attempt_count: MAX_ATTEMPTS - 1 });
@@ -95,7 +98,7 @@ describe("attemptDelivery", () => {
 
   it("treats a network/timeout error the same as a failed attempt, never throwing", async () => {
     vi.doMock("node:dns/promises", () => ({ lookup: vi.fn().mockResolvedValue([{ address: "93.184.216.34", family: 4 }]) }));
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(Object.assign(new Error("aborted"), { name: "TimeoutError" })));
+    post.fn = vi.fn().mockRejectedValue(Object.assign(new Error("aborted"), { name: "TimeoutError" }));
 
     const { attemptDelivery } = await import("@/lib/webhooks/deliver");
     const { client, updates } = fakeSupabase(baseDelivery);
@@ -109,7 +112,7 @@ describe("attemptDelivery", () => {
   it("never attempts a fetch for a disabled endpoint", async () => {
     vi.doMock("node:dns/promises", () => ({ lookup: vi.fn().mockResolvedValue([{ address: "93.184.216.34", family: 4 }]) }));
     const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
+    post.fn = fetchMock;
 
     const { attemptDelivery } = await import("@/lib/webhooks/deliver");
     const disabled = { ...baseDelivery, webhook_endpoints: { ...baseDelivery.webhook_endpoints, enabled: false } };
@@ -123,7 +126,7 @@ describe("attemptDelivery", () => {
 
   it("never attempts a fetch for a URL that fails the safety check (SSRF)", async () => {
     const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
+    post.fn = fetchMock;
 
     const { attemptDelivery } = await import("@/lib/webhooks/deliver");
     const unsafe = { ...baseDelivery, webhook_endpoints: { ...baseDelivery.webhook_endpoints, url: "http://127.0.0.1:9999/hook" } };
@@ -138,7 +141,7 @@ describe("attemptDelivery", () => {
   it("retries (does not permanently kill the webhook) when the URL safety check itself fails transiently, e.g. a DNS timeout — regression test for a real bug caught in live E2E testing", async () => {
     vi.doMock("node:dns/promises", () => ({ lookup: vi.fn().mockRejectedValue(new Error("DNS lookup timed out")) }));
     const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
+    post.fn = fetchMock;
 
     const { attemptDelivery } = await import("@/lib/webhooks/deliver");
     const { client, updates } = fakeSupabase(baseDelivery); // baseDelivery's URL is a normal https:// hostname, not a literal IP — this exercises resolveAndCheck's async DNS path.
@@ -154,7 +157,7 @@ describe("attemptDelivery", () => {
 
   it("does nothing when the delivery row doesn't exist (already deleted, e.g. by a cascaded webhook deletion)", async () => {
     const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
+    post.fn = fetchMock;
     const { attemptDelivery } = await import("@/lib/webhooks/deliver");
     const { client } = fakeSupabase(null);
     await expect(attemptDelivery(client, "does-not-exist")).resolves.toBeUndefined();
