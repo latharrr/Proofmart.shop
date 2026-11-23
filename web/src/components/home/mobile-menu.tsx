@@ -42,14 +42,14 @@ export default function MobileMenu({ account }: { account: ReactNode }) {
             {SECTION_LINKS.map((l) => (
               <li key={l.id}>
                 <a href={`/#${l.id}`} data-active={active === l.id ? "true" : "false"} onClick={() => setOpen(false)}>
-                  <span className="pm-mk-menu-n">{l.wp}</span>
+                  <span className="pm-mk-menu-n">{l.n}</span>
                   {l.label}
                 </a>
               </li>
             ))}
             <li>
               <Link href="/security" data-active={pathname === "/security" ? "true" : "false"} onClick={() => setOpen(false)}>
-                <span className="pm-mk-menu-n" aria-hidden="true" />
+                <span className="pm-mk-menu-n">08</span>
                 Security
               </Link>
             </li>

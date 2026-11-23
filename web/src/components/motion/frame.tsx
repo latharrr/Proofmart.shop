@@ -1,17 +1,10 @@
 import type { CSSProperties, ElementType, ReactNode } from "react";
 
-/** Retired with the crosshair grid; renders nothing so stale imports are harmless. */
-export function Crosshair(_props: { className?: string; style?: CSSProperties }) {
-  void _props;
-  return null;
-}
-
 /**
- * A sheet on the desk: one bordered surface (`.pm-frame`) holding a stage,
- * with an optional caption ruled off along its foot, the way a working paper
- * carries its reference line. `tone` picks the stock: paper (the pad),
- * sheet (lighter, for working panels), haze (the deeper pad green) or ink
- * (graphite, reserved for secrets shown once).
+ * A card: one 1px-bordered surface (`.pm-frame`, radius 6px, no shadow)
+ * holding a stage, with an optional mono caption ruled off along its foot.
+ * `tone` picks the stock: paper, sheet (the same paper, kept for call
+ * sites), haze (--paper-2) or ink (inverted, for secrets shown once).
  */
 export default function Frame({
   as: Tag = "div",

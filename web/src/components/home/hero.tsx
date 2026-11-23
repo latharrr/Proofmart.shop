@@ -1,78 +1,107 @@
-import OpenScanButton from "@/components/home/open-scan-button";
+import CopyButton from "@/components/account/copy-button";
 import RollPill from "@/components/motion/roll-pill";
-import StatementSheet from "@/components/paper/statement-sheet";
-import Tickmark from "@/components/paper/tickmark";
+import RunSampleButton from "@/components/home/run-sample-button";
+import { Serif } from "@/components/home/section-head";
+import { MARKER_REGISTRY } from "@/lib/verification/registry";
 
-const ASSURANCES = [
-  { k: "No model in the path", v: "Deterministic rules over the page's own arithmetic. No LLM, no score." },
-  { k: "Same bytes, same verdict", v: "Every result records the engine version that produced it." },
-  { k: "Nothing kept signed out", v: "A signed-out upload is deleted as soon as its scan finishes." },
-];
-
-const LEGEND = [
-  { kind: "agreed" as const, tone: "ink", label: "Agrees with prior balance ± the row" },
-  { kind: "break" as const, tone: "fail", label: "Break: verdict FAIL" },
-  { kind: "query" as const, tone: "review", label: "Query: verdict REVIEW" },
-  { kind: "footed" as const, tone: "ink", label: "Footed: the column re-added" },
-];
+const CURL = `curl https://proofmart.shop/v1/verify -H "Authorization: Bearer $PROOFMART_API_KEY" -F file=@statement.pdf`;
 
 /**
- * The first sheet on the pad. Left: what ProofMart is, in one sentence, and
- * the two ways in. Right: page 4 of the sample statement, re-footed, with
- * its breaks ringed. Along the foot, the tickmark legend that every other
- * sheet on the site is written in.
+ * Left eight columns: the claim at display size and the two ways in. Right
+ * four: the system panel, every row a fact the code states (the marker
+ * count is the registry's own length), typed in once on load, then the
+ * one call that runs it all, ready to copy.
  */
+// Typing schedule for the system panel (CSS, before any script loads):
+// 18ms a character, each row starting when the one above it ends.
+const CHAR_MS = 18;
+const START_MS = 420;
+
 export default function Hero() {
+  const SYSTEM: [string, string][] = [
+    ["engine", "deterministic rules"],
+    ["markers", String(MARKER_REGISTRY.length)],
+    ["verdicts", "FAIL > REVIEW > CLEAR"],
+    ["signing", "Ed25519"],
+    ["delivery", "web · api · webhooks · cli"],
+    ["billing", "INR · Razorpay"],
+  ];
+  const lens = SYSTEM.map(([k, v]) => k.length + 1 + v.length + 2);
+  const starts = lens.map((_, i) => START_MS + lens.slice(0, i).reduce((a, b) => a + b, 0) * CHAR_MS);
+  const typing = (i: number) => ({ ["--d" as string]: `${starts[i]}ms`, ["--n" as string]: lens[i], ["--t" as string]: `${lens[i] * CHAR_MS}ms` });
+  const curlStart = starts[starts.length - 1] + lens[lens.length - 1] * CHAR_MS;
+
   return (
     // `id="run"`: older in-app links send people to /#run to verify a document.
-    <section id="run" className="pm-h-hero" aria-labelledby="hero-title">
-      <div className="pm-wrap pm-h-hero-grid">
-        <div className="pm-h-hero-copy">
-          <h1 id="hero-title" className="pm-h-title">
-            Footed, cross&#8209;footed, <span className="pm-red">ticked.</span>
-          </h1>
-          <p className="pm-h-lead">
-            ProofMart re-adds every row of a PDF bank statement, ticks each balance that agrees and rings each one that doesn&rsquo;t, with the sum that
-            proves it. Then one verdict: FAIL, REVIEW or CLEAR.
-          </p>
-          <div className="pm-h-actions">
-            <OpenScanButton>Start a scan</OpenScanButton>
-            <RollPill href="#outputs" native variant="secondary">
-              Read the API response
-            </RollPill>
-          </div>
-          <dl className="pm-h-assure">
-            {ASSURANCES.map((a) => (
-              <div key={a.k}>
-                <dt>
-                  <Tickmark kind="agreed" size={15} />
-                  {a.k}
-                </dt>
-                <dd>{a.v}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-
-        <StatementSheet animate className="pm-h-sheet" />
-      </div>
-
+    <section id="run" className="pm-hero" aria-labelledby="hero-title">
       <div className="pm-wrap">
-        <div className="pm-h-legend">
-          <p className="pm-h-legend-title">Tickmarks used on this site</p>
-          <ul>
-            {LEGEND.map((l) => (
-              <li key={l.kind} data-tone={l.tone}>
-                <Tickmark kind={l.kind} />
-                {l.label}
-              </li>
-            ))}
-          </ul>
-          <a href="#access" className="pm-xref">
-            Whole statement, live: W/P A
-          </a>
+        <p className="pm-index" data-leader="">
+          <span className="pm-index-n">[01]</span>
+          <span className="pm-index-dash" aria-hidden="true">
+            —
+          </span>
+          <span className="pm-index-label">ProofMart</span>
+          <span className="pm-index-leader" aria-hidden="true" />
+          <span className="pm-index-meta">Document forensics API · India</span>
+        </p>
+
+        <div className="pm-hero-grid">
+          <div className="pm-hero-copy">
+            <h1 id="hero-title" className="pm-hero-title">
+              <span className="pm-mask">
+                <span>Point at</span>
+              </span>{" "}
+              <span className="pm-mask">
+                <span>
+                  <Serif>the row.</Serif>
+                </span>
+              </span>
+            </h1>
+            <p className="pm-hero-lead">
+              ProofMart re-adds every row of a PDF bank statement with fixed rules, with no model in the path, and pins each finding to its page, row
+              and box. Then one verdict: <span className="pm-v" data-tone="FAIL">FAIL</span>, <span className="pm-v" data-tone="REVIEW">REVIEW</span> or{" "}
+              <span className="pm-v" data-tone="CLEAR">CLEAR</span>.
+            </p>
+            <div className="pm-actions">
+              <RunSampleButton>Run the sample</RunSampleButton>
+              <RollPill href="#outputs" native variant="secondary">
+                Read <span className="pm-mono">/v1/verify</span>
+              </RollPill>
+            </div>
+          </div>
+
+          <aside className="pm-sys" aria-label="System">
+            <div className="pm-sys-head">
+              <span>system</span>
+              <span className="pm-sys-live">
+                <span aria-hidden="true" className="pm-mk-api-dot" />
+                /v1
+              </span>
+            </div>
+            <dl className="pm-sys-rows">
+              {SYSTEM.map(([k, v], i) => (
+                <div key={k} className="pm-sys-row" style={typing(i)}>
+                  <dt>{k}:</dt>
+                  <dd>{v}</dd>
+                </div>
+              ))}
+            </dl>
+            <div className="pm-sys-curl" data-cursor="copy" style={{ ["--d" as string]: `${curlStart}ms`, ["--t" as string]: `${Math.min(900, CURL.length * 6)}ms` }}>
+              <code>
+                <span className="pm-sys-prompt" aria-hidden="true">
+                  ${" "}
+                </span>
+                {CURL}
+              </code>
+              <CopyButton value={CURL} copiedLabel="Copied" variant="paper" size="sm" ariaLabel="Copy the curl command">
+                Copy
+              </CopyButton>
+            </div>
+          </aside>
         </div>
       </div>
+      {/* Where the travelling document settles while the hero is pinned. */}
+      <div className="pm-fly-slot" aria-hidden="true" />
     </section>
   );
 }

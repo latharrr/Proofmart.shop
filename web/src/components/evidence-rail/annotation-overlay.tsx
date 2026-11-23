@@ -5,63 +5,58 @@ import { useLayoutEffect, useRef } from "react";
 export interface AnnotationOverlayProps {
   rect: { x: number; y: number; w: number; h: number };
   color: string;
+  /** The verdict wash behind the box; "none" for a hover preview. */
   fill: string;
   /** Same units as `rect`: the sample uses a fixed 640x800 mock page; real documents pass the page's actual PDF-point dimensions from pdf.js. */
   viewBoxWidth: number;
   viewBoxHeight: number;
-  /** Bump to re-trigger the draw-in animation even if the rect itself is unchanged (e.g. re-selecting the same finding). */
+  /** Bump to re-trigger the draw-in even if the rect itself is unchanged (e.g. re-selecting the same finding). */
   animationKey: string;
+  /** Hover preview: a dashed, pulsing outline rather than the pinned box. */
+  preview?: boolean;
 }
 
 /**
- * The pinned finding, ringed in pencil: a wash over the region, then a
- * rounded ring drawn round it in one stroke, the way a reviewer circles a
- * figure on a printout. The ring is a `<rect>` with full-height corner
- * radius so it stays exactly on the PDF coordinates (tests/e2e measure it).
- * Under reduced motion it appears already drawn.
+ * A finding's box on the page, exactly on its PDF coordinates (tests/e2e
+ * measure the first `rect`): the stroke draws round it in one pass (400ms),
+ * then the verdict wash fades in behind. Under reduced motion both are
+ * simply there.
  */
-export default function AnnotationOverlay({ rect, color, fill, viewBoxWidth, viewBoxHeight, animationKey }: AnnotationOverlayProps) {
+export default function AnnotationOverlay({ rect, color, fill, viewBoxWidth, viewBoxHeight, animationKey, preview = false }: AnnotationOverlayProps) {
   const strokeRef = useRef<SVGRectElement>(null);
+  const washRef = useRef<SVGRectElement>(null);
 
   useLayoutEffect(() => {
     const el = strokeRef.current;
-    if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      el.style.transition = "none";
-      el.style.strokeDashoffset = "0";
-      return;
-    }
-    el.style.transition = "none";
-    el.style.strokeDashoffset = "1";
-    // Force reflow so the transition below animates from the reset offset.
-    el.getBoundingClientRect();
-    el.style.transition = "stroke-dashoffset 520ms cubic-bezier(0.16, 1, 0.3, 1)";
-    el.style.strokeDashoffset = "0";
-  }, [animationKey, rect]);
+    const wash = washRef.current;
+    if (!el || preview) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    el.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 400, easing: "cubic-bezier(0.2, 0, 0, 1)" });
+    wash?.animate([{ opacity: 0 }, { opacity: 0, offset: 0.6 }, { opacity: 1 }], { duration: 640, easing: "ease-out" });
+  }, [animationKey, rect, preview]);
 
   const { x, y, w, h } = rect;
-  const r = Math.min(h / 2, w / 2);
 
   return (
     <svg
       viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
       preserveAspectRatio="xMidYMid meet"
+      className={preview ? "pm-box pm-box-preview" : "pm-box"}
       style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", overflow: "visible" }}
     >
-      <rect x={x} y={y} width={w} height={h} rx={r} fill={fill} stroke="none" />
+      {preview ? null : <rect ref={washRef} x={x} y={y} width={w} height={h} rx={2} fill={fill} stroke="none" />}
       <rect
         ref={strokeRef}
         x={x}
         y={y}
         width={w}
         height={h}
-        rx={r}
+        rx={2}
         fill="none"
         stroke={color}
-        strokeWidth={2.2}
-        strokeLinecap="round"
-        pathLength={1}
-        strokeDasharray={1}
+        strokeWidth={preview ? 1.5 : 2}
+        strokeDasharray={preview ? "4 3" : 1}
+        pathLength={preview ? undefined : 1}
         strokeDashoffset={0}
       />
     </svg>

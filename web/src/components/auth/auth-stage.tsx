@@ -1,37 +1,30 @@
 import type { ReactNode } from "react";
-import Frame from "@/components/motion/frame";
-import StatementSheet from "@/components/paper/statement-sheet";
 import Tickmark from "@/components/paper/tickmark";
 
-// Beside each auth form (after it on a phone): the product itself, the
-// sample statement re-footed on its working paper, with one line under it
-// about what the page leads to. It is static markup, so the form never waits
-// on it.
+// Under each auth form, ruled off inside the same panel: one line about
+// what the page leads to, and the finding or points that back it. Static
+// markup, so the form never waits on it.
 
 export type StageVerdict = "FAIL" | "REVIEW" | "CLEAR";
 
 export interface AuthStageProps {
   variant: "stack" | "single";
-  /** Accepted for older call sites; the sheet always shows page 4 as audited. */
+  /** Accepted for older call sites. */
   verdict?: StageVerdict;
-  /** Content of the band under the scene. */
+  /** Content of the band. */
   band: ReactNode;
-  /** Centred in the bottom crosshair row. */
+  /** The band's mono label. */
   label?: string;
-  /** File line at the top of the stage. */
+  /** Accepted for older call sites. */
   file?: string;
 }
 
-export default function AuthStage({ variant, band, label, file = "meridian_apr25_statement.pdf" }: AuthStageProps) {
+export default function AuthStage({ band, label }: AuthStageProps) {
   return (
-    <Frame as="aside" tone="sheet" label={label} className="pm-auth-stage" stageClassName="pm-auth-stage-box">
-      <div className="pm-auth-stage-head" aria-hidden="true">
-        <span className="pm-mono">{file}</span>
-        <span className="pm-mono">{variant === "stack" ? "6 pages · p4 open" : "p4 / 6"}</span>
-      </div>
-      <StatementSheet className="pm-auth-sheet" showNotes={false} />
+    <aside className="pm-auth-stage" aria-label={label}>
+      {label ? <p className="pm-auth-stage-label">{label}</p> : null}
       <div className="pm-auth-band">{band}</div>
-    </Frame>
+    </aside>
   );
 }
 

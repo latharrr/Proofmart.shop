@@ -14,8 +14,17 @@ export default function NotFound() {
       <main id="main">
         <section className="pm-wrap pm-nf" aria-labelledby="pm-nf-title">
           <div className="pm-nf-text">
+            <p className="pm-index">
+              <span className="pm-index-n">[404]</span>
+              <span className="pm-index-dash" aria-hidden="true">
+                —
+              </span>
+              <span className="pm-index-label">Not found</span>
+              <span className="pm-index-leader" aria-hidden="true" />
+              <span className="pm-index-meta">proofmart.shop</span>
+            </p>
             {/* A missing page is not a verdict about anyone's document, so
-                nothing here takes a pencil colour. */}
+                nothing here takes a verdict colour. */}
             <h1 id="pm-nf-title" className="pm-nf-title">
               Page not found.
             </h1>

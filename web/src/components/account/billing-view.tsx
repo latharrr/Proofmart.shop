@@ -2,7 +2,6 @@ import Link from "next/link";
 import { PLANS, type Plan, type PlanId } from "@/lib/billing/plans";
 import { PRICING } from "@/lib/home-data";
 import Frame from "@/components/motion/frame";
-import Tilt from "@/components/motion/tilt";
 import Reveal from "@/components/motion/reveal";
 import RollPill from "@/components/motion/roll-pill";
 import CreateCheckoutButton from "@/app/account/billing/create-checkout-button";
@@ -167,13 +166,11 @@ export default function BillingView({ usage, reset, daysLeft, checkout }: { usag
             );
             return isPro ? (
               <Reveal key={p.id} delay={idx * 80} className="pm-acct-plan-wrap">
-                <Tilt max={5} damping={8} className="pm-acct-plan-tilt">
                   <Frame tone="sheet" label={isFree ? "Upgrade" : "Your plan"} className="pm-acct-plan-frame" stageClassName="pm-acct-plan-stage">
                     <article className="pm-acct-plan pm-acct-plan-pro" aria-labelledby={`pm-acct-plan-${p.id}`}>
                       {body}
                     </article>
                   </Frame>
-                </Tilt>
               </Reveal>
             ) : (
               <Reveal key={p.id} delay={idx * 80} className="pm-acct-plan-wrap">

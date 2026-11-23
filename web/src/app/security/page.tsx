@@ -101,6 +101,15 @@ export default function SecurityPage() {
       <Topbar />
       <main id="main">
         <header className="pm-wrap pm-sec-hero">
+          <p className="pm-index">
+            <span className="pm-index-n">[S]</span>
+            <span className="pm-index-dash" aria-hidden="true">
+              —
+            </span>
+            <span className="pm-index-label">Security</span>
+            <span className="pm-index-leader" aria-hidden="true" />
+            <span className="pm-index-meta">As built today</span>
+          </p>
           <h1 className="pm-sec-title">What happens to your documents.</h1>
           <p className="pm-h-lead">
             Where files are stored, who can see them, how long anything is kept, how it is deleted and how results are signed, as the system is built

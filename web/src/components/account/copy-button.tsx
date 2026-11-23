@@ -12,6 +12,29 @@ import PillLabel from "./pill-label";
  *
  * Renders a rolling-label pill (foundation `.pm-pill`).
  */
+const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#%&*+=";
+
+/** Resolves `text` from mono glyphs in ~280ms (instantly under reduced motion). */
+function Scramble({ text }: { text: string }) {
+  const [out, setOut] = useState(text);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const start = performance.now();
+    let raf = requestAnimationFrame(function frame(now) {
+      const p = Math.min(1, (now - start) / 280);
+      setOut([...text].map((c, i) => (i / text.length < p || c === " " ? c : GLYPHS[(Math.random() * GLYPHS.length) | 0])).join(""));
+      if (p < 1) raf = requestAnimationFrame(frame);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [text]);
+  return (
+    <>
+      <span className="pm-sr">{text}</span>
+      <span aria-hidden="true">{out}</span>
+    </>
+  );
+}
+
 export default function CopyButton({
   value,
   children = "Copy",
@@ -52,7 +75,7 @@ export default function CopyButton({
       setState("failed");
     }
     if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => setState("idle"), 1800);
+    timer.current = setTimeout(() => setState("idle"), 1500);
   }
 
   return (
@@ -71,8 +94,8 @@ export default function CopyButton({
             children
           ) : state === "copied" ? (
             <span className="pm-copied">
-              <Tickmark kind="agreed" size={14} className="pm-draw" />
-              {copiedLabel}
+              <Tickmark kind="agreed" size={14} />
+              <Scramble text={copiedLabel} />
             </span>
           ) : (
             "Copy blocked"

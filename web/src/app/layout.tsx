@@ -1,27 +1,19 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { JetBrains_Mono, Libre_Franklin } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import MotionLayer, { MOTION_BOOT } from "@/components/motion/motion-layer";
 import "./globals.css";
 
-// Both are self-hosted by next/font at build time. The CSP allows
+// All three are self-hosted by next/font at build time. The CSP allows
 // `font-src 'self'` only, so a <link> to fonts.googleapis.com would be
-// blocked by the browser and the page would silently fall back to a system
-// stack: next/font is the only way these can load here.
+// blocked and the page would silently fall back to a system stack.
 //
-// The working-paper system (DESIGN.md): Libre Franklin, the gothic printed
-// on ledger pads and bank forms, sets headings, UI and prose; JetBrains Mono
-// sets figures, code and identifiers, where every digit must line up.
-const franklin = Libre_Franklin({
-  variable: "--font-franklin",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const jetbrains = JetBrains_Mono({
-  variable: "--font-jetbrains",
-  subsets: ["latin"],
-  display: "swap",
-});
+// The console system (DESIGN.md): Geist sets UI and headings, Geist Mono
+// every figure, code and label, and Instrument Serif italic is the one
+// editorial voice, a few words per section at most.
+const geist = Geist({ variable: "--font-geist", subsets: ["latin"], display: "swap" });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"], display: "swap" });
+const serif = Instrument_Serif({ variable: "--font-instrument", subsets: ["latin"], weight: "400", style: "italic", display: "swap" });
 
 const TITLE = "ProofMart · Document forensics API";
 const DESCRIPTION =
@@ -50,8 +42,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${franklin.variable} ${jetbrains.variable}`}>
+    <html lang="en" className={`${geist.variable} ${geistMono.variable} ${serif.variable}`} suppressHydrationWarning>
       <body>
+        {/* Before first paint: opt in to entrance states unless reduced motion is preferred. */}
+        <script dangerouslySetInnerHTML={{ __html: MOTION_BOOT }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -69,6 +63,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           Skip to content
         </a>
         {children}
+        <MotionLayer />
       </body>
     </html>
   );

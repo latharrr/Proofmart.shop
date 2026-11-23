@@ -1,9 +1,10 @@
 import Link from "next/link";
 import Wordmark from "@/components/brand/wordmark";
+import IstClock from "@/components/home/ist-clock";
 import { APP_VERSION } from "@/lib/evidence-data";
 import { FOOTER } from "@/lib/home-data";
 
-/** The foot of the pad: closed with a double rule, like the last sheet of a schedule. */
+/** The foot of every marketing page: four mono columns, the clock, the build, and a way back up. */
 export default function SiteFooter() {
   return (
     <footer className="pm-footer">
@@ -15,7 +16,7 @@ export default function SiteFooter() {
           </div>
           {FOOTER.map((c) => (
             <div key={c.h}>
-              <p className="pm-label pm-footer-h">{c.h}</p>
+              <p className="pm-footer-h">{c.h}</p>
               <ul className="pm-footer-links">
                 {c.links.map((l) =>
                   // Home anchors stay plain <a> ("/#pipeline" works from /security too).
@@ -34,8 +35,14 @@ export default function SiteFooter() {
           ))}
         </div>
         <div className="pm-footer-base">
-          <span>© 2026 Deepanshu Labs</span>
-          <span className="pm-mono">v{APP_VERSION} · public beta</span>
+          <span>© 2026 Deepanshu Labs · Made in India</span>
+          <IstClock />
+          <span>
+            build v{APP_VERSION} · public beta
+          </span>
+          <a href="#main" className="pm-footer-top">
+            Back to top ↑
+          </a>
         </div>
       </div>
     </footer>

@@ -5,11 +5,9 @@ import RollPill from "@/components/motion/roll-pill";
 import AuthStage, { type AuthStageProps } from "@/components/auth/auth-stage";
 
 /**
- * Frame for every auth page: the pad's printed head (mark home, a plain way
- * back to the site, a button to the other flow), one column that states the
- * page's single purpose, and the
- * sample statement on its working paper beside the form (after it on a
- * phone).
+ * Frame for every auth page: a thin bar (mark home, a way back, the other
+ * flow), then one centred, bordered panel on the grid: a mono index row,
+ * the page's single purpose, the form, and a ruled band under it.
  */
 export default function AuthShell({
   title,
@@ -20,6 +18,8 @@ export default function AuthShell({
   switchTo,
   stage,
   below,
+  index = "01",
+  indexLabel = "Account",
 }: {
   /** Accepted for older call sites; the title carries the page's state. */
   eyebrow?: string;
@@ -34,41 +34,54 @@ export default function AuthShell({
   stage: AuthStageProps;
   /** Extra content after the footer. */
   below?: ReactNode;
+  /** The panel's index row: number and label. */
+  index?: string;
+  indexLabel?: string;
 }) {
   return (
     <div className="pm-auth">
       <header className="pm-auth-top">
-        <Wordmark href="/" />
-        <nav className="pm-auth-nav" aria-label="Account">
-          <Link href="/" className="pm-link pm-auth-home">
-            <span className="pm-auth-home-long">Back to home</span>
-            <span className="pm-auth-home-short">Home</span>
-          </Link>
-          {switchTo && (
-            <RollPill href={switchTo.href} variant="secondary" size="sm" dot>
-              {switchTo.label}
-            </RollPill>
-          )}
-        </nav>
+        <div className="pm-wrap pm-auth-top-inner">
+          <Wordmark href="/" />
+          <nav className="pm-auth-nav" aria-label="Account">
+            <Link href="/" className="pm-link pm-auth-home">
+              <span className="pm-auth-home-long">Back to home</span>
+              <span className="pm-auth-home-short">Home</span>
+            </Link>
+            {switchTo && (
+              <RollPill href={switchTo.href} variant="secondary" size="sm" dot>
+                {switchTo.label}
+              </RollPill>
+            )}
+          </nav>
+        </div>
       </header>
 
-      <div className="pm-auth-grid">
-        <main id="main" className="pm-auth-col">
-          <div className="pm-auth-title-row">
+      <main id="main" className="pm-auth-main">
+        <div className="pm-auth-card">
+          <p className="pm-index">
+            <span className="pm-index-n">[{index}]</span>
+            <span className="pm-index-dash" aria-hidden="true">
+              —
+            </span>
+            <span className="pm-index-label">{indexLabel}</span>
+            <span className="pm-index-leader" aria-hidden="true" />
+            <span className="pm-index-meta">proofmart.shop</span>
+          </p>
+          <div className="pm-auth-col">
             <h1 className="pm-auth-title" data-size={size}>
               {title}
             </h1>
+            {subtitle && <p className="pm-auth-sub">{subtitle}</p>}
+
+            <div className="pm-auth-stack">{children}</div>
+
+            {footer && <div className="pm-auth-footer">{footer}</div>}
+            {below}
           </div>
-          {subtitle && <p className="pm-auth-sub">{subtitle}</p>}
-
-          <div className="pm-auth-stack">{children}</div>
-
-          {footer && <div className="pm-auth-footer">{footer}</div>}
-          {below}
-        </main>
-
-        <AuthStage {...stage} />
-      </div>
+          <AuthStage {...stage} />
+        </div>
+      </main>
     </div>
   );
 }

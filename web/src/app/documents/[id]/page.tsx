@@ -36,7 +36,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
     <>
       {doc.status === "ready" && doc.document_hash && (
         <RollPill href={`/api/documents/${doc.id}/dossier`} native size="sm" dot>
-          Download dossier
+          Export signed dossier
         </RollPill>
       )}
       {doc.storage_pathname && (
@@ -87,6 +87,14 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
                 </>
               )}
               {" · "}engine <span className="pm-mono">v{doc.verification_version}</span>
+              {doc.document_hash && (
+                <>
+                  {" · "}sha256{" "}
+                  <span className="pm-mono" title={doc.document_hash}>
+                    {doc.document_hash.slice(0, 12)}…{doc.document_hash.slice(-4)}
+                  </span>
+                </>
+              )}
             </>
           }
           actions={actions}

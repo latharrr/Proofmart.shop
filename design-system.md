@@ -1,157 +1,92 @@
 # design-system.md — ProofMart
 
-Derived from lusion.co, adapted for a document-forensics product.
-This file is the **objective** reference: the System critic checks adherence against
-it and nothing else. Where this file and `bar.md` disagree, `bar.md` wins.
-The previous Steep-derived system is archived as `design-system-steep.md`.
+The objective reference for "Operator Console × Editorial Index". DESIGN.md
+explains the system; this file is the checklist a reviewer measures against.
+Tokens live once, in `web/src/app/globals.css` (`:root` plus `@theme inline`
+for Tailwind 4). The earlier Lusion- and Steep-derived systems and the
+working-paper system are retired (`design-system-steep.md`, `bar*.md` are
+history only).
 
 ---
 
-## 1. Type
+## 1. Tokens
 
-One grotesk for everything, plus a mono reserved for machine strings.
-
-| Role | Family | Desktop | Mobile | Weight | Tracking | Line-height | Case |
-|---|---|---|---|---|---|---|---|
-| display | Geist | 148px | 60px | 400 | −0.045em | 0.95 | sentence |
-| heading-lg | Geist | 88px | 44px | 400 | −0.04em | 1.0 | sentence |
-| heading | Geist | 48px | 32px | 400 | −0.03em | 1.08 | sentence |
-| heading-sm | Geist | 28px | 24px | 400 | −0.02em | 1.2 | sentence |
-| body-lg | Geist | 22px | 18px | 400 | −0.01em | 1.4 | sentence |
-| body | Geist | 17px | 16px | 400 | normal | 1.5 | sentence |
-| label | Geist | 14px | 13px | 500 | 0.02em | 1.2 | UPPERCASE |
-| identifier | Geist Mono | 13px | 12px | 400 | 0 | 1.5 | as data |
-
-- Geist and Geist Mono load through `next/font/google` (CSP is `font-src 'self'`).
-- Nothing on the page is bold. 500 is used only by `label`.
-- Display and heading lines enter through a **line mask** (see §6).
-- Mono is reserved for machine strings: marker IDs (`BALANCE_BREAK`), endpoints,
-  request IDs, JSON, page/row coordinates, amounts inside a finding's arithmetic.
-- Every page-chrome text size is one of the roles above. **Inside a 3D scene or a
-  floating product artifact** (a reproduced statement, a finding card) the artifact
-  may use its own internal scale, down to 10px for the reproduced document.
-
-## 2. Colour
-
-**Field and ink, the achromatic UI**
-
-| Token | Hex | Role |
+| Token | Value | Use |
 |---|---|---|
-| field | `#f0f1fa` | page background |
-| paper | `#ffffff` | cards, inputs, light pills, artifacts |
-| haze | `#e4e6ef` | secondary pill, input rest fill, subtle panels |
-| line | `#d9dbe6` | hairlines, crosshair marks at 40% ink, dividers |
-| mute | `#6b6f80` | secondary text, helper text, inline links at rest |
-| ink | `#0b0c10` | primary text, display type |
-| graphite | `#2b2e3a` | primary pill, dark stages, dark bands |
+| `--paper` | `#F2EFE8` | page background |
+| `--paper-2` | `#E8E4DA` | recessed panels, hover fills, active sidebar item |
+| `--doc` | `#FFFFFF` | document pages, inputs, code, system panel |
+| `--ink` | `#0E0E0C` | text, primary buttons, index-row rule |
+| `--ink-2` | `#55534D` | secondary text (6.7:1 on paper) |
+| `--line` | `rgb(14 14 12 / .12)` | hairlines, grid, row rules |
+| `--line-strong` | `rgb(14 14 12 / .36)` | control and card borders (≥3:1) |
+| `--signal` | `#FF4D00` | brand accent: CTA hover, live, active nav, tabs, progress |
+| `--signal-ink` | `#E64500` | accent as a ≥3:1 stroke: focus ring, caret |
+| `--signal-text` | `#B83700` | accent as small text (5.1:1): index and step numbers, row arrows |
+| `--fail` / `-ink` / `-wash` | `#C8102E` / `#B00E28` / 10% | FAIL only |
+| `--review` / `-ink` / `-wash` | `#B07800` / `#805600` / 10% | REVIEW only |
+| `--clear` / `-ink` / `-wash` | `#1F8A4C` / `#18703E` / 10% | CLEAR only |
+| `--term` / `--term-text` / `--term-2` / `--term-line` | ink / paper / 70% / 12% | inverted sections |
+| `--r` | `6px` | cards, buttons, inputs (layout is 0) |
+| `--gutter` | `clamp(16px, 4vw, 48px)` | page side gutter |
+| `--col-gap` | `24px` | 12-column gap |
+| `--section` | `clamp(80px, 10vw, 160px)` | section padding |
+| `--head-h` | `56px` | header height |
+| `--t-12 … --t-120` | 12/14/16/20/28/44/72/120 (clamped) | the only type sizes |
 
-**Electric accent**: only in 3D, ribbons, focus rings and one highlight per screen.
+Verdict text uses the `-ink` step; the base hue is for strokes, boxes and
+pills' borders. Inverted sections use `--fail-on-ink #FF6B7D`,
+`--review-on-ink #E8B04A`, `--clear-on-ink #4CC27E`.
 
-| Token | Hex | Role |
-|---|---|---|
-| volt | `#3b49f4` | 3D ribbon, focus ring, active nav dot, one emphasised word or line |
-| volt-2 | `#5981fe` | gradient partner of volt, inside 3D/ribbons only |
+## 2. Type
 
-**Verdict signal**: functional and exempt.
+| Role | Family | Size | Weight | Notes |
+|---|---|---|---|---|
+| display | Geist | `--t-120` | 500 | hero and closing line only |
+| page title | Geist | `--t-72` | 500 | security, 404 |
+| section title | Geist | `--t-44` | 500 | every home section, auth |
+| title | Geist | `--t-20` | 500 | step and card names |
+| body | Geist | 16 / 18 lead | 400 | ≥4.5:1 |
+| body-sm | Geist | 14 | 400 | |
+| mono | Geist Mono | 12–13 | 400–600 | figures, codes, hashes, labels, code; ligatures off |
+| label | Geist Mono | 12 | 500 | uppercase, 0.06em |
+| accent | Instrument Serif | inherits | 400 italic | 1–3 words per section |
 
-| Token | Hex | Role |
-|---|---|---|
-| fail | `#e5342b` | FAIL badge, pin box, fail count |
-| review | `#c98a12` | REVIEW badge, review count |
-| clear | `#1d9a63` | CLEAR badge, clear count |
+All fonts load through `next/font/google` (self-hosted; CSP `font-src 'self'`).
+Tabular numerals are global.
 
-Rules
-- UI chrome uses only field/paper/haze/line/mute/ink/graphite plus volt.
-- volt as a solid UI fill: at most one control per screen (e.g. the active step).
-- Verdict colours never decorate. Red only ever means FAIL.
-- Exception: the Google "G" on "Continue with Google" keeps its official colours.
-- Dark bands (`graphite` background, `paper` text) are allowed for 3D stages and at
-  most one content section per page.
+## 3. Layout checks
 
-## 3. Space and frame
+- [ ] Grid hairlines visible behind content (12 columns; 4 on ≤640px), light on inverted sections.
+- [ ] Every home section opens with an index row `[nn] — LABEL ···· meta` on a 1px ink rule; numbers run 01–08 in page order.
+- [ ] Section title in columns 1–7, aside in 9–12; collapses to one column ≤1000px.
+- [ ] Only hero and closing use 120px; other section titles ≤44px.
+- [ ] No horizontal page scroll at 1440 / 1024 / 768 / 390.
+- [ ] App shell: sidebar ≥961px, bar + Menu sheet below.
+- [ ] Auth and 404: one centred bordered panel with an index row.
 
-- Base unit 4px. Component padding from {4, 8, 12, 16, 20, 24, 32}.
-- Page gutter **72px** desktop, **20px** mobile. Max content width 1296px.
-- Major section spacing **≥160px** desktop, **≥96px** mobile.
-- **Crosshair marks**: `+` glyphs, 13px, `ink` at 40%, at the four corners of every
-  framed stage or media frame and on its column lines. Same size and colour
-  everywhere.
+## 4. Colour checks
 
-## 4. Shape and depth
+- [ ] `--signal` appears on no verdict; verdict hues appear on nothing but verdicts and markers.
+- [ ] Every verdict shows glyph + word.
+- [ ] Body and secondary text ≥4.5:1 at rest (no greyed-out copy).
+- [ ] No shadows. No gradients except the hairline grid and link underlines.
 
-| Element | Radius |
-|---|---|
-| pill (buttons, chips, nav) | 9999px |
-| stage / media frame | 20px |
-| card | 20px |
-| input | 14px |
+## 5. Honesty checks (PRODUCT.md)
 
-- Shadows only on things floating above the field (artifacts, popovers, the
-  account menu): `0 1px 2px rgba(11,12,16,.06), 0 12px 32px -8px rgba(11,12,16,.18)`.
-  Flat content cards have no shadow.
-- **Perspective:** depth moves use `perspective: 1200px`. Card tilt at most 8° on any
-  axis. Media planes may enter from up to 12° and settle at 0°.
+- [ ] Marker list rendered from `MARKER_REGISTRY` (home grid, hero count).
+- [ ] Prices from `lib/billing/plans.ts`, shown in INR, with "Placeholder pricing — subject to change."
+- [ ] Every illustrative artefact carries a SAMPLE badge (rail, outputs, hero page, pipeline page).
+- [ ] No customers, logos, testimonials, usage/accuracy/latency/uptime numbers, certifications, SLAs or integrations; no counters.
+- [ ] Header says `API v1`, not "online" (there is no public health check).
+- [ ] No AI/ML/score/confidence language about the engine.
 
-## 5. Components
+## 6. Motion checks
 
-- **Primary pill:** graphite fill, paper label, `label` type, padding 16px 24px
-  (min-height 48px), optional 6px dot after the label.
-- **Secondary pill:** haze fill (or paper on haze surfaces), ink label, same metrics.
-- **Icon pill:** 48px circle, haze.
-- **Pill hover:** label rolls up (the label translates −100% while a duplicate rises
-  from +100%) in 300ms `--ease-out`; background shifts one step in 400ms. No lift,
-  no scale.
-- **Inline link:** `mute` at rest with a `→` suffix and no underline, `ink` on hover;
-  the arrow nudges 4px right.
-- **Input:** paper fill, 1px line border, 14px radius, padding 14px 16px; focus is a
-  2px volt ring.
-- **Stage:** 20px radius, crosshair marks, a 3D canvas or media inside, a designed
-  poster frame shown until the 3D is ready (same composition, no layout shift).
-- **Finding row:** paper, 3px left edge in the verdict colour, mono identifier, body
-  description, mono arithmetic on haze.
-
-## 6. Motion
-
-| Token | Value |
-|---|---|
-| `--ease-out` | `cubic-bezier(0.4, 0, 0.1, 1)` |
-| `--ease-scene` | `cubic-bezier(0.35, 0, 0, 1)` |
-| UI duration | 300–450ms |
-| reveal duration | 900ms, stagger 80ms per line |
-| scene duration | 800–1400ms |
-
-- **Line reveal:** each display or heading line sits in an `overflow: hidden` box and
-  rises from `translateY(105%)` to 0. This is the only text entrance.
-- **Block reveal:** non-text blocks rise 32px and fade in 900ms `--ease-scene`,
-  triggered on entering the viewport. Content is visible at rest without JS
-  (progressive enhancement).
-- **Scroll-linked:** stage scale or recede, perspective tilt to flat, ribbon path
-  draw, parallax layers (0.85×–1.15× scroll speed).
-- No springs, no overshoot, no bounce, no linear UI tweens.
-- `prefers-reduced-motion: reduce`: the 3D renders one static pose, reveals are
-  instant, and scroll-linked motion is off.
-
-## 7. 3D
-
-- three.js (`three` package), client-only, loaded lazily after first paint. The page
-  is usable before it loads.
-- Physically based materials (`MeshPhysicalMaterial` / `MeshStandardMaterial`),
-  an environment map for reflections, soft shadows or contact shadows, gentle depth.
-- Cursor parallax: the scene eases toward the pointer (damped, never snapping).
-- Device pixel ratio capped at 2. Pause rendering when off-screen or the tab is hidden.
-- Mobile: fewer objects, no cursor; still real 3D on the home hero.
-- Subject matter is documents: paper sheets, statement rows, the pin box, the
-  verdict. No abstract blobs.
-
-## 8. Hard don'ts
-
-1. No bold display type, no serif.
-2. No hue in UI chrome outside volt and the verdict colours.
-3. No verdict colour used decoratively or as a hover state.
-4. No shadow on a flat content card.
-5. No button that isn't a full pill, and no sentence-case button label.
-6. No spring, overshoot or bounce easing.
-7. No content hidden behind a loader; the first frame is the product.
-8. No underline on an inline link at rest.
-9. No mono on prose.
-10. No layout shift when 3D or media loads.
+- [ ] Under `prefers-reduced-motion: reduce`: no Lenis, pin, scrub, scramble, typing or magnetic pull; every final state shown; colours on hover still change.
+- [ ] Only transform / opacity / clip-path / stroke-dashoffset animate.
+- [ ] Hidden starting states exist only under `html[data-motion]` or `html[data-gsap]`.
+- [ ] GSAP, ScrollTrigger and Lenis are dynamically imported after first paint, on the home page only, and torn down on unmount.
+- [ ] CLS < 0.05; headlines never clip at rest; typed text has its full size reserved.
+- [ ] The system cursor is always visible.
+- [ ] Rail: scroll only switches findings; a click or key releases the pin in place.

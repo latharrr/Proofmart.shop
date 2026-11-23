@@ -1,30 +1,27 @@
 import type { CSSProperties, ElementType, ReactNode } from "react";
 
 /**
- * A plain wrapper. The working-paper system has no scroll entrances: a sheet
- * is on the desk before you look at it, so content is always visible and only
- * pencil marks move (DESIGN.md, Motion). Kept as a component so call sites
- * can name a semantic element and pass attributes through.
+ * Marks a block for the motion layer's entrance (y 16→0 + fade, once, at
+ * 85% of the viewport; motion-layer.tsx). Visible at rest without script and
+ * under reduced motion. `delay` staggers siblings in ms.
  */
 export default function Reveal({
   children,
   as: Tag = "div",
-  delay: _delay,
+  delay,
   className,
   style,
   ...rest
 }: {
   children: ReactNode;
   as?: ElementType;
-  /** Accepted for older call sites; nothing is delayed. */
   delay?: number;
   className?: string;
   style?: CSSProperties;
   [attr: string]: unknown;
 }) {
-  void _delay;
   return (
-    <Tag className={className} style={style} {...rest}>
+    <Tag className={className} style={delay ? { ...style, ["--d" as string]: `${delay}ms` } : style} data-reveal="" {...rest}>
       {children}
     </Tag>
   );

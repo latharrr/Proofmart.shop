@@ -1,71 +1,23 @@
 export interface PipelineStage {
   i: string;
   name: string;
-  ms: string;
   body: string;
-  signal: string;
 }
 
-// Describes only what lib/api/pipeline.ts and lib/verification actually do.
-// An earlier version claimed template-registry matching and glyph-metric
-// checks; the registry's own docstring explains why neither exists, so the
-// page must not say they do.
+// Describes only what lib/api/pipeline.ts and lib/verification actually do,
+// in the order they run. No timings: the only real ones are a single sample
+// scan's, and a number that varies with every document is not a claim.
 export const PIPELINE: PipelineStage[] = [
-  {
-    i: "01",
-    name: "Inspect",
-    ms: "210 ms",
-    body: "Confirms the bytes are a real PDF, then classifies it as text-based, scanned or mixed, with a confidence score.",
-    signal: "pdfType · confidence · pages",
-  },
-  {
-    i: "02",
-    name: "Extract",
-    ms: "1.4 s",
-    body: "Recovers every text run with its position on the page. Pages without a usable text layer go through OCR, run in-process.",
-    signal: "runs · boxes · ocr",
-  },
-  {
-    i: "03",
-    name: "Reconcile",
-    ms: "2.9 s",
-    body: "Rebuilds the ledger from column positions, then re-checks it: running balances, page carry-forwards, date order, duplicates.",
-    signal: "markers · evidence",
-  },
-  {
-    i: "04",
-    name: "Decide",
-    ms: "260 ms",
-    body: "A fixed rule, not a score: any FAIL finding makes the verdict FAIL, else any REVIEW makes it REVIEW, else CLEAR.",
-    signal: "verdict · findings · coordinates",
-  },
+  { i: "01", name: "Inspect", body: "Confirms the bytes are a real PDF and classifies it as text-based, scanned or mixed." },
+  { i: "02", name: "Extract", body: "Recovers every text run with its position. Pages with no usable text layer fall back to OCR, run in-process." },
+  { i: "03", name: "Reconstruct tables", body: "Rebuilds the ledger from column occupancy: which runs share an x-range, row by row." },
+  { i: "04", name: "Markers", body: "Six fixed rules re-check the rebuilt rows: balances, carry-forwards, date order, duplicates, OCR and encoding." },
+  { i: "05", name: "Verdict", body: "A fixed precedence, not a score: any FAIL makes it FAIL, else any REVIEW makes it REVIEW, else CLEAR." },
 ];
 
-export type MarkerCategory = "Arithmetic" | "Provenance" | "Typography" | "Extraction" | "Semantic";
-export type MarkerVerdict = "FAIL" | "REVIEW" | "CLEAR";
-
-export interface Marker {
-  id: string;
-  cat: MarkerCategory;
-  verdict: MarkerVerdict;
-  desc: string;
-  cites: string;
-}
-
-// Mirrors the live MARKER_REGISTRY in lib/verification/registry.ts exactly —
-// id, category, and verdict per marker. Keep both lists in sync: this page
-// claims to be the marker catalog, so it must never show a marker the
-// verification engine doesn't actually run.
-export const MARKERS: Marker[] = [
-  { id: "BALANCE_BREAK", cat: "Arithmetic", verdict: "FAIL", desc: "Running balance disagrees with prior balance plus credit minus debit in a reconstructed ledger table.", cites: "row · math · box" },
-  { id: "CROSS_PAGE_TOTAL_MISMATCH", cat: "Arithmetic", verdict: "FAIL", desc: "Running balance fails to carry forward correctly across a page break.", cites: "row · page · box" },
-  { id: "DATE_SEQUENCE_ANOMALY", cat: "Semantic", verdict: "REVIEW", desc: "A row's date is earlier than the row immediately before it in a reconstructed ledger.", cites: "row · date · box" },
-  { id: "DUPLICATE_TRANSACTION", cat: "Semantic", verdict: "REVIEW", desc: "Two or more rows share an identical date and amount.", cites: "rows · match" },
-  { id: "OCR_LOW_CONFIDENCE", cat: "Extraction", verdict: "REVIEW", desc: "Page classified as needing OCR: its text layer is unreliable or absent.", cites: "page · confidence" },
-  { id: "ENCODING_ANOMALY", cat: "Extraction", verdict: "REVIEW", desc: "Broken font encoding or CID mapping detected somewhere in the document.", cites: "document · encoding" },
-];
-
-export const MARKER_TABS = ["All", "Arithmetic", "Semantic", "Extraction"] as const;
+// The marker catalogue on the home page reads lib/verification/registry.ts
+// directly (components/home/markers-section.tsx), so there is no second
+// list here to drift out of sync.
 
 export interface Integration {
   name: string;
@@ -77,9 +29,9 @@ export interface Integration {
 }
 
 export const INTEGRATIONS: Integration[] = [
-  { name: "Upload", kind: "No account", body: "The live scan on this page. Drop, paste or pick a PDF and get real findings back.", code: "drag · paste · click" },
-  { name: "REST API", kind: "API key", body: "Three depths of the same pipeline: classify only, extract, or the full verification.", code: "/v1/verify · /v1/extract · /v1/inspect" },
-  { name: "Webhooks", kind: "API key", body: "Every verification also posts its result to your URL, HMAC-signed and retried on failure.", code: "verification.completed · .failed" },
+  { name: "Web upload", kind: "No account", body: "Drop, paste or pick a PDF on this page. Signed-out uploads are deleted when the scan finishes.", code: "drag · paste · click" },
+  { name: "API", kind: "API key", body: "Three depths of one pipeline: classify, extract, or the full verification.", code: "/v1/verify · /v1/extract · /v1/inspect" },
+  { name: "Webhooks", kind: "API key", body: "Each result is POSTed to your URL, HMAC-signed. Six attempts: at once, then +1m, +5m, +30m, +2h, +12h.", code: "verification.completed · .failed" },
   { name: "CLI", kind: "API key", body: "A small, dependency-free client for the same public API, for scripts and batch jobs.", code: "proofmart verify statement.pdf" },
 ];
 
@@ -137,25 +89,25 @@ export const FOOTER: FooterColumn[] = [
   {
     h: "Product",
     links: [
+      { label: "Evidence rail", href: "/#product" },
       { label: "How it works", href: "/#pipeline" },
-      { label: "Marker catalog", href: "/#markers" },
-      { label: "Response & dossier", href: "/#outputs" },
+      { label: "Markers", href: "/#markers" },
       { label: "Pricing", href: "/#pricing" },
     ],
   },
   {
-    h: "Developers",
+    h: "API",
     links: [
-      { label: "Integrations", href: "/#integrate" },
+      { label: "Response & dossier", href: "/#outputs" },
+      { label: "Integrate", href: "/#integrate" },
       { label: "API keys", href: "/account/api-keys" },
       { label: "Webhooks", href: "/account/webhooks" },
-      { label: "My documents", href: "/documents" },
     ],
   },
   {
     h: "Company",
     links: [
-      { label: "Trust & security", href: "/security" },
+      { label: "My documents", href: "/documents" },
       { label: "Sign in", href: "/login" },
       { label: "Create account", href: "/signup" },
     ],
@@ -166,6 +118,7 @@ export const FOOTER: FooterColumn[] = [
       { label: "Privacy", href: "/privacy" },
       { label: "Terms", href: "/terms" },
       { label: "Refunds", href: "/refunds" },
+      { label: "Security", href: "/security" },
       { label: "Contact", href: "/contact" },
     ],
   },

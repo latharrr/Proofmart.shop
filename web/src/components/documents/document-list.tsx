@@ -10,16 +10,15 @@ import { StatusBadge, VerdictBadge, documentKindLabel, formatDay } from "./verdi
 
 export type DocumentListRow = Pick<
   DocumentRow,
-  "id" | "filename" | "size_bytes" | "status" | "verdict" | "document_kind" | "findings_count" | "error_message" | "created_at"
+  "id" | "filename" | "size_bytes" | "status" | "verdict" | "document_kind" | "findings_count" | "error_message" | "page_count" | "document_hash" | "created_at"
 >;
 
 /**
- * My documents as a ruled schedule on the pad: one row per document, newest
- * first. Each row leads with a small page glyph whose flagged line carries the
- * verdict's pencil, so the verdicts read down the column before any text does.
- * The filename is the row's link (its hit area stretches across the row);
- * Re-run, Delete and the open arrow sit above that layer so they stay
- * separately clickable. On a phone each row folds into a three-line card.
+ * My documents as an index table: No. / file / sha256 / pages / verdict /
+ * date, newest first. The filename is the row's link (its hit area
+ * stretches across the row); Re-run, Delete and the open arrow sit above
+ * that layer so they stay separately clickable. Hovering a row trails a
+ * page-1 thumbnail (motion-layer.tsx). On a phone each row folds into a card.
  */
 export default function DocumentList({ docs }: { docs: DocumentListRow[] }) {
   const tally = { FAIL: 0, REVIEW: 0, CLEAR: 0 };
@@ -39,42 +38,47 @@ export default function DocumentList({ docs }: { docs: DocumentListRow[] }) {
         ))}
       </div>
       <div className="pm-docs-head" aria-hidden="true">
-        <span>Document</span>
+        <span>No.</span>
+        <span>File</span>
+        <span>sha256</span>
+        <span>Pages</span>
         <span>Verdict</span>
-        <span>Findings</span>
-        <span>Verified</span>
+        <span>Date</span>
         <span className="pm-docs-head-actions">Actions</span>
       </div>
       <ul className="pm-docs-rows">
-        {docs.map((doc) => (
-          <DocumentListItem key={doc.id} doc={doc} />
+        {docs.map((doc, i) => (
+          <DocumentListItem key={doc.id} doc={doc} n={i} />
         ))}
       </ul>
     </div>
   );
 }
 
-function DocumentListItem({ doc }: { doc: DocumentListRow }) {
+function DocumentListItem({ doc, n }: { doc: DocumentListRow; n: number }) {
   const href = `/documents/${doc.id}`;
   const ready = doc.status === "ready";
-  const tone = ready ? (doc.verdict ?? undefined) : doc.status;
   const sub =
     doc.status === "error"
       ? (doc.error_message ?? "Processing failed.")
       : doc.status === "processing"
         ? "Still being checked — refresh in a moment."
-        : `${documentKindLabel(doc.document_kind)} · ${formatBytes(doc.size_bytes)}`;
+        : `${documentKindLabel(doc.document_kind)} · ${formatBytes(doc.size_bytes)} · ${doc.findings_count} ${doc.findings_count === 1 ? "finding" : "findings"}`;
 
   return (
-    <li className="pm-docs-row" data-testid="document-row" data-status={doc.status} data-verdict={doc.verdict ?? undefined}>
+    <li
+      className="pm-docs-row"
+      data-testid="document-row"
+      data-status={doc.status}
+      data-verdict={doc.verdict ?? undefined}
+      data-cursor="inspect"
+      data-preview={`doc:${doc.id}`}
+      style={{ ["--n" as string]: n }}
+    >
+      <span className="pm-docs-n" aria-hidden="true">
+        {String(n + 1).padStart(2, "0")}
+      </span>
       <div className="pm-docs-name">
-        <span className="pm-docs-sheet" data-tone={tone} aria-hidden="true">
-          <span />
-          <span />
-          <span />
-          <span data-hit="" />
-          <span />
-        </span>
         <span className="pm-docs-name-text">
           <Link href={href} className="pm-docs-link">
             {doc.filename}
@@ -85,21 +89,14 @@ function DocumentListItem({ doc }: { doc: DocumentListRow }) {
         </span>
       </div>
 
-      <div className="pm-docs-verdict">
-        {ready && doc.verdict ? <VerdictBadge verdict={doc.verdict} /> : doc.status !== "ready" ? <StatusBadge status={doc.status} /> : null}
+      <div className="pm-docs-hash" title={doc.document_hash ?? undefined}>
+        {doc.document_hash ? `${doc.document_hash.slice(0, 8)}…` : <span className="pm-docs-dim">—</span>}
       </div>
 
-      <div className="pm-docs-count">
-        {ready ? (
-          <>
-            <span className="pm-docs-count-n" data-zero={doc.findings_count === 0 || undefined}>
-              {doc.findings_count}
-            </span>
-            <span className="pm-docs-count-l">{doc.findings_count === 1 ? "finding" : "findings"}</span>
-          </>
-        ) : (
-          <span className="pm-docs-dim">—</span>
-        )}
+      <div className="pm-docs-pages">{doc.page_count ?? <span className="pm-docs-dim">—</span>}</div>
+
+      <div className="pm-docs-verdict">
+        {ready && doc.verdict ? <VerdictBadge verdict={doc.verdict} /> : doc.status !== "ready" ? <StatusBadge status={doc.status} /> : null}
       </div>
 
       <div className="pm-docs-date">

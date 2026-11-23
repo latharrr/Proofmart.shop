@@ -1,88 +1,155 @@
-import type { ReactNode } from "react";
+"use client";
+
+import CopyButton from "@/components/account/copy-button";
 import RollPill from "@/components/motion/roll-pill";
-import SheetHead from "@/components/home/sheet-head";
-import Tickmark from "@/components/paper/tickmark";
+import SectionHead, { Serif } from "@/components/home/section-head";
+import Tabs from "@/components/home/tabs";
 import { INTEGRATIONS } from "@/lib/home-data";
 
-// A printout of the call and its summarised answer. The only colour in it is
-// the verdict, which is the one thing in it that actually means something.
-const TERMINAL: { indent?: number; parts: ReactNode[] }[] = [
-  { parts: [<span key="p" className="pm-j-punct">$</span>, " curl https://proofmart.shop/v1/verify \\"] },
-  { indent: 4, parts: ["-H ", <span key="h" className="pm-j-key">&quot;Authorization: Bearer $PROOFMART_API_KEY&quot;</span>, " \\"] },
-  { indent: 4, parts: ["-F ", <span key="f" className="pm-j-key">&quot;file=@meridian_apr25.pdf&quot;</span>] },
-  { parts: [] },
-  { parts: [<span key="c" className="pm-j-punct"># 200 OK, summarised</span>] },
-  { parts: [<span key="v" className="pm-j-fail">FAIL</span>, "  4 findings"] },
-  { indent: 2, parts: [<span key="g" className="pm-j-fail">break</span>, "  BALANCE_BREAK              p4 · r17"] },
-  { indent: 2, parts: [<span key="g" className="pm-j-fail">break</span>, "  CROSS_PAGE_TOTAL_MISMATCH  p3 → p4"] },
-  { indent: 2, parts: [<span key="g" className="pm-j-review">query</span>, "  DUPLICATE_TRANSACTION      p2 · r04,r07"] },
-  { indent: 2, parts: [<span key="g" className="pm-j-review">query</span>, "  OCR_LOW_CONFIDENCE         p4 · r14"] },
+// The same multipart POST /v1/verify (field "file", lib/api/route-helpers.ts)
+// in three languages. Node needs 20+ for fs.openAsBlob.
+const SNIPPETS = [
+  {
+    id: "curl",
+    label: "curl",
+    code: `curl https://proofmart.shop/v1/verify \\
+  -H "Authorization: Bearer $PROOFMART_API_KEY" \\
+  -F file=@statement.pdf`,
+  },
+  {
+    id: "node",
+    label: "Node",
+    code: `import { openAsBlob } from "node:fs";
+
+const form = new FormData();
+form.append("file", await openAsBlob("statement.pdf"), "statement.pdf");
+
+const res = await fetch("https://proofmart.shop/v1/verify", {
+  method: "POST",
+  headers: { Authorization: \`Bearer \${process.env.PROOFMART_API_KEY}\` },
+  body: form,
+});
+const { verdict, findings } = await res.json();`,
+  },
+  {
+    id: "python",
+    label: "Python",
+    code: `import os, requests
+
+with open("statement.pdf", "rb") as f:
+    res = requests.post(
+        "https://proofmart.shop/v1/verify",
+        headers={"Authorization": f"Bearer {os.environ['PROOFMART_API_KEY']}"},
+        files={"file": ("statement.pdf", f, "application/pdf")},
+    )
+print(res.json()["verdict"])`,
+  },
 ];
 
+// lib/webhooks/deliver.ts RETRY_DELAYS_MINUTES = [1, 5, 30, 120, 720]:
+// one immediate attempt, then five retries, cumulative from the first.
+const RETRIES = [
+  { at: 0, label: "0" },
+  { at: 1, label: "+1m" },
+  { at: 6, label: "+5m" },
+  { at: 36, label: "+30m" },
+  { at: 156, label: "+2h" },
+  { at: 876, label: "+12h" },
+];
+
+/** Placed on a log scale so the early retries don't all sit on top of each other. */
+const pos = (min: number) => (Math.log10(min + 1) / Math.log10(877)) * 100;
+
+// One stroke icon per channel, drawn in on enter (stroke-dashoffset).
+const ICONS: Record<string, string> = {
+  "Web upload": "M12 16V4M7 9l5-5 5 5M4 15v5h16v-5",
+  API: "M8 4c-2 0-3 1-3 3v2c0 1.5-1 3-2.5 3C4 12 5 13.5 5 15v2c0 2 1 3 3 3M16 4c2 0 3 1 3 3v2c0 1.5 1 3 2.5 3-1.5 0-2.5 1.5-2.5 3v2c0 2-1 3-3 3",
+  Webhooks: "M9 8a3 3 0 1 1 5 2.2L10.5 16M6 15a3 3 0 1 0 3 3h6M18 12a3 3 0 1 1-1.5 5.6L13 11",
+  CLI: "M4 6l5 5-5 5M11 18h9",
+};
+
 /**
- * Wiring it in: the call as a printout, and the four ways the same engine is
- * delivered as a ledger, each with what it needs and the string you'd type.
+ * Wiring it in: the four delivery channels as one ruled row, then the call
+ * in curl, Node and Python, each copyable.
  */
 export default function IntegrateSection() {
   return (
-    <section id="integrate" className="pm-h-section" aria-labelledby="integrate-title">
+    <section id="integrate" className="pm-section" aria-labelledby="integrate-title">
       <div className="pm-wrap">
-        <SheetHead
+        <SectionHead
+          n="06"
+          label="Integrate"
+          meta="One engine · four ways in"
           id="integrate-title"
-          wp="E"
-          title="One POST. Same engine everywhere."
+          title={
+            <>
+              One POST. <Serif>Same engine</Serif> everywhere.
+            </>
+          }
           aside={
             <p>
-              Send a PDF as multipart form data with your API key; the response arrives inline. The upload on this page, the API, webhooks and the CLI
-              all run the same pipeline.
+              Send a PDF as multipart form data with your API key and the report comes back inline. The upload on this page, the API, webhooks and the
+              CLI all run the same pipeline.
             </p>
           }
         />
 
-        <div className="pm-h-integrate">
-          <div className="pm-h-integrate-call">
-            <figure className="pm-print" aria-label="Sample curl request and summarised response">
-              <div className="pm-print-head">
-                <span className="pm-mono">terminal</span>
-                <span className="pm-mono">PDF up to 20 MB</span>
-                <span className="pm-sample">Sample</span>
-              </div>
-              <div className="pm-json">
-                {TERMINAL.map((line, i) => (
-                  <div key={i} className="pm-json-line" style={{ ["--indent" as string]: line.indent ?? 0 }}>
-                    <span className="pm-json-n" aria-hidden="true">
-                      {String(i + 1).padStart(2, "0")}
+        <ol className="pm-ways">
+          {INTEGRATIONS.map((it, i) => (
+            <li key={it.name} className="pm-way">
+              <span className="pm-way-top">
+                <span className="pm-way-n">{String(i + 1).padStart(2, "0")}</span>
+                {ICONS[it.name] ? (
+                  <svg className="pm-way-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d={ICONS[it.name]} pathLength={1} />
+                  </svg>
+                ) : null}
+              </span>
+              <h3 className="pm-way-name">{it.name}</h3>
+              <span className="pm-way-kind">{it.kind}</span>
+              <p className="pm-way-body">{it.body}</p>
+              {it.name === "Webhooks" ? (
+                <div className="pm-retry" role="img" aria-label="Delivery attempts: immediately, then after 1 minute, 5 minutes, 30 minutes, 2 hours and 12 hours">
+                  <span className="pm-retry-line" aria-hidden="true" />
+                  {RETRIES.map((r, k) => (
+                    <span key={r.label} className="pm-retry-pt" style={{ left: `${pos(r.at)}%`, ["--i" as string]: k }} aria-hidden="true">
+                      <span>{r.label}</span>
                     </span>
-                    <span>{line.parts.length === 0 ? " " : line.parts}</span>
-                  </div>
-                ))}
-              </div>
-            </figure>
-            <div className="pm-h-actions">
-              <RollPill href="/account/api-keys" dot>
-                Create an API key
-              </RollPill>
-              <RollPill href="/account/webhooks" variant="secondary">
-                Register a webhook
-              </RollPill>
-            </div>
-          </div>
-
-          <ol className="pm-h-ways">
-            {INTEGRATIONS.map((it) => (
-              <li key={it.name}>
-                <div className="pm-h-way-top">
-                  <h3>{it.name}</h3>
-                  <span className="pm-label">{it.kind}</span>
+                  ))}
                 </div>
-                <p>{it.body}</p>
-                <span className="pm-mono pm-h-way-code">
-                  <Tickmark kind="agreed" size={14} />
-                  {it.code}
-                </span>
-              </li>
-            ))}
-          </ol>
+              ) : null}
+              <code className="pm-way-code">{it.code}</code>
+            </li>
+          ))}
+        </ol>
+
+        <div className="pm-code" data-reveal="">
+          <Tabs
+            label="Language"
+            className="pm-tabs pm-code-tabs"
+            tabs={SNIPPETS.map((s) => ({
+              id: s.id,
+              label: s.label,
+              content: (
+                <div className="pm-code-body" data-cursor="copy">
+                  <pre>
+                    <code>{s.code}</code>
+                  </pre>
+                  <CopyButton value={s.code} copiedLabel="Copied" variant="paper" size="sm" ariaLabel={`Copy the ${s.label} example`}>
+                    Copy
+                  </CopyButton>
+                </div>
+              ),
+            }))}
+          />
+          <div className="pm-actions">
+            <RollPill href="/account/api-keys" dot>
+              Create an API key
+            </RollPill>
+            <RollPill href="/account/webhooks" variant="secondary">
+              Register a webhook
+            </RollPill>
+          </div>
         </div>
       </div>
     </section>

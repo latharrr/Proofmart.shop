@@ -2,7 +2,7 @@ import Link from "next/link";
 import { FINDINGS } from "@/lib/evidence-data";
 import { VERIFY_HREF } from "@/components/app/app-shell";
 import RollPill from "@/components/motion/roll-pill";
-import StatementSheet from "@/components/paper/statement-sheet";
+import SampleDocument from "@/components/evidence-rail/sample-document";
 import { VerdictBadge } from "./verdict";
 
 const STEPS = [
@@ -55,7 +55,10 @@ export default function DocumentsEmpty() {
       </div>
 
       <figure className="pm-docs-empty-figure" aria-label="Example of a saved report">
-        <StatementSheet className="pm-docs-empty-sheet" showNotes={false} caption="Example: page 4 of the sample statement, re-footed" />
+        <div className="pm-docs-empty-sheet pm-docpage" data-dim="">
+          <SampleDocument page={4} />
+          <span className="pm-sample">Sample</span>
+        </div>
         <div className="pm-docs-empty-card">
           <div className="pm-docs-card-top">
             <span className="pm-docs-card-marker">{fail.marker}</span>

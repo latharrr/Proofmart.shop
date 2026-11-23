@@ -4,16 +4,15 @@ import Link from "next/link";
  * The ProofMart mark and wordmark: one definition for the topbar, footer,
  * auth shell, app shell and 404.
  *
- * The mark is a ruled sheet with a red-pencil tick through its last line:
- * a figure checked. Drawn as SVG so it stays crisp at every size; the sheet
- * takes `currentColor`, the tick the red pencil.
+ * The mark is a page with one row boxed: a finding pinned to its place. The
+ * page takes `currentColor`; the box is the one --signal accent in the mark.
  */
 export function BrandMark({ size = 24 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" style={{ flex: "none", display: "block" }}>
-      <path d="M3.5 1.75h12.6l4.4 4.4V22.25H3.5Z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="miter" />
-      <path d="M7 8.5h9.5M7 12.25h9.5M7 16h4.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M11.6 16.4 14.6 19.4 22.4 9.8" fill="none" stroke="var(--red, #bf3020)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4.75 2.75h14.5v18.5H4.75Z" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M8 7h8M8 10h8M8 17h5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M6.75 12.25h10.5v2.5H6.75Z" fill="var(--signal, #FF4D00)" />
     </svg>
   );
 }
@@ -22,15 +21,15 @@ export function BrandMark({ size = 24 }: { size?: number }) {
  * Mark plus name. `href` makes it a link home: `#main` on the home page
  * itself, `/` everywhere else.
  */
-export default function Wordmark({ href, size = 24, fontSize = 21 }: { href?: string; size?: number; fontSize?: number }) {
+export default function Wordmark({ href, size = 22, fontSize = 19 }: { href?: string; size?: number; fontSize?: number }) {
   const inner = (
     <>
       <BrandMark size={size} />
-      <span style={{ fontSize, fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1 }}>ProofMart</span>
+      <span style={{ fontSize, fontWeight: 600, letterSpacing: "-0.035em", lineHeight: 1 }}>ProofMart</span>
     </>
   );
 
-  const style = { display: "inline-flex", alignItems: "center", gap: 9, color: "var(--ink, #222527)", flex: "none", textDecoration: "none" } as const;
+  const style = { display: "inline-flex", alignItems: "center", gap: 8, color: "var(--ink, #0E0E0C)", flex: "none", textDecoration: "none" } as const;
 
   if (!href) return <span style={style}>{inner}</span>;
   // In-page fragments stay a plain <a>: next/link would try to prefetch a route for "#main".

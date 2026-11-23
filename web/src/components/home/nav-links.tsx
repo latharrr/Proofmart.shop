@@ -2,15 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 /** In-page sections of the home page, in scroll order. */
 export const SECTION_LINKS = [
-  { id: "pipeline", label: "How it works", wp: "B" },
-  { id: "markers", label: "Markers", wp: "C" },
-  { id: "outputs", label: "Response", wp: "D" },
-  { id: "integrate", label: "Integrate", wp: "E" },
-  { id: "pricing", label: "Pricing", wp: "F" },
+  { id: "product", label: "Product", n: "02" },
+  { id: "markers", label: "Markers", n: "04" },
+  { id: "integrate", label: "API", n: "06" },
+  { id: "pricing", label: "Pricing", n: "07" },
 ];
 
 /**
@@ -52,14 +51,29 @@ export function useActiveSection(): string | null {
   return active;
 }
 
-/** Desktop primary nav. The active link is underlined in red pencil. */
+/** Desktop primary nav. One --signal underline slides to the current section's link. */
 export default function NavLinks() {
   const active = useActiveSection();
   const pathname = usePathname();
   const onSecurity = pathname === "/security";
+  const nav = useRef<HTMLElement>(null);
+  const bar = useRef<HTMLSpanElement>(null);
+
+  useLayoutEffect(() => {
+    const el = nav.current?.querySelector<HTMLElement>('[data-active="true"]');
+    const b = bar.current;
+    if (!b) return;
+    if (!el) {
+      b.style.opacity = "0";
+      return;
+    }
+    b.style.opacity = "1";
+    b.style.transform = `translateX(${el.offsetLeft}px) scaleX(${el.offsetWidth})`;
+  }, [active, onSecurity]);
 
   return (
-    <nav aria-label="Primary" className="pm-mk-nav">
+    <nav aria-label="Primary" className="pm-mk-nav" ref={nav}>
+      <span ref={bar} className="pm-mk-nav-bar" aria-hidden="true" />
       {SECTION_LINKS.map((l) => {
         const isActive = active === l.id;
         return (

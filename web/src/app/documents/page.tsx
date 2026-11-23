@@ -25,10 +25,10 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
     error,
   } = await supabase
     .from("documents")
-    .select("id, filename, size_bytes, status, verdict, document_kind, findings_count, error_message, created_at", { count: "exact" })
+    .select("id, filename, size_bytes, status, verdict, document_kind, findings_count, error_message, page_count, document_hash, created_at", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(from, from + PAGE_SIZE - 1)
-    .returns<Pick<DocumentRow, "id" | "filename" | "size_bytes" | "status" | "verdict" | "document_kind" | "findings_count" | "error_message" | "created_at">[]>();
+    .returns<Pick<DocumentRow, "id" | "filename" | "size_bytes" | "status" | "verdict" | "document_kind" | "findings_count" | "error_message" | "page_count" | "document_hash" | "created_at">[]>();
 
   const total = count ?? 0;
   const hasMore = total > from + PAGE_SIZE;

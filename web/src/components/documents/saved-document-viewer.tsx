@@ -9,7 +9,6 @@ import type { PdfRect } from "@/lib/pdf/types";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import Frame from "@/components/motion/frame";
 import Tickmark, { Arrow, Ident, VERDICT_TICK } from "@/components/paper/tickmark";
-import { usePageTurn } from "@/components/paper/use-page-turn";
 import { VERDICT_TONE, VerdictBadge, documentKindLabel, plural, type VerdictValue } from "./verdict";
 
 const CANVAS_TARGET_WIDTH = 1000;
@@ -56,8 +55,6 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewRef = useRef<HTMLElement>(null);
   const renderChain = useRef<Promise<void>>(Promise.resolve());
-  const leafRef = useRef<HTMLDivElement>(null);
-  usePageTurn(leafRef, page);
 
   // Fetch the stored PDF once — the findings and verdict are already in
   // `envelope`; only the page image needs this round trip.
@@ -340,7 +337,6 @@ export default function SavedDocumentViewer({ documentId, envelope, hasStoredFil
 
             <div className="pm-report-stage-wrap">
               <div className="pm-report-stage" style={{ ["--pm-ar" as string]: `${dims.widthPt / dims.heightPt}`, aspectRatio: `${dims.widthPt} / ${dims.heightPt}` }}>
-                <div ref={leafRef} className="pm-leaf" aria-hidden="true" />
                 {!hasStoredFile && (
                   <p className="pm-report-stage-note">The original PDF wasn&apos;t kept, so there&apos;s no page image to show. The findings are real.</p>
                 )}

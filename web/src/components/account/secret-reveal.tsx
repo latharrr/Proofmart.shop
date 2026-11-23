@@ -7,9 +7,9 @@ import PillLabel from "./pill-label";
 
 /**
  * The one-time reveal of a freshly minted secret (an API key, a webhook
- * signing secret). It is the only sheet in the product printed in graphite
- * ink: the one moment that has to stop someone, because what it shows is
- * never shown again. Focus moves to its heading so a screen reader announces
+ * signing secret). It is the one inverted card in the app, the moment that
+ * has to stop someone, because what it shows is never shown again. The
+ * value stays masked until clicked (copy works either way). Focus moves to its heading so a screen reader announces
  * it, and dismissing it before anything was copied asks first.
  */
 export default function SecretReveal({
@@ -30,6 +30,8 @@ export default function SecretReveal({
 }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const [copied, setCopied] = useState(false);
+  // Blurred until asked for, so a shared screen doesn't show it by accident.
+  const [shown, setShown] = useState(false);
 
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true });
@@ -54,7 +56,16 @@ export default function SecretReveal({
 
         <div className="pm-acct-reveal-secret">
           <span className="pm-label pm-acct-reveal-label">{secretLabel}</span>
-          <code className="pm-acct-reveal-value">{secret}</code>
+          {shown ? (
+            <code className="pm-acct-reveal-value pm-secret-unblur">{secret}</code>
+          ) : (
+            <button type="button" className="pm-acct-reveal-hidden" onClick={() => setShown(true)} aria-label={`Reveal the ${secretLabel.toLowerCase()}`}>
+              <code className="pm-acct-reveal-value" aria-hidden="true">
+                {secret.replace(/./g, "•")}
+              </code>
+              <span className="pm-acct-reveal-hint">Click to reveal</span>
+            </button>
+          )}
         </div>
 
         <div className="pm-acct-reveal-actions">

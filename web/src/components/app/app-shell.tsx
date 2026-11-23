@@ -9,9 +9,8 @@ import AppMobileMenu from "./mobile-menu";
 import { signOutAction } from "./actions";
 
 /**
- * The signed-in workspace frame: a sticky app bar (wordmark, section nav,
- * the "Verify a document" primary pill, account menu) over a <main id="main">
- * that the root layout's skip link targets.
+ * The signed-in workspace frame: the sidebar (or, on a phone, a bar) beside
+ * a <main id="main"> that the root layout's skip link targets.
  *
  * Usage, from any signed-in page — after the page's own auth redirect:
  *
@@ -26,9 +25,9 @@ import { signOutAction } from "./actions";
  * `null` renders the account control without an address (loading skeletons).
  * The shell never redirects — auth gating stays with each page.
  *
- * Desktop: the sections are index tabs along the bottom edge of the pad's
- * head; the current one is cut open into the sheet below it. Below 960px the
- * nav and the account menu fold into one Menu sheet.
+ * Desktop: a sticky left sidebar (wordmark, mono-indexed sections, the
+ * "Verify a document" pill and the account menu at its foot). Below 960px
+ * a thin top bar replaces it and the sections fold into one Menu sheet.
  */
 
 export type AppSection = "documents" | "api-keys" | "webhooks" | "billing";
@@ -60,31 +59,43 @@ export default async function AppShell({ active, email, children }: { active?: A
     </form>
   );
 
+  const verify = (
+    <RollPill href={VERIFY_HREF} dot className="pm-app-verify" aria-label="Verify a document">
+      Verify<span className="pm-app-verify-long"> a document</span>
+    </RollPill>
+  );
+
   return (
     <div className="pm-app">
+      {/* Desktop: a left sidebar of mono-indexed sections. */}
+      <aside className="pm-app-side">
+        <div className="pm-app-brand">
+          <Wordmark href="/documents" />
+        </div>
+        <nav className="pm-app-nav" aria-label="Workspace">
+          <ol>
+            {APP_NAV.map((item, i) => (
+              <li key={item.id}>
+                <Link href={item.href} aria-current={item.id === active ? "page" : undefined}>
+                  <span className="pm-app-nav-n">{String(i + 1).padStart(2, "0")}</span>
+                  {item.short ?? item.label}
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </nav>
+        <div className="pm-app-side-foot">
+          {verify}
+          <AccountMenu email={address} signOut={signOut} />
+        </div>
+      </aside>
+
+      {/* Below 960px: a thin bar with the same sections in one Menu sheet. */}
       <header className="pm-app-bar">
         <div className="pm-app-bar-inner">
-          <div className="pm-app-brand">
-            <Wordmark href="/documents" size={26} fontSize={22} />
-          </div>
-
-          <nav className="pm-app-nav" aria-label="Workspace">
-            <ul>
-              {APP_NAV.map((item) => (
-                <li key={item.id}>
-                  <Link href={item.href} aria-current={item.id === active ? "page" : undefined}>
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
+          <Wordmark href="/documents" />
           <div className="pm-app-actions">
-            <RollPill href={VERIFY_HREF} dot className="pm-app-verify" aria-label="Verify a document">
-              Verify<span className="pm-app-verify-long"> a document</span>
-            </RollPill>
-            <AccountMenu email={address} signOut={signOut} />
+            {verify}
             <AppMobileMenu nav={APP_NAV.map(({ id, href, label }) => ({ id, href, label }))} active={active} email={address} signOut={signOut} />
           </div>
         </div>

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import RollPill from "@/components/motion/roll-pill";
+import { scrollToEl } from "@/components/motion/scroll-to";
 import { SCAN_INTENT_EVENT } from "@/components/evidence-rail/scan-intent";
 
 /**
@@ -47,8 +48,7 @@ export default function OpenScanButton({
           router.push("/?scan=1#access");
           return;
         }
-        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        rail.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
+        scrollToEl(rail, "center");
         window.dispatchEvent(new Event(SCAN_INTENT_EVENT));
       }}
     >

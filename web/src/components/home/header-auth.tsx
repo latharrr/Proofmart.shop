@@ -20,7 +20,7 @@ import OpenScanButton from "@/components/home/open-scan-button";
  * does not log anyone out.
  *
  * layout="bar"  — desktop: .pm-mk-top-auth (Sign in, or the ACCOUNT pill
- *                 panel) plus the header CTA (Get access vs New scan).
+ *                 panel) plus the header CTA (Get API key vs New scan).
  * layout="menu" — the same controls stacked for the phone menu sheet.
  *
  * The initial render is always the signed-out markup, matching the server
@@ -63,7 +63,7 @@ export default function HeaderAuth({ layout = "bar" }: { layout?: "bar" | "menu"
       return (
         <div className="pm-mk-menu-account">
           <RollPill href="/signup" dot block>
-            Get access
+            Get API key
           </RollPill>
           <RollPill href="/login" variant="secondary" block>
             Sign in
@@ -127,7 +127,7 @@ export default function HeaderAuth({ layout = "bar" }: { layout?: "bar" | "menu"
         </OpenScanButton>
       ) : (
         <RollPill href="/signup" size="sm" dot className="pm-mk-top-cta">
-          Get access
+          Get API key
         </RollPill>
       )}
     </>
