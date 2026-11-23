@@ -639,7 +639,6 @@ textarea::placeholder {
 .pm-callout {
   padding: 20px 24px;
   border: 1px solid var(--line-strong);
-  border-left: 2px solid var(--signal);
   border-radius: var(--r);
   background: var(--doc);
 }
