@@ -9,7 +9,7 @@ Re-adds every row of a PDF bank statement and shows the arithmetic: each balance
 | At a glance | |
 |---|---|
 | **Status** | Live beta at proofmart.shop. Live payments have not run yet (see Known limitations) |
-| **Stack** | Next.js 16, TypeScript, Supabase (Postgres + RLS + Auth), Vercel Blob, Tesseract.js OCR |
+| **Stack** | Next.js 16, TypeScript, Tailwind 4, Supabase (Postgres + RLS + Auth), Vercel Blob, Tesseract.js OCR; GSAP + ScrollTrigger + Lenis for the home page's scroll motion (lazy-loaded, off under reduced motion) |
 | **Method** | Fixed arithmetic rules over the statement's own numbers. No AI model in the verdict path |
 | **Tests** | 215 unit tests (197 pass, 7 OCR tests need a fixed Chromium path, 11 skipped); CI runs type-check, lint, tests, build |
 | **Scope** | Web app, PDF parsing pipeline, public API, CLI, auth and storage |
@@ -142,7 +142,7 @@ Next, in order: configure live billing and test one real payment; finish the leg
 
 ## Repo layout and local setup
 
-The app lives in [`web/`](web/); setup, environment variables, auth, the API and Vercel deployment are in [`web/README.md`](web/README.md). `cli/` holds the command-line client. [`DESIGN.md`](DESIGN.md) records the visual system and [`PRODUCT.md`](PRODUCT.md) the product context. `design-system*.md` and `bar*.md` describe retired directions and are kept for history. `chats/` and `project/` hold the original design handoff files.
+The app lives in [`web/`](web/); setup, environment variables, auth, the API and Vercel deployment are in [`web/README.md`](web/README.md). `cli/` holds the command-line client. [`DESIGN.md`](DESIGN.md) records the visual system, "Operator Console × Editorial Index" (Geist, Geist Mono and Instrument Serif on a visible 12-column grid, one --signal accent, verdict hues for verdicts only), and [`design-system.md`](design-system.md) is its token table and review checklist. [`PRODUCT.md`](PRODUCT.md) holds the product context and honesty rules. `design-system-steep.md` and `bar*.md` describe retired directions and are kept for history. `chats/` and `project/` hold the original design handoff files.
 
 ```bash
 cd web
