@@ -51,7 +51,9 @@ export function startHomeScroll(): () => void {
     let railTaken = false;
     let stepST: ScrollTrigger | null = null;
 
-    if (hero && slot && fly && flyPage && rail && railPage && access) {
+    // Phones skip the travelling page: on a narrow screen it only covers the
+    // rail it is about to become. The hero peek carries the first colour there.
+    if (!mobile && hero && slot && fly && flyPage && rail && railPage && access) {
       root.dataset.fly = "";
       const state = { rise: 0, scan: 0, dock: 0 };
       const boxes = Array.from(fly.querySelectorAll<SVGGElement>(".pm-fly-box"));
@@ -110,7 +112,7 @@ export function startHomeScroll(): () => void {
       });
       heroTl
         .to(state, { rise: 1, duration: 0.35 }, 0)
-        .to(hero.querySelectorAll(".pm-hero-copy, .pm-sys, .pm-hero > .pm-wrap > .pm-index"), { y: -96, opacity: 0, duration: 0.3 }, 0.02)
+        .to(hero.querySelectorAll(".pm-hero-copy, .pm-sys, .pm-peek, .pm-hero > .pm-wrap > .pm-index"), { y: -96, opacity: 0, duration: 0.3 }, 0.02)
         .to(state, { scan: 1, duration: 0.55 }, 0.38)
         .to({}, { duration: 0.07 });
 

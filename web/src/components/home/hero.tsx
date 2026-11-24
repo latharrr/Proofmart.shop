@@ -1,5 +1,6 @@
 import CopyButton from "@/components/account/copy-button";
 import RollPill from "@/components/motion/roll-pill";
+import HeroPeek from "@/components/home/hero-peek";
 import RunSampleButton from "@/components/home/run-sample-button";
 import { Serif } from "@/components/home/section-head";
 import { MARKER_REGISTRY } from "@/lib/verification/registry";
@@ -99,6 +100,7 @@ export default function Hero() {
             </div>
           </aside>
         </div>
+        <HeroPeek />
       </div>
       {/* Where the travelling document settles while the hero is pinned. */}
       <div className="pm-fly-slot" aria-hidden="true" />

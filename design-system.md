@@ -61,7 +61,9 @@ Tabular numerals are global.
 - [ ] Every home section opens with an index row `[nn] — LABEL ···· meta` on a 1px ink rule; numbers run 01–08 in page order.
 - [ ] Section title in columns 1–7, aside in 9–12; collapses to one column ≤1000px.
 - [ ] Only hero and closing use 120px; other section titles ≤44px.
-- [ ] No horizontal page scroll at 1440 / 1024 / 768 / 390.
+- [ ] No horizontal page scroll at 1440 / 1024 / 768 / 390; nothing crosses the side gutter at 390.
+- [ ] Hero peek (last rows of SAMPLE page 4, r14 REVIEW and r17 FAIL boxed) closes the first screen; on phones it drops to r / description / balance with the tag under the row.
+- [ ] Pricing on ≤640px: the two plans side by side, each row label across above them.
 - [ ] App shell: sidebar ≥961px, bar + Menu sheet below.
 - [ ] Auth and 404: one centred bordered panel with an index row.
 
@@ -76,7 +78,7 @@ Tabular numerals are global.
 
 - [ ] Marker list rendered from `MARKER_REGISTRY` (home grid, hero count).
 - [ ] Prices from `lib/billing/plans.ts`, shown in INR, with "Placeholder pricing — subject to change."
-- [ ] Every illustrative artefact carries a SAMPLE badge (rail, outputs, hero page, pipeline page).
+- [ ] Every illustrative artefact carries a SAMPLE badge (rail, outputs, hero page, hero peek, pipeline page).
 - [ ] No customers, logos, testimonials, usage/accuracy/latency/uptime numbers, certifications, SLAs or integrations; no counters.
 - [ ] Header says `API v1`, not "online" (there is no public health check).
 - [ ] No AI/ML/score/confidence language about the engine.

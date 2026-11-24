@@ -1981,6 +1981,10 @@ textarea::placeholder {
     top: var(--head-h);
     z-index: 5;
   }
+
+  html:has(.pm-mk-top[data-hidden]) .pm-rail-bar {
+    top: 0;
+  }
 }
 
 @media (max-width: 560px) {
@@ -2525,6 +2529,26 @@ rect.pm-mv-hit {
   color: var(--review-on-ink);
 }
 
+@media (max-width: 640px) {
+  /* A terminal keeps its lines; the body scrolls sideways instead. */
+  .pm-run {
+    padding-inline: 14px;
+    font-size: 12px;
+    white-space: pre;
+  }
+
+  .pm-tab {
+    padding-inline: 9px;
+    white-space: nowrap;
+  }
+
+  .pm-tabs-list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+}
+
 .pm-term .pm-json {
   color: var(--term-text);
 }
@@ -2718,6 +2742,13 @@ rect.pm-mv-hit {
   top: -14px;
 }
 
+/* The last label ends at the line's end instead of hanging past it. */
+.pm-retry-pt:last-of-type span {
+  left: auto;
+  right: -4px;
+  translate: none;
+}
+
 .pm-code {
   margin-top: 48px;
   max-width: 880px;
@@ -2855,8 +2886,42 @@ rect.pm-mv-hit {
     padding-left: 10px;
   }
 
+  /* Two plans side by side; each row's label runs across above them. */
+  .pm-plans,
+  .pm-plans :is(thead, tbody, tfoot) {
+    display: block;
+  }
+
+  .pm-plans tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pm-plans tr > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .pm-plans :is(thead, tfoot) tr > td:first-child {
+    display: none;
+  }
+
   .pm-plans tbody th {
-    width: 30%;
+    width: auto;
+    padding: 14px 0 0;
+    border-bottom: 0;
+  }
+
+  .pm-plans tbody td {
+    padding-block: 8px 14px;
+  }
+
+  .pm-plans tr > :nth-child(2) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .pm-plans tr > [data-pro] {
+    padding-left: 12px;
   }
 
   .pm-plans .pm-pill {
@@ -3059,6 +3124,152 @@ rect.pm-mv-hit {
 .pm-footer-top {
   color: var(--ink);
   text-decoration: none;
+}
+
+/* The first screen's last rows (components/home/hero-peek.tsx): a cut of
+   SAMPLE page 4 with its two findings boxed, so the colour of a verdict is
+   on screen before anything moves. */
+.pm-peek {
+  position: relative;
+  margin-top: clamp(40px, 5vw, 64px);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r);
+  background: var(--doc);
+  font: 12.5px/1.3 var(--font-mono);
+  font-variant-ligatures: none;
+  overflow: hidden;
+}
+
+.pm-peek-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.pm-peek-row {
+  display: grid;
+  grid-template-columns: 3ch 7ch minmax(0, 1fr) 11ch 11ch 12ch minmax(0, 30ch);
+  align-items: center;
+  column-gap: 16px;
+  min-height: 34px;
+  padding: 4px 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.pm-peek-row > :nth-child(1),
+.pm-peek-row > :nth-child(2) {
+  color: var(--ink-2);
+}
+
+.pm-peek-row > :nth-child(3) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pm-peek-row > :nth-child(n + 4):nth-child(-n + 6) {
+  text-align: right;
+}
+
+.pm-peek-cols {
+  min-height: 28px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pm-peek-cols > * {
+  color: var(--ink-2);
+}
+
+.pm-peek-row[data-tone="FAIL"] {
+  background: var(--fail-wash);
+  outline: 2px solid var(--fail);
+  outline-offset: -2px;
+}
+
+.pm-peek-row[data-tone="REVIEW"] {
+  background: var(--review-wash);
+  outline: 2px solid var(--review);
+  outline-offset: -2px;
+}
+
+.pm-peek-row[data-tone="FAIL"] > :nth-child(6) {
+  color: var(--fail-ink);
+  font-weight: 600;
+}
+
+.pm-peek-row[data-tone="REVIEW"] > :nth-child(3) {
+  color: var(--review-ink);
+}
+
+.pm-peek-math {
+  padding: 10px 14px;
+  color: var(--fail-ink);
+  font-size: 13px;
+}
+
+.pm-peek-math span {
+  color: var(--ink-2);
+}
+
+.pm-peek-math b {
+  font-weight: 600;
+}
+
+.pm-peek-math s {
+  text-decoration-thickness: 1.5px;
+}
+
+.pm-peek-scan {
+  display: none;
+}
+
+@media (max-width: 1000px) {
+  .pm-peek-row {
+    grid-template-columns: 3ch minmax(0, 1fr) 11ch 12ch;
+  }
+
+  .pm-peek-row > :nth-child(2),
+  .pm-peek-row > :nth-child(4) {
+    display: none;
+  }
+
+  .pm-peek-row > :nth-child(7):not(:empty) {
+    grid-column: 2 / -1;
+    padding-bottom: 4px;
+  }
+
+  .pm-peek-row > :nth-child(7):empty,
+  .pm-peek-cols > :nth-child(7) {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .pm-peek-row {
+    grid-template-columns: 3ch minmax(0, 1fr) 11ch;
+    column-gap: 10px;
+    font-size: 12px;
+  }
+
+  .pm-peek-row > :nth-child(5) {
+    display: none;
+  }
+
+  .pm-peek-head > :first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .pm-footer-top:hover {
@@ -6785,7 +6996,7 @@ h1 + p {
 
   @media (max-width: 767px) {
     html[data-motion] .pm-hero {
-      margin-bottom: 40vh;
+      margin-bottom: 0;
     }
   }
 }
@@ -7235,5 +7446,59 @@ html[data-gsap] .pm-close-serif::after {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Hero peek: one signal line reads the rows once after load; each boxed
+   row lights as it passes. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-motion] .pm-peek-scan {
+    position: absolute;
+    inset: 0;
+    display: block;
+    border-top: 2px solid var(--signal);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(0);
+    animation: pm-peek-scan 1.6s cubic-bezier(0.45, 0, 0.55, 1) 1.2s both;
+  }
+
+  html[data-motion] .pm-peek-row[data-tone] {
+    animation: pm-peek-on 0.35s ease-out both;
+  }
+
+  html[data-motion] .pm-peek-row[data-tone="REVIEW"] {
+    animation-delay: 1.85s;
+  }
+
+  html[data-motion] .pm-peek-row[data-tone="FAIL"] {
+    animation-delay: 2.4s;
+  }
+
+  html[data-motion] .pm-peek-math {
+    animation: pm-peek-on 0.35s ease-out 2.5s both;
+  }
+}
+
+@keyframes pm-peek-scan {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+@keyframes pm-peek-on {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 1;
   }
 }
