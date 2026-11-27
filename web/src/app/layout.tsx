@@ -21,6 +21,9 @@ const DESCRIPTION =
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://proofmart.shop"),
+  alternates: {
+    canonical: "./",
+  },
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {
